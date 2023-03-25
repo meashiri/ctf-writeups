@@ -91,5 +91,41 @@ HT ;8mmYwqlh_q0o3_ana=ys9EQ¹6e_j4ýf3x9ract 9h3\h0moÛm0ï7S0_:îj_6l¼:}
 
 * The complete code for the solution is [here](solve_hm74.py)
 
+### Pedantry
+
+In the writeup section after the CTF, I read an interesting comment that said it is more efficient to ignore the data if there are parity errors than to attempt to corrent the bits. I wanted to see if this was indeed the case. So, I set up an experiment with the sample data that I had. 
+
+
+![](img/2023-03-25-10-06-43.png)
+
+The techniques I used were: 
+
+1. Ignore parity and just brute-force it: Since, we have an potentially unlimited messages, if we collect enough messages, we should have enough message fragments to give us the full flag.  I saw that some teams indeed solved the puzzle this way. 
+
+2. Check the parity bits and accept the data bits only if the parity check passes. Else, discard the data bits. This was the scenario mentioned in the discord comment. 
+
+3. Check the parity bits and correct the bit errors as intended. The hypothesis is that this approach should be most efficient, as it maximizes the information in the messages. 
+
+I ran the same samples I had gathered against all the three algorithms.  The results were not very surprising. 
+
+| Approach | # of samples |
+|----------|--------------|
+| Ignore parity | 39 (still was one character off) |
+| Check parity only | 28 |
+| Check & correct | 18 |
+
+
+So, it is efficient to take the effort and correct the bit errors, even if it does not eliminate __all__ errors in the message.
+
+Here is a relative comparison of the three techniques. 
+
+`[X axis - # of samples, Y axis - # of errors from the expected flag]`
+
+![](img/hammingcode.gif)
+
+
+Any of these techniques would work in the context of this challenge, as there were unlimited samples. The distinction would become onlly relevant when we have a limited set of samples. 
+
+Thank you for indulging in my silly pedantry. 
 
 
