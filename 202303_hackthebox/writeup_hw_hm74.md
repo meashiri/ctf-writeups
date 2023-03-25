@@ -124,7 +124,7 @@ Here is a relative comparison of the three techniques.
 ![](img/hammingcode.gif)
 
 
-Any of these techniques would work in the context of this challenge, as there were unlimited samples. The distinction would become onlly relevant when we have a limited set of samples. 
+Any of these techniques would work in the context of this challenge, as there were unlimited samples. The distinction would become relevant only when we have a limited set of samples. 
 
 Thank you for indulging in my silly pedantry. 
 
