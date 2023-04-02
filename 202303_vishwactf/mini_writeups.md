@@ -9,7 +9,7 @@ Pieces of QRcode all over the video. Step through with VLC and capture the frame
 
 * [Mystery of Oakville Town]: 
 
-Steghide on the photo -> gives license plate of escape vehicle. Search sqlite3 db for the escape_vehicle on Mar 28 and 29. Find all connected towns for each traffic cam by select distinct. Finally cancel out the back-and-forth movement of the car to find the final direction.  
+Steghide on the photo -> gives license plate of escape vehicle. Search sqlite3 db for the escape_vehicle on Mar 27 and 28. Find all connected towns for each traffic cam by select distinct. Finally cancel out the back-and-forth movement of the car to find the final direction.  
 
 * [Just Files]:
 
