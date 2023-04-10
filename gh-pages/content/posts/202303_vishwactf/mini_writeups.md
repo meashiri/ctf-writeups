@@ -1,7 +1,7 @@
 ---
 title: "202303_vishwactf"
 date: 2023-04-10T02:56:46-04:00
-tags: usbcap, steg, wav, shamir-sharing
+tags: [usbcap, steg, wav, shamir-sharing]
 categories: writeups
 ---
 
