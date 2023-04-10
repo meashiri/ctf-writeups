@@ -1,0 +1,57 @@
+baseURL = 'http://example.org/'
+languageCode = 'en-us'
+title = 'My CTF notepad - hints, writeups and reflections'
+theme = 'archie'
+
+# Code Highlight
+pygmentsstyle = "monokai"
+pygmentscodefences = true
+pygmentscodefencesguesssyntax = true
+
+paginate=5 # articles per page
+
+
+[taxonomies]
+  category = 'categories'
+  tag = 'tags'
+
+
+[params]
+	mode="light" # color-mode → light,dark,toggle or auto
+	useCDN=false # don't use CDNs for fonts and icons, instead serve them locally.
+	subtitle = "My CTF notepad - hints, writeups and reflections"
+	mathjax = true # enable MathJax support
+	katex = true # enable KaTeX support
+
+[[params.social]]
+name = "GitHub"
+icon = "github"
+url = "https://github.com/meashiri"
+
+
+# Main menu Items
+
+[[menu.main]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[menu.main]]
+name = "All posts"
+url = "/posts"
+weight = 2
+
+[[menu.main]]
+name = "About"
+url = "/about"
+weight = 3
+
+[[menu.main]]
+name = "Tags"
+url = "/tags"
+weight = 4
+
+[[menu.main]]
+name = "Categories"
+url = "/categories"
+weight = 5
