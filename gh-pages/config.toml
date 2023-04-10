@@ -1,4 +1,4 @@
-baseURL = 'http://example.org/'
+baseURL = 'https://meashiri.github.io/ctf-writeups/'
 languageCode = 'en-us'
 title = 'My CTF notepad - hints, writeups and reflections'
 theme = 'archie'
