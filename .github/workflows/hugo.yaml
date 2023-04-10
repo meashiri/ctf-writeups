@@ -58,7 +58,7 @@ jobs:
         run: |
           hugo \
             --gc \
-            --config ./gh-pages/config.toml \
+            --source ./gh-pages/ \
             --minify \
             --baseURL "${{ steps.pages.outputs.base_url }}"          
       - name: Upload artifact
