@@ -1,0 +1,67 @@
+baseURL: 'https://meashiri.github.io/ctf-writeups/'
+languageCode: en-us
+title: CTF notepad
+theme: PaperMod
+pygmentsstyle: monokai
+pygmentscodefences: true
+pygmentscodefencesguesssyntax: true
+paginate: 3
+ShowToc: true
+
+taxonomies:
+  category: categories
+  tag: tags
+
+params:
+  mode: light
+  useCDN: false
+  subtitle: 'My CTF notepad - hints, writeups and reflections'
+  mathjax: true
+  katex: true
+  math: true
+  ShowToc: true
+  TocOpen: true
+  ShowShareButtons: false
+  ShowReadingTime: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowRssButtonInSectionTermList: false
+        
+  homeInfoParams:
+    Title: "Ashiri's CTF notepad"
+    Content: "CTF challenges, solutions, tricks that may come in handy"
+                                
+  socialIcons:
+    - name: github
+      url: 'https://github.com/meashiri'
+    - name: ctftime
+      url: 'https://ctftime.org/user/18233'
+    - name: Rss
+      url: 'index.xml'
+
+  social:
+    - name: GitHub
+      icon: github
+      url: 'https://github.com/meashiri'
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+menu:
+  main:
+    - name: Home
+      url: /
+      weight: 1
+    - name: All posts
+      url: /posts
+      weight: 2
+    - name: About
+      url: /about
+      weight: 5
+    - name: Tags
+      url: /tags
+      weight: 3
+    - name: Categories
+      url: /categories
+      weight: 4

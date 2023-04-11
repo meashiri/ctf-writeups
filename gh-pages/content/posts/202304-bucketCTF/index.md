@@ -23,7 +23,7 @@ __Files__: https://storage.ebucket.dev/bucketctfMC.mcworld
 2. Unzip and search for the flag string 
 ```bash 
     $ unzip -c bucketctfMC.mcworld| xxd | egrep -e 'bucket'
-    $ unzip -c bucketctfMC.mcworld| xxd | egrep -e '000e85[e-f]0|000e8600'
+    $ unzip -c bucketctfMC.mcworld| xxd | egrep -e '000e85[ef]0|000e8600'
 ```
 3. The first command gives the approximate offset and the second will give us the full flag
 ```bash
@@ -301,14 +301,6 @@ Put the binary string into [Cyberchef and decode](https://gchq.github.io/CyberCh
 
 __Flag__: `bucket{clocks_are_crazy_sometimes}`
 
-#### MISC/SCAlloped potatoes
-`
-I'm using a potato battery farm to power my computer. I know potatoes are virtually indestructible, but is my RSA decryption key still safe from a physical attack? hint: For the SCAlloped potatoes challenge, look at what operations are used while decrypting RSA and figure out how they are implemented in computers."
-`
-![](2023-04-09-14-50-17.png)
-
-![](2023-04-09-13-48-59.png)
-
 #### REV/Tetris
 ```
 I'm terrible at Tetris - but luckily, my flag retrieval skills are independent of my Tetris skills. 
@@ -438,6 +430,14 @@ The solution is as below.
 Since there were more than one solution, I added on additional constraint that the character after `t3tR1s` is an underscore.
 
 __Flag__: `bucket{t3tR1s_is_L1F3_!!}`
+
+#### MISC/SCAlloped potatoes
+`
+I'm using a potato battery farm to power my computer. I know potatoes are virtually indestructible, but is my RSA decryption key still safe from a physical attack? hint: For the SCAlloped potatoes challenge, look at what operations are used while decrypting RSA and figure out how they are implemented in computers."
+`
+![](2023-04-09-14-50-17.png)
+
+![](2023-04-09-13-48-59.png)
 
 
 To be added: 
