@@ -251,6 +251,8 @@ I did not solve this challenge. The technique I had used for the same type of pr
 
 This is a case of p=q variation of the RSA problem or where N is a perfect square.
 
+A teammate solved this problem using CRT.
+
 #### MISC/Clocks
 
 ```
