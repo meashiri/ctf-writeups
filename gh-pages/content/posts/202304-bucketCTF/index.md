@@ -6,7 +6,7 @@ tags: ['minecraft', 'GPT', 'LLM', 'side-channel']
 ---
 
 ## Bucket CTF - April 2023
-### 
+#### 
 I had a fantastic time playing in this CTF as part of team __Weak But Leet__. We scored 15939 points and were placed in the second place after some great last minute heroics.
 I mainly worked on MISC, REV and CRYPTO challenges. My team mates are way too fast on the PWN and WEB challs. 
 
@@ -251,7 +251,7 @@ I did not solve this challenge. The technique I had used for the same type of pr
 
 This is a case of p=q variation of the RSA problem or where N is a perfect square.
 
-### MISC/Clocks
+#### MISC/Clocks
 
 ```
 One of my cybersecurity professors, Dr. Timely, randomly sent my this file and said if I can decode the message he will give me an A in the class. Can you help me out?
@@ -267,7 +267,7 @@ bucket{look_at_the_times_sometimes}
 ```
 __Flag__: `bucket{look_at_the_times_sometimes}`
 
-### MISC/Clocks2
+#### MISC/Clocks2
 
 ```
 One of my cybersecurity professors, Dr. Timely, randomly sent my this file and said if I can decode the message he will give me an A in the class. Can you help me out?
@@ -301,7 +301,7 @@ Put the binary string into [Cyberchef and decode](https://gchq.github.io/CyberCh
 
 __Flag__: `bucket{clocks_are_crazy_sometimes}`
 
-### MISC/SCAlloped potatoes
+#### MISC/SCAlloped potatoes
 `
 I'm using a potato battery farm to power my computer. I know potatoes are virtually indestructible, but is my RSA decryption key still safe from a physical attack? hint: For the SCAlloped potatoes challenge, look at what operations are used while decrypting RSA and figure out how they are implemented in computers."
 `
@@ -309,7 +309,7 @@ I'm using a potato battery farm to power my computer. I know potatoes are virtua
 
 ![](2023-04-09-13-48-59.png)
 
-### REV/Tetris
+#### REV/Tetris
 ```
 I'm terrible at Tetris - but luckily, my flag retrieval skills are independent of my Tetris skills. 
 NOTE: the flag follows the format "bucket{*}"
