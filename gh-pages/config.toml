@@ -1,14 +1,15 @@
 baseURL = 'https://meashiri.github.io/ctf-writeups/'
 languageCode = 'en-us'
-title = 'My CTF notepad - hints, writeups and reflections'
-theme = 'archie'
+title = 'CTF notepad'
+theme = 'PaperMod'
 
 # Code Highlight
 pygmentsstyle = "monokai"
 pygmentscodefences = true
 pygmentscodefencesguesssyntax = true
 
-paginate=5 # articles per page
+paginate=3 # articles per page
+ShowToc = true
 
 
 [taxonomies]
@@ -22,6 +23,15 @@ paginate=5 # articles per page
 	subtitle = "My CTF notepad - hints, writeups and reflections"
 	mathjax = true # enable MathJax support
 	katex = true # enable KaTeX support
+	math = true
+	ShowToc = true
+	TocOpen = true
+	ShowShareButtons = false
+	ShowReadingTime = true
+	ShowPostNavLinks = true
+	ShowBreadCrumbs = true
+	ShowCodeCopyButtons = true
+	ShowRssButtonInSectionTermList = false
 
 [[params.social]]
 name = "GitHub"
@@ -29,7 +39,12 @@ icon = "github"
 url = "https://github.com/meashiri"
 
 
+[markup.goldmark.renderer]
+unsafe= true
+
 # Main menu Items
+
+[menu]
 
 [[menu.main]]
 name = "Home"
@@ -44,14 +59,14 @@ weight = 2
 [[menu.main]]
 name = "About"
 url = "/about"
-weight = 3
+weight = 5
 
 [[menu.main]]
 name = "Tags"
 url = "/tags"
-weight = 4
+weight = 3
 
 [[menu.main]]
 name = "Categories"
 url = "/categories"
-weight = 5
+weight = 4

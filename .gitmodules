@@ -1,0 +1,6 @@
+[submodule "gh-pages/themes/fuji"]
+	path = gh-pages/themes/fuji
+	url = https://github.com/dsrkafuu/hugo-theme-fuji.git
+[submodule "gh-pages/themes/hugo-flex"]
+	path = gh-pages/themes/hugo-flex
+	url = https://github.com/de-souza/hugo-flex.git
