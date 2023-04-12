@@ -1,3 +1,7 @@
+---
+permalink: /index.html
+---
+
 # Writeups for CTF challenges 
 
 ### All writeups are hosted in the Github Pages site: 
