@@ -1,9 +1,6 @@
 [submodule "gh-pages/themes/PaperMod"]
 	path = gh-pages/themes/PaperMod
 	url = https://github.com/adityatelange/hugo-PaperMod.git
-[submodule "themes/PaperModX"]
-	path = themes/PaperModX
-	url = https://github.com/reorx/hugo-PaperModX.git
 [submodule "gh-pages/themes/PaperModX"]
 	path = gh-pages/themes/PaperModX
 	url = https://github.com/reorx/hugo-PaperModX.git

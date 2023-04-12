@@ -1,10 +1,7 @@
 baseURL: 'https://meashiri.github.io/ctf-writeups/'
 languageCode: en-us
 title: CTF notepad
-theme: PaperMod
-pygmentsstyle: monokai
-pygmentscodefences: true
-pygmentscodefencesguesssyntax: true
+theme: PaperModX
 paginate: 3
 ShowToc: true
 
@@ -19,14 +16,16 @@ params:
   mathjax: true
   katex: true
   math: true
-  ShowToc: true
-  TocOpen: true
   ShowShareButtons: false
   ShowReadingTime: true
   ShowPostNavLinks: true
   ShowBreadCrumbs: true
   ShowCodeCopyButtons: true
   ShowRssButtonInSectionTermList: false
+  ShowToc: true
+  TocOpen: true
+  TocSide: 'left'
+  
         
   homeInfoParams:
     Title: "Ashiri's CTF notepad"
@@ -48,6 +47,11 @@ markup:
   goldmark:
     renderer:
       unsafe: true
+  highlight:
+    style: dracula
+    lineNos: false
+    noClasses: false
+
 menu:
   main:
     - name: Home
