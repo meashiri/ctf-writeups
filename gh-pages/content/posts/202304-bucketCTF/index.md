@@ -437,9 +437,26 @@ __Flag__: `bucket{t3tR1s_is_L1F3_!!}`
 `
 I'm using a potato battery farm to power my computer. I know potatoes are virtually indestructible, but is my RSA decryption key still safe from a physical attack? hint: For the SCAlloped potatoes challenge, look at what operations are used while decrypting RSA and figure out how they are implemented in computers."
 `
-![](2023-04-09-14-50-17.png)
 
+Import the data into a datamining tool or a charting tool. 
+![](2023-04-09-14-50-17.png#center)
+
+There is certainly a pattern to the data with 3 different bands of data. Also looking closely, these data points are in groups of 10. So, it is logical there are 10 observations for every significant data point. 
+
+As a first step, I normalized the data, so that we get one consistent value for each band. 
+```python
+def normalize(value):
+    if (value < 120):
+        return 100
+    elif (value > 180):
+        return 200
+    else:
+        return 150
+```
+Plotting these values, shows a much clearer pattern. 
 ![](2023-04-09-13-48-59.png)
+
+
 
 
 To be added: 
