@@ -12,7 +12,7 @@ I mainly worked on MISC, REV and CRYPTO challenges. My team mates are way too fa
 
 ![](2023-04-10-01-00-00.png)
 <!--more-->
-![](2023-04-10-01-00-00.png)
+![](2023-04-09-12-53-35.png)
 
 #### MISC/Minecraft
 > I just started playing minecraft for my computer science class and forgot to remove a sign with my password before exiting the world. Could you please check what my password is.
