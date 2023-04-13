@@ -456,6 +456,17 @@ def normalize(value):
 Plotting these values, shows a much clearer pattern. 
 ![](2023-04-09-13-48-59.png)
 
+We can see that every `1` is preceded by a `0`. So, using this logic to decode the values between the markers (`100`) and padding with necessary zeros, gives us the binary string, and the flag. 
+
+```python
+def decode(bstr):
+    bstr = bstr.replace("01", "1")
+    return chr(int("0"*(8-len(bstr)) + bstr, 2))
+```
+__Flag__: `bucket{I5_tH15_aN_NSA_baCkDoOr?}`
+
+
+### Post event learnings
 
 
 
@@ -463,3 +474,5 @@ To be added:
 * misc/Image2
 * misc/Drawing
 * TBDLCG
+
+
