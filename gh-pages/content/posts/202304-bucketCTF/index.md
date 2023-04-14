@@ -439,7 +439,7 @@ I'm using a potato battery farm to power my computer. I know potatoes are virtua
 `
 
 Import the data into a datamining tool or a charting tool. 
-![](2023-04-09-14-50-17.png#center)
+![](2023-04-09-14-50-17.png)
 
 There is certainly a pattern to the data with 3 different bands of data. Also looking closely, these data points are in groups of 10. So, it is logical there are 10 observations for every significant data point. 
 
