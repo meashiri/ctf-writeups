@@ -468,6 +468,11 @@ __Flag__: `bucket{I5_tH15_aN_NSA_baCkDoOr?}`
 
 ### Post event learnings
 
+* Scalloped Potatoes
+
+While I solved the challenge by recognizing the pattern in the observed data, the problem description has this interesting bit: `look at what operations are used while decrypting RSA and figure out how they are implemented in computers.`
+
+Looking into this further, I came across this paper https://www.cs.sjsu.edu/faculty/stamp/students/article.html.
 
 
 To be added: 
