@@ -3,6 +3,8 @@ title: "Vishwactf "
 date: 2023-03-31T02:56:46-04:00
 tags: [usbcap, steg, wav, shamir-sharing]
 categories: [ctf, writeup]
+cover:
+    image: "vishwactf-logo.png"
 ---
 
 #### 1nj3ct0r

@@ -3,6 +3,8 @@ title: "Bucket CTF"
 date: 2023-04-10T22:42:33-04:00
 categories: [ctf, writeup]
 tags: ['minecraft', 'GPT', 'LLM', 'side-channel']
+cover:
+  image: "2023-04-20-21-31-56.png"
 ---
 
 ## Bucket CTF - April 2023
