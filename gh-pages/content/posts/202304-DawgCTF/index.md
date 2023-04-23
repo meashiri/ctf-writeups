@@ -207,7 +207,7 @@ Loading the audio into Audacity confirms that it is indeed DTMF, where two frequ
 941 Hz      *         0           #           D
 ```
 
-There are online DTMF decoders available. I used the (DTMF detector)[https://github.com/ribt/dtmf-decoder] I found on Github.  It samples the sound file at the rate you specify and dumps any information if finds at that index. 
+There are online DTMF decoders available. I used the [DTMF detector](https://github.com/ribt/dtmf-decoder) I found on Github.  It samples the sound file at the rate you specify and dumps any information it finds at that index. 
 
 The following snippet of the output shows that the first few tones are `68971`
 
@@ -223,7 +223,7 @@ The following snippet of the output shows that the first few tones are `68971`
 ```
 Transcribing this and converting decimal values to ASCII, gives us our flag.
 
-__Flag__: DawgCTF{get_out_of_here_stalker}
+__Flag__: `DawgCTF{get_out_of_here_stalker}`
 
 
 ### Hip to be square 
@@ -233,11 +233,11 @@ We are given a text file with a list of numbers.  As the title suggests, we need
 ```bash
     $ for i in `cat thelist.txt`; do ;printf "$i ."; bc <<< "scale=${2:-3}; sqrt($i)"; done | grep ".000" | cut -d. -f2 | xargs
 ```
-The command above echos the number, uses `bc` to calculate the square root of the number to three decimal places, picks the ones that are perfect squares and returns the list as a string.
+The command above echos the number, uses `bc` to calculate the square root of the number to three decimal places, picks the ones that are perfect squares and returns the list of square roots as a string.
 
 `68 97 119 103 67 84 70 70 123 84 104 51 114 51 95 49 53 95 78 48 95 100 51 110 121 49 110 103 125`
 
-Converting this string as ASCII gives the flag.
+Converting this string to ASCII gives the flag.
 
 __Flag__: `DawgCTFF{Th3r3_15_N0_d3ny1ng}`
 
@@ -348,16 +348,32 @@ I went old-school and used my oscilloscope to feed the L and R channels, which i
 
 __Flag__: `DawgCTF{analog_horror}`
 
+## Close but no cigar
+* Came close setting up to solve Binary Bomb level 3 with Z3. Did not complete.
+* `Table for you`. Cracked the password for the 7z file using J-T-R - got the password almost instaneously. I noticed that of the 1023 entries in the table, only one of them was odd becuase it used different letters. Did not realize that the string like `RUVFRUVFRUVFZUVFRWVFRUVFRU ...` can be B64. Here is the full solution:
+```bash
+    (py3) √ dawgctf % cat jurassic_line.txt | base64 -d | tr 'Ee' '01' | perl -lpe '$_=pack"B*",$_'
+    DawgCTF{y0u_kn3w_th3_m4g1c_w0rd!}
+```
+* `Eighty FGX`: Presumably an Enigma problem. But did not know to decode the barcodes.
+* `Bravo Six Going Dark II`: Decoded morse from the flashlights, but it was not yielding sensible values. My morse reading skills need work. 
+* `CarBode`: I presume this has some data in each frame of the GIF, but no clue yet on how to solve it.
+* `Ring Ring`: The area code does not go live until June 2023. So, I am not sure how we are supposed to narrow it down to a town. Must benefit from familiarity to the local area, as the organizers are from Maryland. 
+
 
 ## Post event
 
 * I really wanted to use `angr` to solve the binary bomb challenges. A takeaway for me. 
 * The keys for the Enigma machine challenge was in barcode format `93`
 * The Birds-on-a-wire cipher and Lunar alphabet ciphers are something to remember for the future. 
+* Other ciphers to remember for the future are : 
 
 ## References
-* https://online-barcode-reader.inliteresearch.com/
-*  
+* https://online-barcode-reader.inliteresearch.com/ : Used this to identify bar codes and translate them
+* https://flixier.com/tools/convert-audio-to-text : Used this to transcribe voice to text
+* http://linux.die.net/man/1/ldapsearch : Man page for ldapsearch
+* https://devconnected.com/how-to-search-ldap-using-ldapsearch-examples/ : How to use ldapsearch
+* https://github.com/jameshball/osci-render/ : Utility to generate oscilloscope images. Really cool.
 
 
 
