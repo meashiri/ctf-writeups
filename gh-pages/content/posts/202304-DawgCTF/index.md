@@ -228,6 +228,19 @@ __Flag__: DawgCTF{get_out_of_here_stalker}
 
 ### Hip to be square 
 
+We are given a text file with a list of numbers.  As the title suggests, we need to look closely to identify numbers that are squares. 
+
+```bash
+    $ for i in `cat thelist.txt`; do ;printf "$i ."; bc <<< "scale=${2:-3}; sqrt($i)"; done | grep ".000" | cut -d. -f2 | xargs
+```
+The command above echos the number, uses `bc` to calculate the square root of the number to three decimal places, picks the ones that are perfect squares and returns the list as a string.
+
+`68 97 119 103 67 84 70 70 123 84 104 51 114 51 95 49 53 95 78 48 95 100 51 110 121 49 110 103 125`
+
+Converting this string as ASCII gives the flag.
+
+__Flag__: `DawgCTFF{Th3r3_15_N0_d3ny1ng}`
+
 ### Breaker Breaker 
 
 We are given a audio recording of a police scanner. 
@@ -271,7 +284,7 @@ We are given a jpeg file `UMBC.jpg`. In trying the usual stego techniques, I not
     capacity: 39.2 KB
     Try to get information about embedded data ? (y/n) 
 ```
-Looking at the jpg in hex view, shows some interesting information towards the end of the file. There seems to be a binary string inserted before the market `FFD9`
+Looking at the jpg in hex view, shows some interesting information towards the end of the file. There seems to be a binary string inserted before the marker `FFD9`
 
 ```
 000a69b0: 474c 96f2 16f3 9665 d8c7 e518 e7dc 1f51  GL.....e.......Q
@@ -281,7 +294,7 @@ Looking at the jpg in hex view, shows some interesting information towards the e
 000a69f0: 0110 0011 0011 1101 ffd9                 ..........
 ```
 
-Grabbing those values and converting them to ASCII gives us a string `cGFzc1N0ZWc=`, when when decoded as B64, gives us `passSteg`
+Grabbing those values and converting them to ASCII gives us a string `cGFzc1N0ZWc=`, which when decoded as B64, gives us `passSteg`
 
 Going back to steghide and using the newly acquired password gives us a file `f.txt`, which contains the flag.
 
