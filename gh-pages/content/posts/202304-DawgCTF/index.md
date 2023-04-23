@@ -261,6 +261,33 @@ This category was *F*orensics, *W*eb and *N*etworking. Some really interesting c
 
 ### UMBC [urgent] 
 
+We are given a jpeg file `UMBC.jpg`. In trying the usual stego techniques, I notice this output from `steghide`
+
+```
+    root@stego:/input/2023/dawgctf# steghide info UMBC.jpg 
+    Corrupt JPEG data: 45 extraneous bytes before marker 0xd9
+    "UMBC.jpg":
+    format: jpeg
+    capacity: 39.2 KB
+    Try to get information about embedded data ? (y/n) 
+```
+Looking at the jpg in hex view, shows some interesting information towards the end of the file. There seems to be a binary string inserted before the market `FFD9`
+
+```
+000a69b0: 474c 96f2 16f3 9665 d8c7 e518 e7dc 1f51  GL.....e.......Q
+000a69c0: 5cb5 2927 b16a 76d4 0110 0011 0100 0111  \.)'.jv.........
+000a69d0: 0100 0110 0111 1010 0110 0011 0011 0001  ................
+000a69e0: 0100 1110 0011 0000 0101 1010 0101 0111  ................
+000a69f0: 0110 0011 0011 1101 ffd9                 ..........
+```
+
+Grabbing those values and converting them to ASCII gives us a string `cGFzc1N0ZWc=`, when when decoded as B64, gives us `passSteg`
+
+Going back to steghide and using the newly acquired password gives us a file `f.txt`, which contains the flag.
+
+__Flag__: `DawgCTF{b1n4ry_64_p4ssw0rd}`
+
+
 ### Tower Trouble 
 
 We are given a HEIC file, which is the Apple iPhone picture format. In the metadata of the file, we found the GPS coordinates where the photo was taken. Plugging in the GPS coordinates in Google Maps, gives us the location of the tower and the flag.
