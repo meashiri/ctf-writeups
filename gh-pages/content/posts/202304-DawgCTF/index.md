@@ -107,7 +107,7 @@ Nice production value on this challenge. A video done in the style of Blair Witc
 
 ![](2023-04-23-14-59-42.png)
 
-Using the (symbol ciphers reference page)[https://www.dcode.fr/symbols-ciphers] on dCode, we identify the script as `Gravity Falls Bill Cipher`
+Using the [symbol ciphers reference](https://www.dcode.fr/symbols-ciphers) on dCode, we identify the script as `Gravity Falls Bill Cipher`
 Plugging in the symbols in to the decoder, gives us the string `HEISWATCHINGYOU`
 
 __Flag__: `DawgCTF{HEISWATCHINGYOU}`
