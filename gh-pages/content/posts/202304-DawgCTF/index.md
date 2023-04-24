@@ -1,15 +1,15 @@
 ---
 title: "202304 DawgCTF"
 date: 2023-04-22T17:36:27-04:00
-categories: [ctf, writeup, hardware]
-tags: [oscilloscope, ciphers, binary_bomb, EGG, ]
+categories: [ctf, writeup, hardware, cipher]
+tags: [oscilloscope, ciphers, binary_bomb, EGG]
 cover:
     image: 'dawg_final_logo.svg'
 ---
 
-I participated in a very nice CTF over the weekend as a member of team `Weak But Leet`. The challenges were a good mix of ciphers, reverse-engineering and some unique challenges.
+I participated in a very nice CTF over the weekend as a member of team `Weak But Leet`. The challenges were a good mix of ciphers, reverse-engineering and some unique challenges. We scored 4920 points and were placed 10th. We also scored a first blood on one challenge. 
 
-We scored 4920 points and were placed 10th. We also scored a first blood on one challenge. 
+This CTF was more of a 'puzzle-solving' type CTF, rather than a purely security-centric one. Had a good mix of ciphers. And more importantly, the puzzles were constructed to be engaging and not be too guessy. 
 <!--more-->
 
 ## Crypto
@@ -355,7 +355,7 @@ __Flag__: `DawgCTF{analog_horror}`
     (py3) √ dawgctf % cat jurassic_line.txt | base64 -d | tr 'Ee' '01' | perl -lpe '$_=pack"B*",$_'
     DawgCTF{y0u_kn3w_th3_m4g1c_w0rd!}
 ```
-* `Eighty FGX`: Presumably an Enigma problem. But did not know to decode the barcodes.
+* `Eighty FGX`: Presumably an Enigma problem. But did not know to how decode the barcodes.
 * `Bravo Six Going Dark II`: Decoded morse from the flashlights, but it was not yielding sensible values. My morse reading skills need work. 
 * `CarBode`: I presume this has some data in each frame of the GIF, but no clue yet on how to solve it.
 * `Ring Ring`: The area code does not go live until June 2023. So, I am not sure how we are supposed to narrow it down to a town. Must benefit from familiarity to the local area, as the organizers are from Maryland. 
@@ -367,6 +367,8 @@ __Flag__: `DawgCTF{analog_horror}`
 * The keys for the Enigma machine challenge was in barcode format `93`
 * The Birds-on-a-wire cipher and Lunar alphabet ciphers are something to remember for the future. 
 * Other ciphers to remember for the future are : 
+    * hexa vue cipher : used in the Amongus challenge
+    * 
 
 ## References
 * https://online-barcode-reader.inliteresearch.com/ : Used this to identify bar codes and translate them
@@ -374,6 +376,7 @@ __Flag__: `DawgCTF{analog_horror}`
 * http://linux.die.net/man/1/ldapsearch : Man page for ldapsearch
 * https://devconnected.com/how-to-search-ldap-using-ldapsearch-examples/ : How to use ldapsearch
 * https://github.com/jameshball/osci-render/ : Utility to generate oscilloscope images. Really cool.
-
-
-
+* https://github.com/ByteTh1ef/writeups/blob/main/DawgCTF2023/BeforeandAfter.md
+* https://github.com/dterracino/UnEgg 
+* https://github.com/ribt/dtmf-decoder: Nice, functional DTMF decoder
+* http://genave.com/dtmf/ : DTMF description
