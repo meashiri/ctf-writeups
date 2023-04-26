@@ -111,18 +111,8 @@ The supplied server script describes how the values of x and y are compared usin
     x = int(input("x: "))
     y = int(input("y: "))
 
-    print(x)
-    print(y)
-
     if len(fake_psi(one_encoding(x, 64), zero_encoding(y, 64))) == 0 and x > y and x > 0 and y > 0:
         print(open("flag.txt").read())
-    else: 
-        print(f"{one_encoding(x,64)=}")
-        print(f"{zero_encoding(y,64)=}")
-        print(f"{len(fake_psi(one_encoding(x, 64), zero_encoding(y, 64)))=}")
-        print(f"{(x>y)=}")
-        print(f"{(x>0)=}")
-        print(f"{(y>0)=}")
 ```
 
 The solution is to provde the x and y such that they don't have either '0' or '1' in the same position in their respective binary strings.  I decided to use `x` to be `1010101010 .... ` and `y` to be `01010101 ... `
