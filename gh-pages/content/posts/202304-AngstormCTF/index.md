@@ -15,7 +15,7 @@ A couple of challenges that I solved in the Angstorm CTF. I did not get a chance
 `RSA strikes strikes strikes strikes again again again again!
     Files: rsa.py output`
 
-A simple RSA based challenge, where the challenge server provides the public modulus, exponent and two leaks that are derived from the prime factors. 
+A simple RSA based challenge, where the provided output file has the public modulus, exponent and two leaks that are derived from the prime factors. 
 
 ` leak1 = (p-2) * (q-1)`  and `leak2 = (p-1) * (q-2)`
 
