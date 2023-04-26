@@ -3,6 +3,8 @@ title: "Hack The Box : Cyber Apocalypse 2023 - The Cursed Mission"
 date: 2023-03-24T03:35:36-04:00
 categories: [ctf, writeup]
 tags: [hardware, 'hamming code']
+cover: 
+   image: 'ca-logo-2023.webp'
 ---
 
 A couple of interesting challenges I solved in HTB CTF. 

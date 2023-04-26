@@ -1,5 +1,5 @@
 ---
-title: "202304 HackpackCTF"
+title: "HackpackCTF, NCSU"
 date: 2023-04-15T12:50:50-04:00
 categories: [ctf, writeup]
 tags: [angr, PYTHONPATH, ELIZA]

@@ -1,5 +1,5 @@
 ---
-title: "202304 DawgCTF"
+title: "DawgCTF, UMBC"
 date: 2023-04-22T17:36:27-04:00
 categories: [ctf, writeup, hardware, cipher]
 tags: [oscilloscope, ciphers, binary_bomb, EGG]
@@ -130,6 +130,14 @@ Looking through the online barcode reader sites, this seems to indicate a barcod
 
 ```
 101011011011010111100111001110000111111000011100111101011110011100111001011001011101010101101101101011110011100111001010111100111001001101011101011110011100101101011001101010110110110110011011110011100100111
+```
+The scheme is that each set of 5 bits represent a number, as shown below:
+```
+        0 	11000	1	00011
+        2	00101	3	00110
+        4	01001	5	01010
+        6	01100	7	10001
+        8	10010	9	10100
 ```
 Decoding this using the Postnet [decoder on dCode](https://www.dcode.fr/barcode-postnet) gives us this string of numbers: `98511101005111495985111511695114489848116`
 
@@ -340,9 +348,9 @@ We are given a audio file that seems to have no discernible patterns. Loading th
 
 ![](2023-04-23-15-57-54.png)
 
-I have seen similar patterns to produce Lissajous figures on the oscilloscope. It works like a dynamic Etch-a-sketch, with the two channels working together to control the electron beam. 
+I have seen similar patterns to produce Lissajous figures on the oscilloscope. It works like a dynamic Etch-a-sketch, with the two channels working together to control the electron beam in two axes. 
 
-I went old-school and used my oscilloscope to feed the L and R channels, which immediately showed the flag.   Subsequently, I learnt that there are online sites where we can plug in the sound file and visualize what a scope would give.   This was one of the most satisfying challenges that I solved in this CTF. 
+I went old-school and used my oscilloscope to view the L and R channels in XY mode, which immediately showed the flag.   Subsequently, I learnt that there are online sites where we can plug in the sound file and visualize what a scope would give.   This was one of the most satisfying challenges that I solved in this CTF. 
 
 ![](2023-04-23-01-58-12.png)
 
@@ -363,12 +371,12 @@ __Flag__: `DawgCTF{analog_horror}`
 
 ## Post event
 
-* I really wanted to use `angr` to solve the binary bomb challenges. A takeaway for me. 
+* I really wanted to use `angr` to solve the binary bomb challenges. A takeaway for me to learn how to do that. 
 * The keys for the Enigma machine challenge was in barcode format `93`
-* The Birds-on-a-wire cipher and Lunar alphabet ciphers are something to remember for the future. 
 * Other ciphers to remember for the future are : 
     * hexa vue cipher : used in the Amongus challenge
-    * 
+    * Birds-on-a-wire cipher
+    * Lunar alphabet
 
 ## References
 * https://online-barcode-reader.inliteresearch.com/ : Used this to identify bar codes and translate them
