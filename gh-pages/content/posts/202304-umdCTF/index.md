@@ -535,4 +535,14 @@ Searching for Github for `ChungusBot` brought us to this repository. Looking thr
 __flag__: `UMDCTF{Chungu5_4ppr3c1@t3s_y0ur_l0y@lty_a61527bd8ec`
 
 
+### After the CTF
+
+#### EP-815 
+This was another VESP chall. I could not solve it during the CTF. However inspecting the program afterwards leads to an easier, definitely unintended solution
+
+```bash
+$ awk '!/^(2000|0000|0001|2001|2010|1000|3001)/' EP_815_program.vsp | sed -e 's/^7//g' | sed -e 's/^0//g' | tr -d '\n' | xxd -r -p
+UMDCTF{smuggl3d_n0m5}
+```
+
 
