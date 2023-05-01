@@ -1,5 +1,5 @@
 ---
-title: "AngstormCTF: Montgomery Blair High School"
+title: "AngstromCTF: Montgomery Blair High School"
 date: 2023-04-22T17:36:39-04:00
 categories: [ctf, writeup]
 tags: [RSA, LLM]
@@ -124,8 +124,26 @@ The solution is to provde the x and y such that they don't have either '0' or '1
 ```
     (py3) % nc challs.actf.co 32200
     Supply positive x and y such that x < y and x > y.
-    x: 24595658764946068821
-    y: 12297829382473034410
+    x: 24595658764946068821     #--> 10101010101010101010101010101010101010101010101010101010101010101
+    y: 12297829382473034410     #--> 01010101010101010101010101010101010101010101010101010101010101010
     actf{se3ms_pretty_p0ssible_t0_m3_7623fb7e33577b8a}
 ```
-__Flag__: actf{se3ms_pretty_p0ssible_t0_m3_7623fb7e33577b8a}
+__Flag__: `actf{se3ms_pretty_p0ssible_t0_m3_7623fb7e33577b8a}`
+
+
+### Post event writeups and solutions
+
+
+* https://fazect.github.io/angstrom2023-rev/
+* https://www.madrhacks.org/writeups/angstrom_2023/
+* https://github.com/meme-lord/writeups/blob/main/angstrom/2023/filestore.md
+* https://wiki.cve.gay/en/Writeups/angstrom_2023/filestore
+* https://velog.io/@zzsla/READMEangstromCTF-2023
+* https://blog.snwo.kr/posts/(ctf)-angstrom-ctf-2023/
+* https://github.com/hellopir2/ctf/blob/main/cry/actf23.md
+* https://github.com/abdoghazy2015/CTF-Write-Ups/tree/main/%C3%A5ngstromCTF/2023/Web
+* https://github.com/satoki/ctf_writeups/tree/master/%C3%A5ngstromCTF_2023
+* https://github.com/TCP1P/TCP1P_CTF_writeup/blob/main/2023/angstromctf-2023/README.md
+* https://astr.cc/blog/angstromctf-2023-writeup/
+
+
