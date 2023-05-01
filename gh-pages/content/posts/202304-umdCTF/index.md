@@ -21,11 +21,95 @@ This set of challenges turned out to be a really good refreshers for the CBC cry
 
 [^1]: By Benjamin D. Esham (bdesham) - Own work based on: Cbcmac.png by en:User:PeterPearson. Own work  by bdesham using: Inkscape., Public Domain, https://commons.wikimedia.org/w/index.php?curid=2277179.
 
-//TODO
+The basic structure of Cipher Block Chaining is given by the diagram above. The message is chopped up into blocks of equal size (with necessary padding). The first block is XORed with an initialization vector and the resulting block is encrypted using a secret key. The encrypted output becomes the initialization vector for the next block, and so on. 
 
-1. Send 1 Block (A) ,  get the tag (t1)
-2. Let E = A XOR t1
-3. Send  A || E   (i.e A appended to E), with the expected tag of t1
+With Message Authentication Code, the idea is that an entire message is treated with CBC and only the cipher output of the __last__ block is provided as a proof of authenticity. The principle is that if the message is tampered in any way, the intermediate ciphers will change, creating a cascading effect and invalidate the final cipher. 
+
+As you can see if the scheme allows for variable length messages, it is vulnerable to forgery. 
+
+For the CBC-MAC schemes, the IV for the first block is always 0.
+
+The challenge server is running a program that presents a menu when we connect to it.
+
+```
+    Team Rocket told me CBC-MAC with arbitrary-length messages is safe from forgery. If you manage to forge a message you haven't queried using my oracle, I'll give you something in return.
+
+    What would you like to do?
+        (1) MAC Query
+        (2) Forgery
+        (3) Exit
+
+    Choice: 
+```
+
+The approach is that you can request MACs for upto 10 messages that you can send to the server. The goal is to send a message to the server, using option 2, and predit the MAC tag to get the flag. 
+
+The most important part of the server code is this bit where the MAC tag is calculated and returned. As we see here, IV = 0 and the incoming message (which is validated to be aligned to the block size), is passed to the cipher function. The last 16 bytes of the cipher is returned as the MAC tag. 
+
+```python
+    def cbc_mac(msg, key):
+        iv = b'\x00'*BS
+        cipher = AES.new(key, AES.MODE_CBC, iv=iv)
+        t = cipher.encrypt(msg)[-16:]
+        return hexlify(t)
+```
+
+The approach to forge the message is as follows. 
+
+1. We will send one block of known plain text A (b'aaaaaaaaaaaaaaaa') and recieve a tag (T1)
+1. We will calculate the XOR value of the plain text and the tag (E = A xor T1)
+1. We will append this calculated value to the original plain text and send it for the forgery option, with the expected tag of T1
+1. Why does this work ? 
+```
+    T1 = Encryption(A , key)
+    E = A xor T1
+
+    When we send a message A||E, 
+    A being the first block, gets treated the same as before, yeilding T1 as the cipher. 
+    Now this cipher is XORed with E, the next block. 
+    But, T1 xor E ==> T1 xor T1 xor A => A
+    Hence the Tag from the second encryption function is Tag = Encryption(E xor T1, key)  = Encryption(A, key) = T1
+
+    Thus, the tag is predicable. 
+```
+
+The full solution is provided here:
+```python
+        A = b'A'*16
+
+        def getTag(p, msg):
+            p.recvuntil(b'Choice: ')
+            p.sendline(b'1')
+            p.recvuntil(b'msg (hex): ')
+
+            hexed_msg = hexlify(msg)
+            p.send(hexed_msg)
+
+            p.recvuntil(b'(msg):')
+            tag = p.recvline().strip()
+            print(f"{msg =}\nX:{tag= }")
+
+            return unhexlify(tag)    
+
+        def forgeMessage(p, msg, tag):
+            p.recvuntil(b'Choice: ')
+            p.sendline(b'2')
+            p.recvuntil(b'msg (hex): ')
+            p.send(hexlify(msg))
+            p.recvuntil(b'tag (hex): ')
+            p.send(hexlify(tag))
+
+        p = remote('0.cloud.chals.io', 12769)
+        t1 = getTag(p, A)
+        E = strxor(A, t1)
+
+        print(hexlify(t1))
+        forgeMessage(p, A + E, t1)
+
+        p.interactive()
+```
+
+__flag__: UMDCTF{Th!s_M@C_Sch3M3_1s_0nly_S3cur3_f0r_f!xed_l3ngth_m3ss4g3s_78232813}
 
 #### CBC-MAC 2
 
@@ -131,7 +215,7 @@ The description says it all. That's it. That is the writeup.
 ![](2023-04-30-00-34-41.png)
 
 The criss-cross of green wires at the top of the diagram unscrambles the orders of the bits for each character (byte), which is the decoding mechanism. 
-The blue box is the TTY which shows the characters, which happen be our flag. 
+The blue box is the TTY which shows the characters, which happens to be our flag. 
 
 __flag__: `UMDCTF{w3lc0me_t0_l0g1s1m_yeet}`
 
