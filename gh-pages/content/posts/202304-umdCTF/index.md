@@ -25,7 +25,7 @@ The basic structure of Cipher Block Chaining is given by the diagram above. The 
 
 With Message Authentication Code, the idea is that an entire message is treated with CBC and only the cipher output of the __last__ block is provided as a proof of authenticity. The principle is that if the message is tampered in any way, the intermediate ciphers will change, creating a cascading effect and invalidate the final cipher. 
 
-As you can see if the scheme allows for variable length messages, it is vulnerable to forgery. 
+As you will see if the scheme allows for variable length messages, it is vulnerable to forgery. 
 
 For the CBC-MAC schemes, the IV for the first block is always 0.
 
@@ -109,34 +109,50 @@ The full solution is provided here:
         p.interactive()
 ```
 
-__flag__: UMDCTF{Th!s_M@C_Sch3M3_1s_0nly_S3cur3_f0r_f!xed_l3ngth_m3ss4g3s_78232813}
+__flag__: `UMDCTF{Th!s_M@C_Sch3M3_1s_0nly_S3cur3_f0r_f!xed_l3ngth_m3ss4g3s_78232813}`
 
 #### CBC-MAC 2
 
 `"Okay so I came up with a scheme that might just work. Definitely not trusting those TR peeps anymore. I'm not sure how to prove the security of this besides jsut having you test it again."`
+
+As we saw with the previous challenge, CBC-MAC schemes are vulnerable to forgery if messages of arbitrary lengths are allowed. So, one of the protections designed for this scheme is to calculate and use the length of the message (or the number of blocks), as part of the message. So that message cannot be forged. This approach works only when the length is in the __FIRST__ block of the message.
+
+The most important part of the challenge server again is the MAC calculation function here : 
+
+```python
+    def cbc_mac(msg, key):
+        iv = b'\x00'*BS
+        cipher = AES.new(key, AES.MODE_CBC, iv=iv)
+        ct = cipher.encrypt(msg + l2b(len(msg)//BS, BS))
+        t = ct[-16:]
+        return hexlify(t)
+```
+
+Here we see that the length of the message is calculated, but appended at the __END__ of the message. This makes it vulnerable to message code forgery. 
+
+I relied on the following paper to formulate my attack. 
 
 <cite>![](2023-04-30-11-55-51.png)[^2]</cite>
 
 [^2]: https://www.csa.iisc.ac.in/~arpita/Cryptography15/CT3.pdf
 
 
-//TODO
+The attack consists of these steps
+
+1. `t1 = getTag(p, A+block_one+B+B+B)` Construct a message of `A1BBB` and get its tag (t1).  Assume each letter is a full block. 
+1. `t2 = getTag(p, A)` Construct a message of just A and get its tag (t2). Note that the server will automatically add a block with `1` to this message 
+1. `t3 = getTag(p, C)` Construct a message of same length with a differet content, say C. Get its tag (t3)
+1. `t2_xor_t3 = strxor(t2 ,t3)` Calculate `XOR(t2, t3)`
+1. `E = strxor(B, t2_xor_t3)`  Calculate `E = XOR(B, XOR(t2, t3))`
+1. `forgeMessage(p, C + block_one + E + B + B, t1)` Construct a message like `C1EBB` and send it with the tag t1
+
+The complete solution is as below:
 
 ```python
-        from pwn import * 
-        import logging
-        from binascii import hexlify, unhexlify
-        from Crypto.Util.strxor import strxor
-
-        context.log_level = 'debug'
-
-        # The program deals with bytes. Only the pwntools.send() will deal with hex representations
-
         A = b'A'*16
         B = b'B'*16
         C = b'C'*16
         block_one = b'\x00'*15 + b'\x01'
-
 
         def getTag(p, msg):
             p.recvuntil(b'Choice: ')
@@ -169,15 +185,15 @@ __flag__: UMDCTF{Th!s_M@C_Sch3M3_1s_0nly_S3cur3_f0r_f!xed_l3ngth_m3ss4g3s_782328
 
         t2_xor_t3 = strxor(t2 ,t3)
         E = strxor(B, t2_xor_t3)
-
-        #t4 = getTag(p, C + block_one + E + B + B )
+        # for testing 
+        # t4 = getTag(p, C + block_one + E + B + B )
         # print(hexlify(t4))   # should be same as t1 
         print(hexlify(t1))
 
         forgeMessage(p, C + block_one + E + B + B, t1)
         p.interactive()
-
 ```
+__flag__: `UMDCTF{W3lp_l00k5_l!k3_I_n33d_t0_ch4ng3_th1s_ag41n_s4d_f4ce_3m0j1_927323}`
 
 #### Pokecomms
 `Comms are vital to winning matches. Pikachu looks a little angry. You should figure out what he's saying before he bytes you`
