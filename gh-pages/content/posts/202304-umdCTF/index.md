@@ -500,7 +500,7 @@ __flag__: `UMDCTF{SINJOHRUINS}`
 
 We are given a network capture file in `pcapng` format.  Before we start on this challenge, notice that the title of the challenge hints to `FTP Only`. 
 
-As usual, I use the protocol-hierarchy statistics to see the data in the capture. Nearly 85% of the traffic is TLS. Unless in rare circumstances, we would not be asked to decrypt TLS traffic. So, it is safe to ignore. Given this fact and becuase of the hint from the challenge name, I decided to focus on FTP next. 
+As usual, I use the protocol-hierarchy statistics to see the data in the capture. Nearly 85% of the traffic is TLS. Unless in rare circumstances, we would not be asked to decrypt TLS traffic. So, it is safe to ignore. Given this fact and because of the hint from the challenge name, I decided to focus on FTP next. 
 ```
 $ tshark -r fire-type-pokemon-only -z io,phs
 
@@ -561,11 +561,11 @@ Filtering on FTP as the protocol shows the FTP commands as well as the FTP-Passi
     28927	100.082641502	192.168.16.129	192.168.16.130	FTP	79	Request: RETR secret
 ```
 
-An easy way to retrieve all the files from the packet capture is to use the Export Objects feature. From Wireshark --> File --> Export Objects --> FTP-DATA, shows the files that are available to be retrieved.  Export the four files. 
+An easy way to retrieve all the files from the packet capture is to use the Export Objects feature. `Wireshark --> File --> Export Objects --> FTP-DATA`, shows the files that are available to be retrieved.  Export the four files. 
 
 ![](2023-05-01-21-01-15.png)
 
-Examining these files, we can see that three of them are small PNG files and one zip file.  I tried the usual stego techniques for PNG files (zsteg, binwalk, etc), but they did not seem to hold any additional information.  So, I tried to extract the files from the zip archive, and I was prompted for a password.
+Examining these files, we can see that three of them are small PNG files and one zip file.  I tried the usual stego techniques for PNG files (`zsteg, binwalk, etc`), but they did not seem to hold any additional information.  So, I tried to extract the files from the zip archive, and I was prompted for a password.
 
 ```
     $ file *
@@ -575,7 +575,7 @@ Examining these files, we can see that three of them are small PNG files and one
     secretpic1.png:   PNG image data, 70 x 70, 8-bit/color RGBA, non-interlaced
 
     $ unzip -l secret
-        Archive:  secret
+    Archive:  secret
     Length      Date    Time    Name
     ---------  ---------- -----   ----
     3205229  04-27-2023 12:12   wisdom.mp4
