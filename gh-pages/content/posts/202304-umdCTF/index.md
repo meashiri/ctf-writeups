@@ -1,7 +1,7 @@
 ---
 title: "UMD CTF"
 date: 2023-04-30T13:59:32-04:00
-categories: [ctf, writeup, pokemon]
+categories: [ctf, writeup, pokemon, hardware]
 tags: [hardware, CBC-MAC, 'MAC forgery']
 cover:
     image: 'umdctf_logo.png'
@@ -637,4 +637,50 @@ $ awk '!/^(2000|0000|0001|2001|2010|1000|3001)/' EP_815_program.vsp | sed -e 's/
 UMDCTF{smuggl3d_n0m5}
 ```
 
+#### Beep Boop
+
+I had hacked together some scripts to solve the Beep Boop challenge during the CTF. This is a more refined solution. For future reference.
+
+```python
+    import scipy
+    import numpy as np
+    from scipy.io import wavfile
+
+    fps, data = wavfile.read("sound.wav")
+    print(f"Read data {data.size}  FPS:{fps}")
+
+    tone_dur = 1
+    pause_dur = 0.5
+
+    start = 0
+    while (data[start] == 0):
+        start += 1
+    print(f"Starting to get data at position {start}")
+
+    flag_low = ""
+    flag_hi = ""
+
+
+    for i in range(start, data.size, int((tone_dur+pause_dur)*fps)):
+        begin, end = i, int(i+(tone_dur * fps))
+        # print(f"Processing {begin} to {end}")
+        signal = data[begin:end]
+        freqs = np.fft.fftfreq(signal.size, d=1/fps)
+        amplitudes = np.fft.fft(signal)         # produces a complex number. 
+        amp = abs(amplitudes.real[:])
+
+        # get frequencies where the amplitude is near maximum    
+        f = freqs[np.where((amp > max(amp)*0.04) & (freqs > 0))]
+        fLow, fHi = int(f[0]), int(f[1])
+        flag_low += chr(50+(fLow//11))
+        flag_hi += chr(fHi//13)
+
+    print(flag_low)
+    print(flag_hi)
+
+```
+
+
+#### Writeups
+* https://txnn3r.github.io/UMDCTF
 
