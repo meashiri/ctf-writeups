@@ -42,7 +42,7 @@ The challenge server is running a program that presents a menu when we connect t
     Choice: 
 ```
 
-The approach is that you can request MACs for upto 10 messages that you can send to the server. The goal is to send a message to the server, using option 2, and predit the MAC tag to get the flag. 
+The approach is that you can request MACs for upto 10 messages that you can send to the server. The goal is to send a message to the server, using option 2, and predict the MAC tag to get the flag. 
 
 The most important part of the server code is this bit where the MAC tag is calculated and returned. As we see here, IV = 0 and the incoming message (which is validated to be aligned to the block size), is passed to the cipher function. The last 16 bytes of the cipher is returned as the MAC tag. 
 
@@ -210,7 +210,7 @@ We are given a text file filled with statements like:
 Time for a one-line solution.
 
 ```bash
-    % cat pokecomms.txt | sed -e 's/CHU!/0/g' | sed -e 's/PIKA/1/g' | tr -d ' ' | perl -lpe '$_=pack"B*",$_' | tr -d "\n"
+    % sed -e 's/CHU!/0/g' pokecomms.txt | sed -e 's/PIKA/1/g' | tr -d ' ' | perl -lpe '$_=pack"B*",$_' | tr -d "\n"
 ```
 A very simple cipher that can be solved by replacing `PIKA` with `1` and `CHU!` with `0`. The payoff is perhaps the longest flag I have ever seen in a CTF.
 
@@ -496,10 +496,102 @@ __flag__: `UMDCTF{SINJOHRUINS}`
 
 
 #### Fire Type Pokemon Only
-//TODO
+`Some wannabe trainer with no pokemon left their PC connected to the internet. Watch as I hack this nerd lol`
+
+We are given a network capture file in `pcapng` format.  Before we start on this challenge, notice that the title of the challenge hints to `FTP Only`. 
+
+As usual, I use the protocol-hierarchy statistics to see the data in the capture. Nearly 85% of the traffic is TLS. Unless in rare circumstances, we would not be asked to decrypt TLS traffic. So, it is safe to ignore. Given this fact and becuase of the hint from the challenge name, I decided to focus on FTP next. 
+```
+$ tshark -r fire-type-pokemon-only -z io,phs
+
+Protocol Hierarchy Statistics
+Filter: 
+
+eth                                      frames:34235 bytes:34205924
+  ip                                     frames:34210 bytes:34203112
+    udp                                  frames:1435 bytes:806033
+      data                               frames:119 bytes:25096
+      mdns                               frames:17 bytes:1894
+      ssdp                               frames:6 bytes:1178
+      quic                               frames:1251 bytes:773290
+        quic                             frames:246 bytes:165711
+          quic                           frames:77 bytes:74202
+      dns                                frames:34 bytes:3780
+      llmnr                              frames:4 bytes:276
+      nbns                               frames:3 bytes:276
+      nbdgm                              frames:1 bytes:243
+        smb                              frames:1 bytes:243
+          mailslot                       frames:1 bytes:243
+            browser                      frames:1 bytes:243
+    tcp                                  frames:32735 bytes:33385239
+      tls                                frames:14954 bytes:20300524
+        tcp.segments                     frames:1528 bytes:12490280
+          tls                            frames:1443 bytes:12143373
+      http                               frames:22 bytes:17182
+        ocsp                             frames:14 bytes:14951
+        data-text-lines                  frames:2 bytes:622
+      ftp                                frames:112 bytes:9701
+        ftp.current-working-directory    frames:112 bytes:9701
+      ftp-data                           frames:122 bytes:3231223
+        ftp-data.setup-frame             frames:122 bytes:3231223
+          ftp-data.setup-method          frames:122 bytes:3231223
+            ftp-data.command             frames:122 bytes:3231223
+              ftp-data.command-frame     frames:122 bytes:3231223
+                ftp-data.current-working-directory frames:122 bytes:3231223
+                  data-text-lines        frames:6 bytes:2348
+    icmp                                 frames:40 bytes:11840
+      data                               frames:8 bytes:2760
+      quic                               frames:32 bytes:9080
+  ipv6                                   frames:21 bytes:2590
+    udp                                  frames:21 bytes:2590
+      mdns                               frames:17 bytes:2234
+      llmnr                              frames:4 bytes:356
+  arp                                    frames:4 bytes:222
+===================================================================
+```
+
+Filtering on FTP as the protocol shows the FTP commands as well as the FTP-Passive transfers initiated by the client `192.168.16.129`.  The relevant commands are shown below. From this interaction, we can see that the user `pokemonfan1` retrieved several files from the FTP server. 
+```
+    12476	43.815884924	192.168.16.129	192.168.16.130	FTP	84	Request: USER pokemonfan1
+    12576	45.011050717	192.168.16.129	192.168.16.130	FTP	77	Request: PASS pika
+    14205	54.775654966	192.168.16.129	192.168.16.130	FTP	88	Request: CWD secret_documents
+    14490	59.871546649	192.168.16.129	192.168.16.130	FTP	84	Request: RETR Diglett.png
+    14804	64.976928456	192.168.16.129	192.168.16.130	FTP	77	Request: RETR hmmm
+    15290	69.553040363	192.168.16.129	192.168.16.130	FTP	87	Request: RETR secretpic1.png
+    28927	100.082641502	192.168.16.129	192.168.16.130	FTP	79	Request: RETR secret
+```
+
+An easy way to retrieve all the files from the packet capture is to use the Export Objects feature. From Wireshark --> File --> Export Objects --> FTP-DATA, shows the files that are available to be retrieved.  Export the four files. 
+
+![](2023-05-01-21-01-15.png)
+
+Examining these files, we can see that three of them are small PNG files and one zip file.  I tried the usual stego techniques for PNG files (zsteg, binwalk, etc), but they did not seem to hold any additional information.  So, I tried to extract the files from the zip archive, and I was prompted for a password.
+
+```
+    $ file *
+    Diglett.png:      PNG image data, 70 x 70, 8-bit/color RGBA, non-interlaced
+    hmmm:             PNG image data, 70 x 70, 8-bit/color RGBA, non-interlaced
+    secret:           Zip archive data, at least v2.0 to extract
+    secretpic1.png:   PNG image data, 70 x 70, 8-bit/color RGBA, non-interlaced
+
+    $ unzip -l secret
+        Archive:  secret
+    Length      Date    Time    Name
+    ---------  ---------- -----   ----
+    3205229  04-27-2023 12:12   wisdom.mp4
+    ---------                     -------
+    3205229                     1 file
+
+    $ unzip -x secret
+    Archive:  secret
+    [secret] wisdom.mp4 password: 
+```
+
+I tried the filenames of the PNG files, `Diglett, hmmm and secretpic1` each as the password, but was unsuccessful. I then used the password that was used for the FTP transfer `pika` as the password and was successful in extracting `wisdom.mp4`.  The video was a 6 second clip of the Pokemon TV show and the flag was overlaid on the bottom of the video. 
 
 ![](2023-04-29-23-42-24.png)
 
+__flag__: `UMDCTF{its_n0t_p1kachu!!}`
 
 #### A TXT for You and Me
 
@@ -541,7 +633,7 @@ __flag__: `UMDCTF{Chungu5_4ppr3c1@t3s_y0ur_l0y@lty_a61527bd8ec`
 This was another VESP chall. I could not solve it during the CTF. However inspecting the program afterwards leads to an easier, definitely unintended solution
 
 ```bash
-$ awk '!/^(2000|0000|0001|2001|2010|1000|3001)/' EP_815_program.vsp | sed -e 's/^7//g' | sed -e 's/^0//g' | tr -d '\n' | xxd -r -p
+$ awk '!/^(2000|0000|0001|2001|2010|1000|3001)/' EP_815_program.vsp | sed -e 's/^[7|0]//g' | tr -d '\n' | xxd -r -p
 UMDCTF{smuggl3d_n0m5}
 ```
 
