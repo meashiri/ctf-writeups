@@ -468,7 +468,7 @@ def decode(bstr):
 __Flag__: `bucket{I5_tH15_aN_NSA_baCkDoOr?}`
 
 
-### Post event learnings
+### After the CTF
 
 * Scalloped Potatoes
 
@@ -482,4 +482,59 @@ To be added:
 * misc/Drawing
 * TBDLCG
 
+#### Writeups
+* https://github.com/EmergencyBucket/Writeups-2023/ : Author writeups
+* 
 
+#### Challenges
+|Category|Challenge|Description|
+|---|---|---|
+|CRYPTO|Enigma| Enigma challenge |
+|CRYPTO|Image|
+|CRYPTO|Psychology Random|
+|CRYPTO|Rotund Bits| Encoding in MSB |
+|CRYPTO|SCAlloped_potatoes| Side channel attack
+|CRYPTO|Search - 0| RSA - 108/128 bits leaked
+|CRYPTO|Search - 1| RSA - (p-2)(q-2) leaked
+|CRYPTO|Search - 2| RSA - prime from the message
+|CRYPTO|Search - 3| RSA - n = P*P; m too short; use CRT
+|CRYPTO|TBDLCG| 
+|MISC|Clocks 2|
+|MISC|Codewriter-1| LLM challenge with code execution
+|MISC|Codewriter-2| LLM challenge with code execution
+|MISC|Codewriter-3| LLM challenge with code execution
+|MISC|Detective|
+|MISC|Discord|
+|MISC|Drawing|
+|MISC|Image-2|
+|MISC|LLMagic-1|
+|MISC|LLMagic-2|
+|MISC|LLMagic-3|
+|MISC|Minecraft 2|
+|MISC|Minimal Natural Instruction Structural Transformation|
+|MISC|Secret Bucket|
+|MISC|Survey|
+|MISC|Taniks|
+|MISC|Transmission|
+|MISC|clocks|
+|MISC|minecraft|
+|PWN|Never Called|
+|PWN|Parrot|
+|PWN|Shell|
+|PWN|Shell Harder|
+|PWN|Starting place|
+|REV|Apps|
+|REV|Jess|
+|REV|Maze|
+|REV|Random security|
+|REV|Schematic|
+|REV|Tetris|
+|REV|Troll|
+|REV|licenseer|
+|WEB|Auth|
+|WEB|Ping check|
+|WEB|SQLi-1|
+|WEB|SQLi-2|
+|WEB|SQLi-3|
+|WEB|gif|
+|WEB|sqli - 4|

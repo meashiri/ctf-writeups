@@ -1,8 +1,8 @@
 ---
 title: "UMD CTF"
 date: 2023-04-30T13:59:32-04:00
-categories: [ctf, writeup, pokemon, hardware]
-tags: [hardware, CBC-MAC, 'MAC forgery']
+categories: [ctf, writeup, pokemon, hardware, dsp]
+tags: [CBC-MAC, 'MAC forgery', frequency, FFT ]
 cover:
     image: 'umdctf_logo.png'
 ---
@@ -500,7 +500,7 @@ __flag__: `UMDCTF{SINJOHRUINS}`
 
 We are given a network capture file in `pcapng` format.  Before we start on this challenge, notice that the title of the challenge hints to `FTP Only`. 
 
-As usual, I use the protocol-hierarchy statistics to see the data in the capture. Nearly 85% of the traffic is TLS. Unless in rare circumstances, we would not be asked to decrypt TLS traffic. So, it is safe to ignore. Given this fact and because of the hint from the challenge name, I decided to focus on FTP next. 
+As usual, I use the protocol-hierarchy statistics to see the data in the capture. Nearly 85% of the traffic is TLS. Except in rare circumstances, we would not be asked to decrypt TLS traffic. So, it is safe to ignore. Given this fact and because of the hint from the challenge name, I decided to focus on FTP next. 
 ```
 $ tshark -r fire-type-pokemon-only -z io,phs
 
@@ -682,5 +682,8 @@ I had hacked together some scripts to solve the Beep Boop challenge during the C
 
 
 #### Writeups
-* https://txnn3r.github.io/UMDCTF
+* https://txnn3r.github.io/UMDCTF : Construct an ELF binary to meet YARA rules, multiple QRs in a GIF, PDF dot extraction and decode
+* https://github.com/yarml/Writeups/blob/main/TamuCTF2023/Embedded-Courier/README.md : Communicating over UART with an unknown device emulated with `qemu`
+* 
+
 

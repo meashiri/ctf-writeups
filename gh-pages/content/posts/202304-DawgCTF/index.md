@@ -388,3 +388,70 @@ __Flag__: `DawgCTF{analog_horror}`
 * https://github.com/dterracino/UnEgg 
 * https://github.com/ribt/dtmf-decoder: Nice, functional DTMF decoder
 * http://genave.com/dtmf/ : DTMF description
+
+#### Challenges
+|Category|Challenge|Description
+|----|----|----
+|binex|Hac-Man|
+|binex|Hello World?|
+|binex|Safety First|
+|binex|String Things|
+|bomb|Binary Bomb Bonus Phase|
+|bomb|Binary Bomb Phase 1|
+|bomb|Binary Bomb Phase 2|
+|bomb|Binary Bomb Phase 3|
+|bomb|Binary Bomb Phase 4|
+|bomb|Binary Bomb Phase 5|
+|bomb|Binary Bomb Phase 6|
+|bomb|Binary Bomb Phase 7|
+|bomb|Binary Bomb Phase 8|
+|bomb|Binary Bomb Phase 9|
+|crypto|A Less Normal Binary Tree|
+|crypto|Amogus|
+|crypto|Birds!|
+|crypto|Bravo Six, Going Dark|
+|crypto|Bravo Six, Going Dark II|
+|crypto|Break Core|
+|crypto|Briefcase|
+|crypto|CarBode|
+|crypto|Celestial Caper|
+|crypto|Choo Choo!|
+|crypto|Chuck's Code|
+|crypto|Eighty FGX?|
+|crypto|Et tu, Bacon?|
+|crypto|Linear Algebra Homework?|
+|crypto|Maximum Head Space|
+|crypto|Planet Express|
+|crypto|Table for you?|
+|crypto|Thermodynamic Analysis|
+|crypto|What Is That Melody?!|
+|crypto|What Is That Melody?! II|
+|crypto|You step away for just ONE minute!|
+|fwn|Celestial Caper II|
+|fwn|Crag's Hardware Challenge|
+|fwn|Look Inside: Dinos|
+|fwn|Repeater? Never heard of 'er!|
+|fwn|Subject: UMBC [URGENT]|
+|fwn|These Names|
+|fwn|Tower Trouble|
+|misc|A Normal Binary Tree|
+|misc|Boy Blue|
+|misc|Breaker, Breaker|
+|misc|Discord Challenge|
+|misc|Don't Forget About the Hints!|
+|misc|Down on the Farm|
+|misc|Hip to be square|
+|misc|Oh, Deer|
+|misc|Photo ID|
+|misc|Ram Analyzer|
+|misc|Ring Ring|
+|misc|Transmissions from Pripyat|
+|misc|What's a CTF?|
+|misc|Yo Dawg|
+|reven|Before the Beginning, and After the End|
+|reven|DISK ERROR|
+|reven|DM the bot!|
+|reven|DM the bot.|
+|reven|DM the bot?|
+|reven|Hidden in the Tower|
+|reven|Slippy Slidey Code|
