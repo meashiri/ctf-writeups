@@ -14,15 +14,25 @@ Organized by the students of Engineering students in France, this was a nice CTF
 #### Heap
 `We caught a hacker red-handed while he was encrypting data. Unfortunately we were too late to see what he was trying to hide. We did however manage to get a dump of the java heap. Try to find the information he wants to hide from us.`
 
+We are given a Java heap profiler file. Searching the internet, there seems to be a couple of tools that can inspect it. I chose to use `VisualVM`.
+
 ![](2023-05-15-20-50-21.png)
 
+Open the file in VisualVM, switch to Object view. Filter by `hero`. This gives us several interesting classes. The main one being a class called `AESEncrypt`. 
+
 ![](2023-05-15-20-52-32.png)
+
+Looking into the instance of the object, there are three interesting strings. Inspect the attributes and copying the values gives us the following strings. 
+
 ```
-    KEY = "c45c60232c9847e2"
-    Message = "kSDIsBFTYa3+aLqEpVLXtspdLse8WclEhbqGLiqvM6k="
-    Mode = "AES/ECB/PKCS5Padding"
+    K_E__Y = "c45c60232c9847e2"
+    message = "kSDIsBFTYa3+aLqEpVLXtspdLse8WclEhbqGLiqvM6k="
+    mode = "AES/ECB/PKCS5Padding"
 ```
 
+Plugging these strings into Cyberchef to get the flag.
+
+![](2023-05-15-21-03-13.png)
 
 #### SUDOkLu
 `This is a warmup to get you going. Your task is to read /home/privilegeduser/flag.txt. For our new commers, the title might steer you in the right direction ;). Good luck!`
