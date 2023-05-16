@@ -14,6 +14,15 @@ Organized by the students of Engineering students in France, this was a nice CTF
 #### Heap
 `We caught a hacker red-handed while he was encrypting data. Unfortunately we were too late to see what he was trying to hide. We did however manage to get a dump of the java heap. Try to find the information he wants to hide from us.`
 
+![](2023-05-15-20-50-21.png)
+
+![](2023-05-15-20-52-32.png)
+```
+    KEY = "c45c60232c9847e2"
+    Message = "kSDIsBFTYa3+aLqEpVLXtspdLse8WclEhbqGLiqvM6k="
+    Mode = "AES/ECB/PKCS5Padding"
+```
+
 
 #### SUDOkLu
 `This is a warmup to get you going. Your task is to read /home/privilegeduser/flag.txt. For our new commers, the title might steer you in the right direction ;). Good luck!`
