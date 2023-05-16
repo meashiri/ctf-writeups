@@ -6,7 +6,7 @@ tags: [web3, blockchain, PRNG, heap, LFSR]
 cover:
     image: 'HeroCTF_icon_500.png'
 ---
-Organized by the students of Engineering students in France, this was a nice CTF with an interesting variety of challenges. Unfortunately, I did not have much free time to play in the CTF this weekend. I was able to solve a few challenges, and came very close on a couple. While I didn't participate much, my CTF team did a great job and scored 10119 points, placing 9th in a global field of over 1600 teams
+Organized by the students of Engineering students in France, this was a nice CTF with an interesting variety of challenges. Unfortunately, I did not have much free time to play in the CTF this weekend. I was able to solve a few challenges, and came very close on a couple. While I didn't participate much, my CTF team did a great job and scored 10119 points, placing 9th in a global field of over 1000 teams
 
 <!--more-->
 ## Solves
@@ -30,7 +30,7 @@ Looking into the instance of the object, there are three interesting strings. In
     mode = "AES/ECB/PKCS5Padding"
 ```
 
-Plugging these strings into Cyberchef to get the flag.
+Plug these strings into Cyberchef to get the flag.
 
 ![](2023-05-15-21-03-13.png)
 
@@ -87,6 +87,8 @@ We will use the sudo command to run the `/usr/bin/socket` command to spawn a she
 ```
 
 ## After the CTF
+
+I was stuck on these challenges during the competition. I have captured these solutions and descriptions for future reference. 
 
 #### Futile
 `Linear Futile Shift Register`
