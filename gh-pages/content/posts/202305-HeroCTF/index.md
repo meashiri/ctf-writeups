@@ -292,7 +292,7 @@ The wrinkle is that it takes two 32-bit integers to generate each floating point
 * https://siunam321.github.io/ctf/HeroCTF-v5/
 * https://mxcezl.github.io/posts/write-up/ctf/heroctf-v5/
 * https://chrootcommit.github.io/tags/heroctfv5/
-* Blockchain solves using `forge`: https://github.com/m4k2/HeroCTF-V5-WU-Foundry
+* Blockchain solves using `Foundry`: https://github.com/m4k2/HeroCTF-V5-WU-Foundry
 
 
 
