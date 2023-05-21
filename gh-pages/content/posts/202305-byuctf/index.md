@@ -1,13 +1,13 @@
 ---
 title: "BYU CTF"
 date: 2023-05-19T23:01:20-04:00
-categories: [ctf, writeup]
-tags:
+categories: [ctf, writeup, crc, rsa]
+tags: [crc, scrabble, deseret, xkcd, "ducky script", "usb ducky"]
 cover:
     image: "byuctf_logo.jpg"
 ---
 
-Solved a few challenges in the BYU CTF organized by the Brigham Young University Cyberia academic team. 
+Solved a few challenges in the BYU CTF organized by the Brigham Young University's Cyberia academic team. 
 
 <!--more-->
 
@@ -25,9 +25,9 @@ The challenge text seems to translate to `BE WHY YOU SEE TEA F DESERET MEANS /H/
 
 ![](2023-05-20-16-11-33.png)
 
-Phonetically, it seems to be saying `byuctf deseret means honey`. Inserting the braces, gives us the flag.
+Phonetically, it seems to be saying `byuctf deseret means honey bee`. Inserting the braces, gives us the flag.
 
-Flag: `byuctf{deseret_means_honey}`
+Flag: `byuctf{deseret_means_honey_bee}`
 
 ### Poem
 
@@ -67,7 +67,7 @@ The challenge title refers to this edition of the XKCD comics.
 
 ![](roman_numerals_2x.png)
 
-The notion is to represent a number in romal numerals, but replace the roman letters with the decimal equivalent. So, 123 represented in roman is CXXIII, and will be written as 1001010111  `aka 100-10-10-1-1-1` in XKCD terms.
+The notion is to represent a number in romal numerals, but replace the roman letters with the decimal equivalent. So, 123 represented in roman is CXXIII, and will be written as 1001010111  `or 100-10-10-1-1-1` in XKCD terms.
 
 We are given a challenge server, that would serve 500 of these problems and if we answer them all correctly, we would get the flag.  
 
@@ -82,7 +82,6 @@ First, we formulate our approach:
 
 ```
     501010 + 1010105 ==> LXX + XXXV ==>  70 + 35  ==> eval() ==> 105 ==> CV ==> 1005 (answer to be sent)
-
 ```
 
 The solution for doing the calculation and sending the results to the challenge server is given below. 
@@ -164,6 +163,13 @@ for i in range(8):
 
 ### Ducky 1
 
+The `Ducky` series of challenges are based on the [`USB Rubber Ducky`](https://shop.hak5.org/products/usb-rubber-ducky) product. This innocent-looking device emulates a keyboard when plugged into the victim's computer and injects keyboard strokes, which could execute commands as the victim. Very nasty. The malicious payload can be scripted using Ducky Script, which is compiled into op-codes. 
+
+I used the [Duck toolkit on Github](https://github.com/kevthehermit/DuckToolkit) to solve stages 1 and 2. Stage 3 needed a custom solution. 
+
+* https://usbrubberducky.com/
+* https://ducktoolkit.com/decode
+
 ```
 DuckToolkit-master % python3 ducktools.py -l us -d ../ducky1_inject.bin /dev/stdout
 [+] Reading Duck Bin file
@@ -175,11 +181,15 @@ byuctf{this_was_just_an_intro_alright??}
 ```
 ### Ducky 2
 
+For this challenge, while the text part of the string seems to decode easily, the symbols at the end are challenging. In the discord chat, the organizers mentioned that the flag is fully formed, i.e includes the braces. So, I bruteforced the decoding using all possible languages and searched only for the ones that provides us the flag in the correct format. 
+
+Both SK and CZ keybord layouts seems to provide the flat in the right format. The first one I tried was accepted. 
+
 ```
     for i in `cat langs.txt` 
     for> do
     for> echo LANG=$i     
-    for> python3 ducktools.py -l $i -d ../ducky1_inject.bin /dev/stdout | grep "byuctf{"
+    for> python3 ducktools.py -l $i -d ../ducky2_inject.bin /dev/stdout | grep "byuctf{"
     for> done
     LANG=ch
     LANG=de
@@ -208,14 +218,26 @@ byuctf{this_was_just_an_intro_alright??}
 ```
 ### Ducky 3
 
+This challenge uses a custom mapping for characters/keyboard. Since we are given the payload:
+```
+    STRING abcdefghijklmnopqrstuvwxyz
+    STRING ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    STRING 0123456789
+    STRING !@#$%^&*()-_
+    STRING                  <--- presume that this is the flag
+```
+
+We will use the first 74 op-codes to match them with these strings and use the rest to decode the final string. 
+
 ```python
 chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_"
 
 with open('ducky3_inject.bin', 'rb') as F:
     duckbin = F.read()
     ducks = hexlify(duckbin)
-    lookup = {}
+    lookup = {}   # lookup table
     i = 0
+    # build the lookup table: key = hex code; value = character
     for c in chars:
         lookup[ducks[i:i+4]]=c
         i+=4
@@ -226,13 +248,25 @@ with open('ducky3_inject.bin', 'rb') as F:
             print(f"{ducks[i:i+4]} --> {lookup[ducks[i:i+4]]}")
             s += lookup[ducks[i:i+4]]
         except Exception as e:
-            print (e)
+            print (e)   # print and ignore if a character appears in the flag, but not in the lookup table. This happens for { and }
             #continue
         i+=4    
     print(s)
 
     # byuctf{1_h0p3_y0u_enj0yed-thi5_very_muCH}
 ```
+
+## After the CTF
+Some of the challenges, that I had attempted, but did not solve.
+
+### Q10
+We are given an image file that looks like a scrabble board. The title Q10 also confirms that this is related to the game Scrabble. While I went down the path of trying to determine a pattern with the tiles that were already placed on the board, the solution was in the tiles that were __not__ placed on the board. There are exactly seven tiles left to be placed and the best possible word that can be made is `CIpHERTExT` (The lower case letters are blank tiles, which act as wild cards). The flag then is determined as `byuctf{ciphertext}`
+
+![](2023-05-21-12-08-54.png)
+
+* https://www.scrabulizer.com/
+
+
 
 ## Writeups
 * Official writeups/challenges : https://github.com/BYU-CSA/BYUCTF-2023/
@@ -242,20 +276,20 @@ with open('ducky3_inject.bin', 'rb') as F:
 
 |Category|Challenge|Description
 |----|----|----
-|Crypto|Compact| *
-|Crypto|Poem| *
+|Crypto|Compact| * Dotsies font
+|Crypto|Poem| * Keyboard change 
 |Crypto|RSA1|
 |Crypto|RSA2|
 |Crypto|RSA3|
 |Crypto|RSA4|
 |Crypto|RSA5|
-|Crypto|𐐗𐐡𐐆𐐑𐐓𐐄?| *
+|Crypto|𐐗𐐡𐐆𐐑𐐓𐐄?| *  Deseret alphabet
 |Forensics|Bing Chilling|
-|Forensics|CRConfusion|
+|Forensics|CRConfusion|many samples with different CRC polynomials
 |Forensics|Paleontology|
-|Forensics|Q10|
-|Forensics|ScooterWeb|*
-|Forensics|What does the cougar say?|
+|Forensics|Q10|Scrabble based, use unused tiles
+|Forensics|ScooterWeb|* EXIF + XOR
+|Forensics|What does the cougar say?| Video frame + spectogram
 |Forensics|kcpassword|
 |Jail|Builtins 1|
 |Jail|Builtins 2|
@@ -284,9 +318,9 @@ with open('ducky3_inject.bin', 'rb') as F:
 |OSINT|Legoclones 3|
 |OSINT|Legoclones 4|
 |OSINT|Legoclones 5|
-|Pentesting|MI6configuration 1|
-|Pentesting|MI6configuration 3|
-|Pentesting|MI6configuration 4|
+|Pentesting|MI6configuration 1| nmap + anonymous ftp
+|Pentesting|MI6configuration 3| ssh + sudo
+|Pentesting|MI6configuration 4| reverse shell + priv/esc
 |Pentesting|VMception|
 |Pwn|2038|
 |Pwn|ScooterAdmin1|

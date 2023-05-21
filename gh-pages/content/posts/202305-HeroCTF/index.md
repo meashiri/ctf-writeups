@@ -301,6 +301,10 @@ The wrinkle is that it takes two 32-bit integers to generate each floating point
 * https://mxcezl.github.io/posts/write-up/ctf/heroctf-v5/
 * https://chrootcommit.github.io/tags/heroctfv5/
 * Blockchain solves using `Foundry`: https://github.com/m4k2/HeroCTF-V5-WU-Foundry
+* https://github.com/Kaiziron/heroctf-v5
+* Youwatch: https://mizu.re/post/youwatch
+* System challs: https://v0lk3n.github.io/writeup/HeroCTFv5/HeroCTFv5-SystemCollection
+* https://github.com/deyixtan/ctf/tree/main/challenges/hero-ctf-2023
 
 
 
@@ -330,7 +334,7 @@ The wrinkle is that it takes two 32-bit integers to generate each floating point
 |Misc|Erlify|
 |Misc|Feedback|
 |Misc|I_Use_zsh_BTW|
-|Misc|Irreductible|
+|Misc|Irreductible|Python pickle RCE without reduce
 |Misc|Pygulag|
 |Misc|Pyjail|filtered[eval, exec], 23< input < 127, only print() allowed
 |Misc|Welcome|
