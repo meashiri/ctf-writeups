@@ -305,6 +305,7 @@ The wrinkle is that it takes two 32-bit integers to generate each floating point
 * Youwatch: https://mizu.re/post/youwatch
 * System challs: https://v0lk3n.github.io/writeup/HeroCTFv5/HeroCTFv5-SystemCollection
 * https://github.com/deyixtan/ctf/tree/main/challenges/hero-ctf-2023
+* 
 
 
 

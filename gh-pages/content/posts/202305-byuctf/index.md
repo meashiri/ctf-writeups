@@ -2,7 +2,7 @@
 title: "BYU CTF"
 date: 2023-05-19T23:01:20-04:00
 categories: [ctf, writeup, crc, rsa]
-tags: [crc, scrabble, deseret, xkcd, "ducky script", "usb ducky"]
+tags: [crc, scrabble, deseret, xkcd, "ducky script", "usb ducky", RSA]
 cover:
     image: "byuctf_logo.jpg"
 ---
@@ -256,8 +256,134 @@ with open('ducky3_inject.bin', 'rb') as F:
     # byuctf{1_h0p3_y0u_enj0yed-thi5_very_muCH}
 ```
 
+### RSA 1
+This very basic example of RSA, has very small prime factors that N just becomes a 128-bit number. This can be easily factored from base principles or by consulting FactorDB. 
+
+```python
+    print(f"Bit length of N : {n.bit_length()}")
+
+    f = FactorDB(n)
+    f.connect()
+    r = f.get_factor_list()
+
+    if (len(r) != 2):
+        print(f"{r} .. does not have exactly two factors")
+        raise Exception("Factor count not 2")
+    p,q = r
+
+    print(p,q)
+
+    phi = (p-1)*(q-1)
+
+    d = inverse(e, phi)
+    m = pow(c, d, n)
+    print(long_to_bytes(m))
+
+    # byuctf{too_smol}
+```
+
+### RSA 2
+This case seems to be a case of normal RSA, but the modulus N can be factored by consulting FactorDB. The solution for `RSA 1` also works here. 
+
+### RSA 3
+
+In this case, it seems to be a case of a normal RSA, which is hard to break, but one of the prime factors of N is reused. We detect it by calculating the GCD of the two values of N.  This allows us to factor N easily.
+
+```python
+
+    # We are given, n1, e1=65537, c1    n2, e2=65537, c2
+
+    from Crypto.Util.number import inverse, long_to_bytes, bytes_to_long
+    from math import gcd
+
+
+    # test for co-prime
+    p = gcd(n1, n2) # p != 1, means we have found a factor of N
+
+    if (p != 1):
+        # n1 and n2 are not co-prime
+        q1 = n1 // p
+
+        phi = (p-1)*(q1-1)
+
+        d = inverse(e1, phi)
+        m = pow(c1, d, n1)
+        print(long_to_bytes(m))
+
+        # byuctf{coprime_means_factoring_N_becomes_much_easier}
+```
+
+### RSA 4
+In this scenario, the exponent is a small number (3). The same text is encrypted three times with different prime factors and hence different modulus. 
+
+In this case, if `m` is small compared to `n`, `c`, which is `pow(m, e, n)`, can just be `m ** e`. Thus, we can take `e`-th root of `c` to get back `m`. In this problem, only one ciphertext value is sufficient to recover the plaintext. Normally we need atleast `e` samples to recover the plaintext.
+
+```python
+    # We are given, n1, e1=3, c1    n2, e2=3, c2    n3, e3=3, c3
+
+    # test for co-prime, if all are equal to 1, no factors are shared.
+    print(f"{gcd(n1,n2)=}") 
+    print(f"{gcd(n2,n3)=}") 
+    print(f"{gcd(n3,n1)=}")
+
+    e = 3
+
+    m = find_invpow(c3,e)   # pick the cipher text corresponding to the largest n, find its cube-root (for e=3)
+    print(long_to_bytes(m))
+
+    m,result = gmpy2.iroot(c3, e)
+    if (result):
+        print(long_to_bytes(int(m)))
+    else: 
+        print(f"{e}-root not found")
+
+    # byuctf{hastad_broadcast_attack_is_why_e_needs_to_be_very_large}
+```
+
+### RSA 5
+
+In this scenario, we have the modulus reused twice to encode the same ciphertext, with different exponents. Since we have `gcd(e1, e2) = 1` we are able to use the common modulus attack described in the [stackoverflow article](https://math.stackexchange.com/questions/2730675/decrypt-an-rsa-message-when-its-encrypted-by-same-modulus) as shown below. 
+
+![](2023-05-22-18-01-46.png)
+
+The steps are: 
+1. `gcd(e1, e2) MUST be 1`
+1. Also, `gcd(c1, n) MOST likely will be 1`. If not, use the GCD as one of the factors and factor N.
+1. Calculate euclidean extended gcd of e1 and e2, `u` and `v`
+1. This implies that `e1*u + e2*v MUST be 1`
+1. Calculcate `(pow(c1,u) * pow(c2,v)) % n`.  This will be the numeric value of the plaintext.
+
+
+```python
+
+    # We are given, n   e1=65537,c1   e2=65521,c2 
+
+    from Crypto.Util.number import inverse, long_to_bytes, bytes_to_long
+    from math import gcd
+
+    def egcd(a, b):
+        if a == 0:
+            return (0, 1, b)
+        else:
+            y, x, g = egcd(b % a, a)
+            return (x - (b // a) * y, y, g)
+
+    print(f"{gcd(e1,e2)=}") # must be co-prime
+    u, v, g = egcd(e1, e2)
+    # check
+    assert u*e1 + v*e2 == 1   # definition of EGCD
+
+    print(f"{gcd(c1,n)=}")
+    print(f"{gcd(c2,n)=}")
+
+    m = (pow(c1, u, n) * pow(c2, v, n)) % n
+    print(long_to_bytes(m))
+
+    # byuctf{NEVER_USE_SAME_MODULUS_WITH_DIFFERENT_e_VALUES}
+```
+
 ## After the CTF
-Some of the challenges, that I had attempted, but did not solve.
+Some of the challenges that I had attempted, but did not solve.
 
 ### Q10
 We are given an image file that looks like a scrabble board. The title Q10 also confirms that this is related to the game Scrabble. While I went down the path of trying to determine a pattern with the tiles that were already placed on the board, the solution was in the tiles that were __not__ placed on the board. There are exactly seven tiles left to be placed and the best possible word that can be made is `CIpHERTExT` (The lower case letters are blank tiles, which act as wild cards). The flag then is determined as `byuctf{ciphertext}`
@@ -267,9 +393,12 @@ We are given an image file that looks like a scrabble board. The title Q10 also 
 * https://www.scrabulizer.com/
 
 
-
-## Writeups
+## Writeups & Resources
 * Official writeups/challenges : https://github.com/BYU-CSA/BYUCTF-2023/
+* https://github.com/BYU-CSA/ctf-training
+* https://www.bleepingcomputer.com/news/security/an-encrypted-zip-file-can-have-two-correct-passwords-heres-why/
+* Reverse engineering CRC : https://www.csse.canterbury.ac.nz/greg.ewing/essays/CRC-Reverse-Engineering.html
+
 
 
 ## Challenges
@@ -278,11 +407,11 @@ We are given an image file that looks like a scrabble board. The title Q10 also 
 |----|----|----
 |Crypto|Compact| * Dotsies font
 |Crypto|Poem| * Keyboard change 
-|Crypto|RSA1|
-|Crypto|RSA2|
-|Crypto|RSA3|
-|Crypto|RSA4|
-|Crypto|RSA5|
+|Crypto|RSA1| small n, factorizable
+|Crypto|RSA2| large n, in factorDB
+|Crypto|RSA3| same plain text, same e, different N; non-co-prime N
+|Crypto|RSA4| small e, same plaintext, large N;
+|Crypto|RSA5| same N, same plaintext, similar e; common modulus
 |Crypto|𐐗𐐡𐐆𐐑𐐓𐐄?| *  Deseret alphabet
 |Forensics|Bing Chilling|
 |Forensics|CRConfusion|many samples with different CRC polynomials

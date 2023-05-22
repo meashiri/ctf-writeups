@@ -685,6 +685,7 @@ I had hacked together some scripts to solve the Beep Boop challenge during the C
 * https://txnn3r.github.io/UMDCTF : Construct an ELF binary to meet YARA rules, multiple QRs in a GIF, PDF dot extraction and decode
 * https://github.com/yarml/Writeups/blob/main/TamuCTF2023/Embedded-Courier/README.md : Communicating over UART with an unknown device emulated with `qemu`
 * https://dree.blog/posts/umd-ctf-2023/
-* 
+* Challenge sources : https://github.com/UMD-CSEC/UMDCTF-Public-Challenges
+
 
 
