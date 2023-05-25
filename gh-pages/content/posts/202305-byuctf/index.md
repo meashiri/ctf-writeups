@@ -72,7 +72,7 @@ The notion is to represent a number in romal numerals, but replace the roman let
 We are given a challenge server, that would serve 500 of these problems and if we answer them all correctly, we would get the flag.  
 
 First, we formulate our approach:
-1. We will be given a math statement in xkcd form (eg. `501010 + 101010`)
+1. We will be given a math statement in xkcd form (eg. `501010 + 1010105`)
 1. Turn this into a proper roman numeral representation ( `LXX + XXXV`)
 1. Turn each roman numeral to decimal (`70 + 35`)
 1. Evaluate this statement to get the answer (`105`)
@@ -460,9 +460,9 @@ We are given an image file that looks like a scrabble board. The title Q10 also 
 |Pwn|frorg|
 |Rev|Chain|
 |Rev|Chicken Again|
-|Rev|Ducky1|*
-|Rev|Ducky2|*
-|Rev|Ducky3|*
+|Rev|Ducky1|* duck script simple
+|Rev|Ducky2|* duck script SK keyboard layout
+|Rev|Ducky3|* custom keyboard layout
 |Rev|Go|
 |Rev|RevEng|
 |Rev|Sassie|
