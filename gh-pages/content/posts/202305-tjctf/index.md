@@ -55,7 +55,7 @@ So, the approch is a simple brute-force logic, with progressively building the f
 
 The challenge server supports two functions: 
 
-1. _new_  : which registers a new user and returns the signature, which is the RSA private key (m^d mod N)
+1. _new_  : which registers a new user and returns the signature, which is the RSA private key \\(m^{d}\\;mod \\;N\\)
 1. _login_: which allows a user to login using the signature. 
 
 The user `admin` is pre-registered - so we would not be able to register it and get the signature. If we are able to login as `admin` we would get the flag. So, the challenge boils down to getting the private signature for the user `admin`.
@@ -63,7 +63,7 @@ The user `admin` is pre-registered - so we would not be able to register it and 
 Since the challenge server allows unlimited calls to `new` function, and we can pass in any value as the user name, we can use this control of the plaintext to determine the private key of the user `admin`. 
 
 The approach is as follows: 
-1. Let m be the user name `admin`.  We need to determine \\(m^{d} \\;mod\\; N\\)  
+1. Let \\(m\\) be the user name `admin`.  We need to determine \\(m^{d} \\;mod\\; N\\)  
 1. `N` and `e` are known
 1. Take any random message, \\(m_1\\) and get its signature \\(s_1\\).  I chose \\(m_1 = 2\\)
 1. Determine \\(m_2\\) as the second message, where \\(m_2 = (m * m_1^{-1})\\)
@@ -128,26 +128,137 @@ When `e` is small as it is in this case, if the message is not long enough or ap
     if (result):
         print(long_to_bytes(int(m)))
 ```
+
+### iheartrsa
+
+We are given the source of the program running on the challenge server. The important bits of the program are:
+
+```python
+    with open('flag.txt') as f:
+        flag = f.readline()
+
+    raw_bin = str(
+        bin(int('0x'+str(hashlib.sha256(flag.encode('utf-8')).hexdigest()), 16))[2:])
+    hsh = int('0b1' + '0' * (256 - len(raw_bin)) + raw_bin, 2)      # padded to 256 bits
+```
+The flag is read from a file, encoded into bytes, converted to a hashdigest, further turned to binary and padded to 256 bits.  This is used as message \\(hsh\\) for RSA and can be at most 256bits
+
+```python
+    p = number.getPrime(1024)
+    q = number.getPrime(1024)
+    n = p * q       #2048 bits
+    e = 0
+
+    for i in range(0, 100):
+        if pow(hsh, i) >= n:
+            e = i
+            break
+    m = pow(hsh, e, n)  #hsh is 256 bits, hence e = 8  
+```
+The message \\(hsh\\) is used as the plaintext for textbook RSA, with the smallest choice of \\(e\\) that will cause \\((hsh)^{e} \\ge \\;n\\). Since `n` is 2048 bits and `hsh` is 256 bits, `e` is most likely equal to `8`.
+
+```python
+print(f'm: {m}')
+print(f'n: {n}')
+
+try:
+    answer = input_with_timeout('', 20)
+    try:
+        answer = ast.literal_eval(answer)   # <----- pass a literal value. AST is not relevant. 
+        if hsh == answer:                   # <----- win condition
+            print('you love rsa so i <3 you :DD')
+            print(flag)
+        else:
+            print("im upset")
+    except Exception as e:
+        print("im very upset")
+except Exception as e:
+    print("\nyou've let me down :(")
+```
+We are given the ciphertext `m` and modulus `n`. Our task is to determine the original hash, which is used as the plaintext for RSA. 
+
+Note that the plaintext, which is the hash of the flag, is always the same. Hence successive connections to the challenge server will give us the same message \\(hsh\\) encrypted with different values of `n`, with different prime factors.  Also, since `e = 8` and is quite small, this allows us to use `Håstad's broadcast attack`.
+
+Our approach is: 
+1. Connect to the server at most 8 times (as `e = 8`) and collect the pairs of `m` and `n`
+1. Use chinese remainder theorem on the lists of \\(M=[m_1, m_2, m_3 ... m_8]\\; and \\; N=[n_1, n_2, n_3 ... n_8]\\), and take the 8th-root to determine the value of `hsh`. 
+1. Pass this value of the `hsh` to the challenge server to get the flag.
+
+```python
+    def crt(a, n):
+        sum = 0
+        prod = reduce(lambda a,b: a*b, n)
+
+        for n_i, a_i in zip(n, a):
+            p = prod // n_i
+            sum += a_i * gmpy2.invert(p, n_i) * p
+        return sum % prod
+
+    def getConn(callRemote=True):
+        if(callRemote):
+            p = remote('tjc.tf', 31628)
+        else:
+            p = process(["python3", "iheartrsa.py"])
+        return p 
+
+    M = []  # collection of ciphers
+    N = []  # collection of modulii
+
+    def get_mn():
+        r = getConn()
+        mi = int(r.recvline().split(b':')[1].strip())   # "m: <nnn...nn>"
+        ni = int(r.recvline().split(b':')[1].strip())   # "n: <nnn...nn>"
+        M.append(mi)
+        N.append(ni)
+        r.close()
+        return
+
+    for i in range(8):
+        get_mn()
+
+    calc_crt = crt(M, N)
+    calc_hash, result = gmpy2.iroot(calc_crt, 8)
+    if (result):
+        print(f"[^] sending {calc_hash}")
+        r = getConn()
+        r.recvline()
+        r.recvline()
+        r.sendline(str(calc_hash).encode())
+        r.interactive()
+    else:
+        print(f"8th-root not found")
+```
+Executing the script against the challenge server, gives us the original hash value and also gets us the flag. 
+
+```
+    ...
+    [^] sending 146913410772757766194482407144214295333114411765260602423197339861209058274813
+    [+] Opening connection to tjc.tf on port 31628: Done
+    [*] Switching to interactive mode
+    you love rsa so i <3 you :DD
+    tjctf{iloversaasmuchasilovemymom0xae701ebb}
+```
+
+
 ## Resources
 * https://github.com/ret2school/ctf/tree/master/2023/tjctf/pwn
 * https://pyokagan.name/blog/2019-10-14-png/ 
 * https://crypto.stackexchange.com/questions/8902/given-a-message-and-signature-find-a-public-key-that-makes-the-signature-valid
-* 
 
 
 ## Challenges
 |Category|Challenge|Description
 |----|----|----
 |crypto|aluminum-isopropoxide|
-|crypto|baby-rsa|
+|crypto|baby-rsa| small-e. take cuberoot
 |crypto|drm-1|
 |crypto|e|
 |crypto|ezdlp|
-|crypto|iheartrsa|
+|crypto|iheartrsa| small-e, same m, different N
 |crypto|keysmith|
 |crypto|merky-hell|
-|crypto|squishy|
-|forensics|beep-boop-robot|
+|crypto|squishy| RSA oracle, control on plaintext
+|forensics|beep-boop-robot| Morse code
 |forensics|miniscule|fix IHDR, make IDAT Zlib instead of Zstd, fix CRC for IDAT
 |forensics|neofeudalism|
 |forensics|nothing-to-see|
