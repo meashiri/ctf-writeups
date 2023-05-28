@@ -116,6 +116,8 @@ The solution is as follows:
     loginUser(r, p_orig, s_admin)
     r.interactive()
 ```
+Alternate solution: Since `long_to_bytes(b'admin') == long_to_bytes(b'\x00admin')` register a user called `\x00admin` and get the signature to use with `admin` [from Alol on discord]
+
 ### baby-rsa
 
 When `e` is small as it is in this case, if the message is not long enough or appropriately padded, the cipher becomes smaller than N, allowing us to take the cuberoot of `c` to obtain the original message.
