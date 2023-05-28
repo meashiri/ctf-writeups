@@ -116,6 +116,16 @@ The solution is as follows:
     loginUser(r, p_orig, s_admin)
     r.interactive()
 ```
+### baby-rsa
+
+When `e` is small as it is in this case, if the message is not long enough or appropriately padded, the cipher becomes smaller than N, allowing us to take the cuberoot of `c` to obtain the original message.
+
+```python
+    e = 3
+    m,result = gmpy2.iroot(c, e)
+    if (result):
+        print(long_to_bytes(int(m)))
+```
 
 ## Challenges
 |Category|Challenge|Description
