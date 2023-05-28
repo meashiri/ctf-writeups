@@ -3,6 +3,7 @@ title: "TJCTF"
 date: 2023-05-26T11:11:05-04:00
 categories: [ctf, writeup, rsa]
 tags: [rsa, rsa-oracle]
+math: true
 cover:
     image: 2023-05-27-20-35-50.png
 ---
