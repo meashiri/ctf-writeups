@@ -63,12 +63,12 @@ The user `admin` is pre-registered - so we would not be able to register it and 
 Since the challenge server allows unlimited calls to `new` function, and we can pass in any value as the user name, we can use this control of the plaintext to determine the private key of the user `admin`. 
 
 The approach is as follows: 
-1. Let m be the user name `admin`.  We need to determine $$ m^{d}  mod N $$
-1. N and e are known
-1. Take any random message, $$m_1$$ and get its signature $$s_1$$.  I chose $$m_1 = 2$$
-1. Determine $$m_2$$ as the second message, where $$ m_2 = (m * m_1^{-1}) $$
-1. Get the signature $$s_2 =  m_2^{d}  mod N  = ({m * m_1^{-1}})^{d} mod N $$ for the message $$m_2$$
-1. Calculate $$s = s_1 * s_2 = m_1^{d} * m^d * m_1^{-d} mod N = m^{d} mod N $$
+1. Let m be the user name `admin`.  We need to determine \\(m^{d} mod N\\)  
+1. `N` and `e` are known
+1. Take any random message, \\(m_1\\) and get its signature \\(s_1\\).  I chose \\(m_1 = 2\\)
+1. Determine \\(m_2\\) as the second message, where \\(m_2 = (m * m_1^{-1})\\)
+1. Get the signature \\(s_2 =  m_2^{d}  mod N  = ({m * m_1^{-1}})^{d} mod N \\) for the message \\(m_2\\)
+1. Calculate \\(s = s_1 * s_2 = m_1^{d} * m^d * m_1^{-d} mod N = m^{d} mod N \\)
 1. Hence `s` is the private signature of the user `admin`. Login using this signature for user `admin` and get the flag.
 
 The inspiration for the solution came from this [stackexchange article](https://crypto.stackexchange.com/questions/35644/chosen-message-attack-rsa-signature)
@@ -126,6 +126,12 @@ When `e` is small as it is in this case, if the message is not long enough or ap
     if (result):
         print(long_to_bytes(int(m)))
 ```
+## Resources
+* https://github.com/ret2school/ctf/tree/master/2023/tjctf/pwn
+* https://pyokagan.name/blog/2019-10-14-png/ 
+* https://crypto.stackexchange.com/questions/8902/given-a-message-and-signature-find-a-public-key-that-makes-the-signature-valid
+* 
+
 
 ## Challenges
 |Category|Challenge|Description
@@ -140,12 +146,10 @@ When `e` is small as it is in this case, if the message is not long enough or ap
 |crypto|merky-hell|
 |crypto|squishy|
 |forensics|beep-boop-robot|
-|forensics|miniscule|
+|forensics|miniscule|fix IHDR, make IDAT Zlib instead of Zstd, fix CRC for IDAT
 |forensics|neofeudalism|
 |forensics|nothing-to-see|
-|misc|discord|
 |misc|gish|
-|misc|survey|
 |pwn|flip-out|
 |pwn|formatter|
 |pwn|groppling-hook|
