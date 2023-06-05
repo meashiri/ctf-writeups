@@ -145,6 +145,8 @@ Use `gqrx` to load the given raw file. The file contains the raw IQ signals and 
 #### Hanging Nose
 `Divine Comedy-themed Christmas tree baubles: that's the future of the ornaments business, I'm telling you!`
 
+We are given an STL file of a christmas tree ornament. Examining the inside of the object reveals the flag.
+
 ![](dante_ornament.png)
 
 #### DIY Enc
@@ -155,6 +157,9 @@ Use `gqrx` to load the given raw file. The file contains the raw IQ signals and 
 `Dante took many pictures of his journey to the afterlife. They contain many revelations. I'll give you one of these pictures if you'll give me one of yours!`
 
 ### After the CTF
+#### Adventurer's Knapsack
+`For every good trip in the afterworld you need a good knapsack!`
+
 
 ### Resources
 * http://www.aprs.org/iss-aprs/issicons.html
