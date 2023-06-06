@@ -119,7 +119,7 @@ We are given a WAV file. Loading the file into Audacity and examing both the wav
 
 Searching for the abbreviation of the challenge title, APRS, leads us to this [page on SignalsWiki](https://www.sigidwiki.com/wiki/Automatic_Packet_Reporting_System_(APRS)). Automatic Packet Reporting System is a packet system for real time data communications. Used by hams for location reporting, weather stations etc. APRS is transported over the AX.25 protocol using 1200 bit/s Bell 202 AFSK on frequencies located within the 2 meter amateur band. 
 
-Further research, led me to a tool called [DireWolf](https://github.com/wb2osz/direwolf) on GitHub, which has a set of utilities to deal with AX.25.  I used a tool in the toolkit called `atest` to extract data from the wave file, which looks like this: 
+Further research led me to a tool called [DireWolf](https://github.com/wb2osz/direwolf) on GitHub, which has a set of utilities to deal with AX.25.  I used a tool in the toolkit called `atest` to extract data from the wave file, which looks like this: 
 ```
     DECODED[1] 0:02.175 N0CALL audio level = 63(33/33)     
     [0] N0CALL>APN001:!4346.02N\01115.45EgHello flag! Pkt 0002/1080
@@ -132,7 +132,7 @@ Further research, led me to a tool called [DireWolf](https://github.com/wb2osz/d
     020:  34 35 45 67 48 65 6c 6c 6f 20 66 6c 61 67 21 20  45EgHello flag! 
     030:  50 6b 74 20 30 30 30 32 2f 31 30 38 30           Pkt 0002/1080
 ```
-As depicted, there are 1080 packets of data - each containing a GPS coordinate, an icon `g` and the label `Hello flag!`. Given that the label and the icon are repeated for each packet, I extracted the GPS coordinates and imported it into GPSVisualizer. With moderate tweaking, and changing the plot type from tracks to waypoints, we get to read the flag. There are some displacements, but it was close enough to give us the flag : `DANTE{FLAG_REPORTING_SYSTEM}`
+As depicted, there are 1080 packets of data - each containing a GPS coordinate, an icon `g` and the label `Hello flag!`. Given that the label and the icon are repeated for each packet, I ignored them and extracted only the GPS coordinates and imported it into GPSVisualizer. With moderate tweaking, and changing the plot type from tracks to waypoints, we get to read the flag. There are some displacements, but it was close enough to give us the flag : `DANTE{FLAG_REPORTING_SYSTEM}`
 
 ![](2023-06-04-00-11-52.png)
 
@@ -146,12 +146,107 @@ Use `gqrx` to load the given raw file. The file contains the raw IQ signals and 
 #### Hanging Nose
 `Divine Comedy-themed Christmas tree baubles: that's the future of the ornaments business, I'm telling you!`
 
-We are given an STL file of a christmas tree ornament. Examining the inside of the object reveals the flag.
+We are given an 3D STL file of a christmas tree ornament. Examining the inside of the object reveals the flag.
 
 ![](dante_ornament.png)
 
 #### DIY Enc
 `I met a strange soul who claimed to have invented a more robust version of AES and dared me to break it. Could you help me?`
+
+We are given a python program that implements the AES-CBC-CTR encoding scheme and returns the encrypted value of the flag. AES-CBC-CTR is a variant of the CBC cipher technique where each block can be processed in parallel and there is no chaining of initial values (IV) from one block to the next, like with standard AES. The variation of the encryption key for each block is achieved by appending the block number (aka Counter) to the `nonce` for each block. This along with the key produces a predictable and reproducible key material that is XOR'd with the data block to produce the encrypted block.
+
+Note that the XOR input for each block is different, due to the counter that is different from block to block. So we have to unencrypt each block independently. 
+
+![](AES-in-CTR-mode-of-operation.png)
+
+Here are the important parts of the server program:
+```python
+        assert len(FLAG) == 19
+        print('Encrypting flag...')
+        key = os.urandom(16)            # random key 
+        nonce = os.urandom(15)          # random nonce
+        cipher = AES.new(key, AES.MODE_CTR, nonce=nonce)
+        
+        # longer ciphertext => safer ciphertext
+        flag_enc = cipher.encrypt(FLAG*3).hex() # encrypted flag is 19*3=57 bytes => 4 blocks of 16 bytes
+        print(f'Encrypted flag = {flag_enc}\n')
+
+        print('You can choose only the length of the plaintext, but not the plaintext. You will not trick me :)')
+        # 7 attempts to get encrypted value of random bytes of the length we get to specify
+        for i in range(7): 
+            length = int(input('> '))
+            assert length > 3 and length < 100, "Invalid input"
+            pt = b64encode(os.urandom(length)) # The bytes are b64 encoded and then encrypted 
+            # if bytes are longer than 16, multiple blocks are used.
+            cipher = AES.new(key, AES.MODE_CTR, nonce=nonce) 
+            # share the hex value of the encrypted bytes.
+            ct = cipher.encrypt(pt).hex()
+            print(f'ct = {ct}')
+        print('Enough.')
+```
+Couple of observations.
+1. The flag is repeated twice in addition to the original bytestring. 
+1. The same `key+nonce` combination is used to encrypt both the flag and the random bytes.
+1. The `nonce` is only 15 bytes, to allow the last byte to be used as the counter. 
+1. The random bytes are base64 encoded before fed into the cipher 
+1. Base64 encoding relies on padding if the original text is not long enough. The padding character in the output is the equals sign `=`. There can be a maximum of 2 consecutive `=` signs in a B64-encoded string.
+
+To understand the relation between the length of the input bytes and the padding that is necessary, I wrote the small script below.  This shows that if we use data lengths of 4, 7, 10, 13 etc, we can determine that there would be two equal signs at the end of the base-64 string. We can also calculate the index/position of those equal signs. 
+
+```python
+    for i in range(30):
+        b64str = b64encode(os.urandom(i))
+        print(f"Plain text len = {i} ... B64 len = {len(b64str)} ... Last two chars = {b64str[-2:]} ")
+    '''
+    # produces 
+        Plain text len =  4 ... B64 len =  8 ... Last two chars = b'==' 
+        Plain text len =  7 ... B64 len = 12 ... Last two chars = b'==' 
+        Plain text len = 10 ... B64 len = 16 ... Last two chars = b'==' 
+    ''' 
+```
+So, we can conclude that by choosing the length of the plaintext, we can control the last two characters of the plaintext to be equal to `=`. Since the AES encryption is a simple XOR operation, we can get back the corresponding bytes of the encryption key, when we know the plaintext. Also, the length of the input determines the length of the B64 string, hence, we can predict the positions of the equal signs in the B64 string. 
+
+The flag being repeated gives us an opportunity to retrieve the XOR input value for each block, as depicted in the table below. For instance, in Block 1,  the known text of the flag_header `DANTE{` can be used to determine the key for the first 6 bytes. The 7th and 8th bytes can be determined by getting the encrypted value with length 4, as it results in a B64 string of 8 characters, the last two (i.e 7th and 8th) being equal signs (`=`). Continuing similarly, the length that is depicted in the subscript of the asterisks in the following table determines the corresponding bytes of the key. Using this key values, we can decrypt the original encrypted flag.
+
+![](2023-06-05-23-52-49.png)
+
+The following shows the characters that can be determined by the plain-text lengths shown. Since, there are 8 distinct length values, we need 8 tries to fully determine the flag characters. The challenge only allows for 7 tries. During the CTF, I was able to guess the missing character. However, for completeness sake, a second try would be necessary to determine the last character. 
+
+![](2023-06-05-23-55-48.png)
+
+The full solution is as follows:
+```python
+    p = process(['python3', 'DIYenc.py'])
+    # p = remote("challs.dantectf.it", 31510)
+    my_flag = list("DANTE{????????????}")*3  # pick any character that would not appear in the actual flag
+    p.recvuntil(b'= ')
+    flag_str = p.recvline().strip().decode()
+
+    flag_hex = binascii.unhexlify(flag_str)
+
+    LEN=[4, 7, 10, 19, 22, 34, 37]  #First try. Add 40 and remove one of the numbers for the next try
+
+    for rand_len in LEN:
+        p.recvuntil(b'>')
+        p.sendline(bytes(str(rand_len), 'utf-8'))
+        p.recvuntil(b'= ')
+        ct = p.recvline().strip().decode()
+        ct_bytes = binascii.unhexlify(ct)
+        L = len(ct_bytes)   # L-1 is the last index, L-2 is the penultimate. They should be "=="
+        my_flag[L-2] = chr(ct_bytes[L-2]^ord('=')^flag_hex[L-2])
+        my_flag[L-1] = chr(ct_bytes[L-1]^ord('=')^flag_hex[L-1])
+
+        # print(f"{L}:{ct}{len(ct)}\n->{''.join(my_flag)}")
+
+    FLAG = my_flag[0:19]   
+    for i,x in enumerate(FLAG):   # collapse and overlay the repeated flag segments onto the first one.
+        y = my_flag[19:38][i]
+        z = my_flag[38:57][i]
+        if (x == '?'): FLAG[i] = y if y != '?' else z
+    print(''.join(FLAG))
+```
+
+__Flag:__ `DANTE{l355_1S_m0R3}`
 
 
 #### PiedPic
@@ -161,7 +256,7 @@ We are given an STL file of a christmas tree ornament. Examining the inside of t
 #### Adventurer's Knapsack
 `For every good trip in the afterworld you need a good knapsack!`
 
-I did not solve this problem during the CTF. It is quite an interesting challenge and led me down several paths of investigating the vulnerabilities of Merkle_Hellman cryptography system.
+I did not solve this problem during the CTF. It is quite an interesting challenge and led me down several paths of investigating the vulnerabilities of Merkle_Hellman cryptography system. I focused too much on breaking into the encryption side of the challenge. The solution was in the decryption side, with a low-density attack on the public keys. 
 
 The problem is succinctly captured in a small sage script that I have annotated below:
 
@@ -212,7 +307,7 @@ The density of the subset sum problem `d` is defined by \\(d = \\dfrac{N}{\\log_
 
 There are two well-known algorithms:
 - Lagarias and Odlyzko (LO) algorithm (works on `d < 0.6463`)
-- Coster, Joux, LaMacchia, Odlyzko, Schnorr, and Stern (CJLOSS) algorithm (works on `d < 0.9408`)
+- [Coster, Joux, LaMacchia, Odlyzko, Schnorr, and Stern (CJLOSS)](https://www.di.ens.fr/~fouque/ens-rennes/sac-LLL.pdf) algorithm (works on `d < 0.9408`)
 
 I was not able to solve the problem using LLL method. After the CTF, I was able to apply the CJLOSS algorithm to solve the challenge and get the flag. The implementation was borrowed from Hyunsik Jeong's [excellent GitHub site](https://github.com/hyunsikjeong/LLL).
 
@@ -309,6 +404,7 @@ print(converted_code)
 # cat flag.txt
 ```
 
+
 ### Resources
 * http://www.aprs.org/iss-aprs/issicons.html
 * http://www.aprs.org/doc/APRS101.PDF
@@ -322,8 +418,8 @@ print(converted_code)
 ### List
 |Category|Challenge|Description
 |----|----|----
-|Crypto|Adventurer's Knapsack|Merkle-Hellman Knapsack cryptography
-|Crypto|DIY enc|
+|Crypto|Adventurer's Knapsack|Low density attack on Merkle-Hellman Knapsack cryptography
+|Crypto|DIY enc|control plain-text length attack
 |Crypto|PiedPic|Image cryptography
 |Crypto|Small Inscription|
 |Forensics|Almost Perfect Remote Signing|APRS signals in wav
