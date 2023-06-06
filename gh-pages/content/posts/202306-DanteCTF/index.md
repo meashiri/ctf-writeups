@@ -384,6 +384,84 @@ if __name__ == "__main__":
 
 Flag: `DANTE{kN4ps4ck_w_l0w_d3NS1ty}`
 
+#### Strange Bytes
+
+`I got hacked by a ransomware and it encrypted some important files. Some crypto analyst told me they were encrypted using AES CBC, but there is something strange in them which can probably be exploited. I don't have enough money to give the job to proper crypto analysts, could you decrypt them for me please?`
+
+We are given a zip file that contains 250 files with randomized names and binary content. 
+
+```bash
+$ ls
+    AIUbdNOXwWGlWnYr	LEKCIcfOKyxBAnPr	aomdlkohWfOVeIZh	nNHIvmwxHKaJoLyX
+    AYsHuuyNNpslggKC	LMTRnXCEdvIiqTeg	arsuyluKISNANMOb	nRtYrRplqNBHPFGA
+    AakqpTMQRCNybbGO	LQHDlEYGVtlFrHEG	axyyjKyNkoNyyYdq	nWlaOgEzUKQbETKN
+    ...
+
+(py3) % xxd AIUbdNOXwWGlWnYr 
+    00000000: 6de1 ff83 3ea9 4d88 5330 cda7 fc75 a7f6  m...>.M.S0...u..
+    00000010: b05d 0de1 0ab3 776e 450f 07fa d78e c3aa  .]....wnE.......
+    00000020: 7a13 b35f 310f d30a 7cab 3276 11d9 85e3  z.._1...|.2v....
+    00000030: f302 1c11 1af1 0464 7f2b 39e7 dee4 c512  .......d.+9.....
+    00000040: 4e82 4bb0 bcbc d50a d087 02bb abee ec86  N.K.............
+    00000050: eb0e 088c e534 06c4 613d 2bcc ebcb cc33  .....4..a=+....3
+    00000060: 8f8d 886f fb3d 459b 592c 78bb f85b 189c  ...o.=E.Y,x..[..
+    00000070: eb5d 026f 40e2 febc 5ecd 52ce 655b a05c  .].o@...^.R.e[.\
+    00000080: f3c0 f06f fb02 fea3 9b6d abde 2867 209e  ...o.....m..(g .
+    00000090: 9686 3463 a4b7 8b55 aa4d 88b0 3381 1e3a  ..4c...U.M..3..:
+    000000a0: ba1b 2579 44af df4f 620b 0fe4 7ba1 b85c  ..%yD..Ob...{..\
+    000000b0: 3a43 4243 9e7e 73a6 6608 cda3 9359 1d08  :CBC.~s.f....Y..
+    000000c0: 0805 c03e a3ca 1eae 881f 9188 d1a7 df87  ...>............
+    000000d0: 03c4 b1ab 405f c964 b629 80ff ccf3 fce6  ....@_.d.)......
+    000000e0: 609d 031f c4f5 94c5 3195 3c63 967b 81f1  `.......1.<c.{..
+    000000f0: 3445 5ef7 04f1 65ea d263 c2fb 911d deb0  4E^...e..c......
+    00000100: 3f22 fd1f d015 344a 31a9 95e4 1887 07da  ?"....4J1.......
+    00000110: b3f6 bf1d 89                             .....
+
+(py3) % ls | wc
+     250     250    4250
+(py3) % strings * | grep CBC | wc
+     250     250    1635
+```
+
+`common_substring.sh` is a bash script that compiles two strings (which are the long hex strings representing the content of two randomly picked files). Given that the problem descripts states that the encryption is AES-CBC, we can presume that these 48 bytes are the KEY and IV.  The only matching scheme is AES-256-CBC, which has a 16 Byte IV and a 32 Byte Key.
+
+```
+(py3) % common_substring.sh `xxd -c 1000 -p WHKDzNMIpiCJkEcC` `xxd -c 1000 -p xxTNmngkPZJyezEo`  | fold -w 32
+    5cf3c0f06ffb02fea39b6dabde286720        IV      KEY
+    9e96863463a4b78b55aa4d88b033811e        KEY  or KEY
+    3aba1b257944afdf4f620b0fe47ba1b8        KEY     IV
+    5c3a434243
+                                            (1)     (2)
+```
+The 48 bytes of the information can be either IV (16) + KEY (32)  or KEY(32) + IV (16).   The second combination worked for a sample file. Now, we need to automate the decryption. I wanted to take a slightly more complicated route of decrypting everything on the fly, without having to create any copies. 
+
+The following script accomplishes this. 
+1. It converts the binary file into one long hex string
+1. It deletes the `strange bytes`, which is the AES IV and the KEY
+1. Remove the new-line character
+1. Convert back to a binary file 
+1. Use `openssl` to decrypt the file and stream the content to the terminal.
+
+```bash decrypt_file.sh
+(py3) % xxd -c 1000 -p $1 | sed -e 's/5cf3c0f06ffb02fea39b6dabde2867209e96863463a4b78b55aa4d88b033811e3aba1b257944afdf4f620b0fe47ba1b85c3a434243//g' | tr -d '\n' | xxd -r -p | openssl aes-256-cbc -d -nosalt -iv 3aba1b257944afdf4f620b0fe47ba1b8 -K 5cf3c0f06ffb02fea39b6dabde2867209e96863463a4b78b55aa4d88b033811e  
+```
+The following driver script repeatedly calls the decryption script for each file and looks for the string `DANTE` in the output. 
+
+```bash
+(py3) % for i in `ls`
+for> do
+for> echo $i
+for> decrypt_file.sh $i | awk '/DANTE/'
+for> done
+    ...
+    vZuyuEAaHLTynMwH
+    veUIZbPBWvSDVcdL
+    S(H...DqQkHyfTzsGYttyRZvCSPJDANTE{AHh9HhH0hH_ThAat_RAnsomware_maDe_m3_SaD_FFFFAAABBBBDDDD67}
+    vhMLZuwFhjUlSLfX            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...
+```
+__Flag:__`DANTE{AHh9HhH0hH_ThAat_RAnsomware_maDe_m3_SaD_FFFFAAABBBBDDDD67}`
+
 #### HellJail
 
 ```python
@@ -405,6 +483,7 @@ print(converted_code)
 ```
 
 
+
 ### Resources
 * http://www.aprs.org/iss-aprs/issicons.html
 * http://www.aprs.org/doc/APRS101.PDF
@@ -422,18 +501,18 @@ print(converted_code)
 |Crypto|DIY enc|control plain-text length attack
 |Crypto|PiedPic|Image cryptography
 |Crypto|Small Inscription|
-|Forensics|Almost Perfect Remote Signing|APRS signals in wav
+|Forensics|Almost Perfect Remote Signing|APRS signals in wav -> GPS coords -> Plot
 |Forensics|Dirty Checkerboard|
 |Forensics|Do You Know GIF?|
 |Forensics|Imago Qualitatis|text/image in Raw IQ data
 |Forensics|Routes Mark The Spot|PCAP with ipv6 traffic
 |Forensics|Who Can Haz Flag|
-|Misc|Demonic Navigation Skills|DNS
+|Misc|Demonic Navigation Skills|DNS navigation of CLASS9 records
 |Misc|Flag Fabber|
 |Misc|Gloomy Wood|
 |Misc|Hanging Nose|
 |Misc|HellJail|
-|Misc|StrangeBytes|
+|Misc|StrangeBytes| AES encrypted files with IV+KEY injected into each file
 |Misc|Survey|
 |Pwn|Dante's Notebook|
 |Pwn|Infernal Break|
