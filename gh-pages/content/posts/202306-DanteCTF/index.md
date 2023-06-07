@@ -388,7 +388,7 @@ Flag: `DANTE{kN4ps4ck_w_l0w_d3NS1ty}`
 
 `I got hacked by a ransomware and it encrypted some important files. Some crypto analyst told me they were encrypted using AES CBC, but there is something strange in them which can probably be exploited. I don't have enough money to give the job to proper crypto analysts, could you decrypt them for me please?`
 
-We are given a zip file that contains 250 files with randomized names and binary content. 
+We are given a zip file that contains 250 files with randomized names and binary content. We also see that every one of these files contain a string `\:CBC` once. 
 
 ```bash
 $ ls
@@ -423,14 +423,14 @@ $ ls
      250     250    1635
 ```
 
-`common_substring.sh` is a bash script that compiles two strings (which are the long hex strings representing the content of two randomly picked files). Given that the problem descripts states that the encryption is AES-CBC, we can presume that these 48 bytes are the KEY and IV.  The only matching scheme is AES-256-CBC, which has a 16 Byte IV and a 32 Byte Key.
+`common_substring.sh` is a bash script that compares two strings and finds the longest substring that is common between them. In this case, the two strings are the long hex strings representing the content of two randomly picked files. Given that the problem descripts states that the encryption is AES-CBC, we can presume that these 48 bytes are the KEY and IV.  The only matching scheme is AES-256-CBC, which has a 16 Byte IV and a 32 Byte Key.
 
 ```
 (py3) % common_substring.sh `xxd -c 1000 -p WHKDzNMIpiCJkEcC` `xxd -c 1000 -p xxTNmngkPZJyezEo`  | fold -w 32
     5cf3c0f06ffb02fea39b6dabde286720        IV      KEY
     9e96863463a4b78b55aa4d88b033811e        KEY  or KEY
     3aba1b257944afdf4f620b0fe47ba1b8        KEY     IV
-    5c3a434243
+    5c3a434243                           [MARKER - IGNORE]
                                             (1)     (2)
 ```
 The 48 bytes of the information can be either IV (16) + KEY (32)  or KEY(32) + IV (16).   The second combination worked for a sample file. Now, we need to automate the decryption. I wanted to take a slightly more complicated route of decrypting everything on the fly, without having to create any copies. 
@@ -443,7 +443,11 @@ The following script accomplishes this.
 1. Use `openssl` to decrypt the file and stream the content to the terminal.
 
 ```bash decrypt_file.sh
-(py3) % xxd -c 1000 -p $1 | sed -e 's/5cf3c0f06ffb02fea39b6dabde2867209e96863463a4b78b55aa4d88b033811e3aba1b257944afdf4f620b0fe47ba1b85c3a434243//g' | tr -d '\n' | xxd -r -p | openssl aes-256-cbc -d -nosalt -iv 3aba1b257944afdf4f620b0fe47ba1b8 -K 5cf3c0f06ffb02fea39b6dabde2867209e96863463a4b78b55aa4d88b033811e  
+(py3) % xxd -c 1000 -p $1 
+    | sed -e 's/5cf3c0f06ffb02fea39b6dabde2867209e96863463a4b78b55aa4d88b033811e3aba1b257944afdf4f620b0fe47ba1b85c3a434243//g' 
+    | tr -d '\n' 
+    | xxd -r -p 
+    | openssl aes-256-cbc -d -nosalt -iv 3aba1b257944afdf4f620b0fe47ba1b8 -K 5cf3c0f06ffb02fea39b6dabde2867209e96863463a4b78b55aa4d88b033811e  
 ```
 The following driver script repeatedly calls the decryption script for each file and looks for the string `DANTE` in the output. 
 
@@ -456,8 +460,8 @@ for> done
     ...
     vZuyuEAaHLTynMwH
     veUIZbPBWvSDVcdL
-    S(H...DqQkHyfTzsGYttyRZvCSPJDANTE{AHh9HhH0hH_ThAat_RAnsomware_maDe_m3_SaD_FFFFAAABBBBDDDD67}
-    vhMLZuwFhjUlSLfX            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        S(H...DqQkHyfTzsGYttyRZvCSPJDANTE{AHh9HhH0hH_ThAat_RAnsomware_maDe_m3_SaD_FFFFAAABBBBDDDD67}
+    vhMLZuwFhjUlSLfX                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     ...
 ```
 __Flag:__`DANTE{AHh9HhH0hH_ThAat_RAnsomware_maDe_m3_SaD_FFFFAAABBBBDDDD67}`
