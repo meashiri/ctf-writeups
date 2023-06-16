@@ -495,6 +495,9 @@ print(converted_code)
 * https://github.com/BlackVS/Awesome-CTS
 * https://crypto.stackexchange.com/questions/50068/how-to-attack-merkle-hellman-cryptosystem-if-the-first-element-in-the-superincre
 * http://www.cs.sjsu.edu/faculty/stamp/papers/topics/topic16/Knapsack.pdf
+* https://born2scan.run/writeups/2023/06/02/DanteCTF.html
+* https://github.com/born2scan/dantectf-23
+
 
 
 
