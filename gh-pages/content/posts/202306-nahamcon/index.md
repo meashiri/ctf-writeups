@@ -5,7 +5,7 @@ categories: [ctf, writeup]
 tags: [REXX, 'Germain prime', RSA, SHA1, 'MAC forgery', Z3, sqlite3, blob, 'DomPDF RCE']
 math: true
 cover:
-    image: naham_banner2.png
+    image: naham_banner3.png
 ---
 A really cool CTF challenge as part of Nahamcon. 
 <!--more-->
