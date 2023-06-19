@@ -300,7 +300,7 @@ We need to determine the appropriate key length first and then we can apply the 
 #### Just One More
 `Just one more?`
 
-We are given the following file and the corresponding output, which contains two lists. One with the random numbers, the other with the sumproduct of the flag characters and the list of random numbers. After each iteration, the array of random numbers is shuffled to move the first number to the end of the list. 
+We are given the following file and the corresponding output, which contains two lists. One with the random numbers, the other with the sumproduct of the flag characters and the list of random numbers. After each iteration, the array of random numbers is shuffled right and moves the last number to the head of the list. 
 
 ```python
     OUT = open('output.txt', 'w')
@@ -359,7 +359,7 @@ This script finds a satisfactory condition and prints the flag.
 ```
 /usr/local/bin/regina: REXX-Regina_3.9.4(MT) 5.00 25 Oct 2021 (64 bit)
 ```
-Connecting via SSH gives us the banner. Googling REXX-Regina indicates that REXX is a programming language that was invented by IBM. It is spoken with other ancient incantations like TSO, ISPF, REXX, JCL, VTAM. 
+Connecting via SSH gives us the banner. Googling REXX-Regina indicates that REXX is a programming language that was invented by IBM. It is spoken with other ancient incantations like TSO, ISPF, COBOL, JCL, VTAM. 
 
 Now that we know the programming language, the next step was to figure out the means of entering the input and executing it. Suspecting that the terminal is expecting program input from `<stdin>`, I used variants of `say 'hello world'  <Ctfl+D>` to have it successfully execute the command.   From that point, it was a matter of discovering our current environment, figuring out the flag's location (`flag.txt` in the current directory), and displaying it. 
 
@@ -372,7 +372,8 @@ say linein('flag.txt')
 'uname -a'
 'ls -lsart'
 'cat flag.txt'
-  
+<Ctrl + D>
+
 flag{2459b9ae7c704979948318cd2f47dfd6}
 
 Linux regina-8dd9dfd157fc05b6-5b87db5c46-9dq64 5.15.89+ #1 SMP Sat Mar 11 10:24:08 UTC 2023 x86_64 Linux
@@ -432,17 +433,17 @@ The given file seems to be a standard JPEG file. When `binwalk` did not provide 
     (py3)% file tiny-little-fibers 
     tiny-little-fibers: JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, progressive, precision 8, 2056x1371, components 3
 
-    (py3) √ war % xxd tiny-little-fibers| grep -i ffd8
+    (py3)% xxd tiny-little-fibers| grep -i ffd8
     00000000: ffd8 ffe0 0010 4a46 4946 0001 0100 0001  ......JFIF......
 
-    (py3) √ war % xxd tiny-little-fibers| grep -i ffd9
+    (py3)% xxd tiny-little-fibers| grep -i ffd9
     0004c130: cf3f ffd9 6600 6c00 6100 0a00 6700 7b00  .?..f.l.a...g.{.
     00097ec0: 1b02 5816 72e1 1321 7115 e2f8 cf3f ffd9  ..X.r..!q....?..
 
-    (py3) √ war % printf "%d\n" $((16#4c134))
+    (py3)% printf "%d\n" $((16#4c134))
     311604
 
-    (py3) % xxd -s +311604 tiny-little-fibers | more
+    (py3)% xxd -s +311604 tiny-little-fibers | more
     0004c134: 6600 6c00 6100 0a00 6700 7b00 3200 0a00  f.l.a...g.{.2...
     0004c144: 3200 6300 3500 0a00 3300 3400 6300 0a00  2.c.5...3.4.c...
     0004c154: 3500 6100 6200 0a00 6500 6100 3800 0a00  5.a.b...e.a.8...
@@ -451,7 +452,7 @@ The given file seems to be a standard JPEG file. When `binwalk` did not provide 
     0004c184: 3300 6600 3700 0a00 3200 3500 3900 0a00  3.f.7...2.5.9...
     0004c194: 6600 7d00 0a00 0a00 0000 0013 a4fe 0014  f.}.............
 
-    (py3) % xxd -s +311604 -c 100 -p tiny-little-fibers | head -1 | sed -e 's/00//g' | xxd -r -p | tr -d '\n'
+    (py3)% xxd -s +311604 -c 100 -p tiny-little-fibers | head -1 | sed -e 's/00//g' | xxd -r -p | tr -d '\n'
     flag{22c534c5abea84bf6c1193e263f7259f}
 ```
 
@@ -633,7 +634,7 @@ We get a [cool certificate](CertificateWBL.png) that shows that we were placed 6
 |Reverse Engineering|The Sandbox|
 |Reverse Engineering|ur_a_wizard|
 |Reverse Engineering|writeright|
-|Warmups|Blobber|
+|Warmups|Blobber|sqlite blob data
 |Warmups|Fast Hands|
 |Warmups|Glasses|
 |Warmups|Ninety One|
