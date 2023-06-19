@@ -359,7 +359,7 @@ This script finds a satisfactory condition and prints the flag.
 ```
 /usr/local/bin/regina: REXX-Regina_3.9.4(MT) 5.00 25 Oct 2021 (64 bit)
 ```
-Connecting via SSH gives us the banner. Googling REXX-Regina indicates that REXX is a programming language that was invented by IBM. It is spoken with other anncient incantations like TSO, ISPF, REXX, JCL, VTAM. 
+Connecting via SSH gives us the banner. Googling REXX-Regina indicates that REXX is a programming language that was invented by IBM. It is spoken with other ancient incantations like TSO, ISPF, REXX, JCL, VTAM. 
 
 Now that we know the programming language, the next step was to figure out the means of entering the input and executing it. Suspecting that the terminal is expecting program input from `<stdin>`, I used variants of `say 'hello world'  <Ctfl+D>` to have it successfully execute the command.   From that point, it was a matter of discovering our current environment, figuring out the flag's location (`flag.txt` in the current directory), and displaying it. 
 
