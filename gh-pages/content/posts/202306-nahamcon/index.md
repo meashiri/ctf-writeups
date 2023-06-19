@@ -492,13 +492,13 @@ User5: Aha! You're right, I was here before all of you! Here's your flag for fin
 #### Stickers
 `Wooohoo!!! Stickers!!! Hackers love STICKERS!! You can make your own with our new website!`
 
+We are given a web site that purports to sell stickers. The website presents an order form. 
 ![](2023-06-18-21-15-11.png)
 
-Upon submitting the form, 
+Upon submitting the form, it generates a PDF document representing the order form including some of the data we provided as the input. 
 ![](2023-06-18-21-16-13.png)
 
 The URL is `http://challenge.nahamcon.com:30331/quote.php?organisation=My+Org+Name&email=email%40email.com&small=1&medium=2&large=4`. This tells us that the backend is in PHP and it inserts the organization name and email into the generated PDF. 
-
 
 Searched Google for PHP PDF exploits and one of the first hits was this writeup of the CVE by Snyk. The second link was a coded exploit on GitHub by Positive Security. 
 * https://snyk.io/blog/security-alert-php-pdf-library-dompdf-rce/
@@ -506,10 +506,12 @@ Searched Google for PHP PDF exploits and one of the first hits was this writeup 
 * https://positive.security/blog/dompdf-rce
 
 These sites have a very detailed writeup on the vulnerability. I will summarize the steps I used. 
+
 1. create a exploit font file by opening a font file and inserting a RCE code into it. 
 ```php
     <?php system("cat /flag.txt"); ?>
 ```
+
 2. Create a exploit CSS that refers to the font file in an accessible location. Store the CSS in an accessible location as well.
 ```css
     @font-face {
@@ -520,6 +522,7 @@ These sites have a very detailed writeup on the vulnerability. I will summarize 
     }
 ```
 Note the name of the font you used. You will need it later. 
+
 3. Inject a reference to the CSS in the `organization name` field of the form on the challenge web server
 ![](2023-06-18-21-31-14.png)
 
