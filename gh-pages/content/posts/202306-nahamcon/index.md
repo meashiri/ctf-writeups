@@ -361,7 +361,7 @@ This script finds a satisfactory condition and prints the flag.
 ```
 Connecting via SSH gives us the banner. Googling REXX-Regina indicates that REXX is a programming language that was invented by IBM. It is spoken with other ancient incantations like TSO, ISPF, COBOL, JCL, VTAM. 
 
-Now that we know the programming language, the next step was to figure out the means of entering the input and executing it. Suspecting that the terminal is expecting program input from `<stdin>`, I used variants of `say 'hello world'  <Ctfl+D>` to have it successfully execute the command.   From that point, it was a matter of discovering our current environment, figuring out the flag's location (`flag.txt` in the current directory), and displaying it. 
+Now that we know the programming language, the next step was to figure out the means of entering the input and executing it. Suspecting that the terminal is expecting program input from `<stdin>`, I used variants of `say 'hello world'  <Ctrl+D>` to have it successfully execute the command.   From that point, it was a matter of discovering our current environment, figuring out the flag's location (`flag.txt` in the current directory), and displaying it. 
 
 ```
 /usr/local/bin/regina: REXX-Regina_3.9.4(MT) 5.00 25 Oct 2021 (64 bit)
@@ -389,7 +389,7 @@ total 24
 flag{2459b9ae7c704979948318cd2f47dfd6}
 ```
 
-`say linein('flag.txt')` is the REXX native way to display the flag,  `'cat flag.txt'` spawns a shell command from REXX. Both of them would work for this challenge. 
+`say linein('flag.txt')` is the REXX native way to display the flag.  `'cat flag.txt'` spawns a shell command from REXX. Both of them would work for this challenge. 
 
 #### Blobber
 `This file is really... weird... `
@@ -582,6 +582,8 @@ We get a [cool certificate](CertificateWBL.png) that shows that we were placed 6
 * https://gist.github.com/mlashley/224a91cff0b1712e161121817b1e24b3
 * https://notateamserver.xyz/nahamcon-2023-crypto/ (matrix based solve for JOM)
 * https://github.com/daffainfo/ctf-writeup/tree/main/NahamCon%20CTF%202023
+* https://github.com/ainkun/ctf-writeups/blob/main/Nahamcon2023/crypto/just-one-more/solve.sage
+
 
 
 ### List
