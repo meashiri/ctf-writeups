@@ -573,6 +573,14 @@ or from the browser:
 
 We get a [cool certificate](CertificateWBL.png) that shows that we were placed 67th out of 2563 teams. 
 
+### After the CTF
+#### Signed Jeopardy
+
+* Excellent writeup here : https://l3ak.org/writeups/nahamconctf/
+#### Just One More
+* https://github.com/nzec/ctf-notes/tree/master/NahamCon23/Just%20One%20More : `sympy.linsolve()` solution
+* https://github.com/An00bRektn/CTF/blob/main/live_events/nahamcon_23/crypto_just_one_more/solve.py : `sage RREF` solution
+
 ### Resources and Links
 * https://snyk.io/blog/security-alert-php-pdf-library-dompdf-rce/
 * https://github.com/positive-security/dompdf-rce/
@@ -583,6 +591,7 @@ We get a [cool certificate](CertificateWBL.png) that shows that we were placed 6
 * https://notateamserver.xyz/nahamcon-2023-crypto/ (matrix based solve for JOM)
 * https://github.com/daffainfo/ctf-writeup/tree/main/NahamCon%20CTF%202023
 * https://github.com/ainkun/ctf-writeups/blob/main/Nahamcon2023/crypto/just-one-more/solve.sage
+* https://l3ak.org/writeups/nahamconctf/
 
 
 
