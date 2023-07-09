@@ -3,6 +3,7 @@ title: "UIUCTF - The return of Clippy"
 date: 2023-06-30T20:48:08-04:00
 categories: [ctf, writeup]
 tags: [FSK, SAME, vim, 'Small group']
+math: true
 cover:
     image: uiuc2023_banner.png
 ---
@@ -88,6 +89,41 @@ We are given three encoded messages and the plain text of one of those messages.
     print(xor(c3, key))
 ```
 #### Group Project (todo)
+`In any good project, you split the work into smaller tasks...`
+
+We are given the following challenge file and a challenge server.
+```python
+    print("[$] Did no one ever tell you to mind your own business??")
+
+    g, p = 2, getPrime(1024)    # g = 2, p = 1024 bit prime
+    a = randint(2, p - 1)       # a is a random integer between 2 and p-1
+    A = pow(g, a, p)            # A = pow(g, a, p)  Diffie Hellman step #1
+    print("[$] Public:")
+    print(f"[$]     {g = }")
+    print(f"[$]     {p = }")
+    print(f"[$]     {A = }")
+
+    try:
+        k = int(input("[$] Choose k = "))
+    except:
+        print("[$] I said a number...")     # BUG1 : note that there is no return, hence execution continues
+
+    if k == 1 or k == p - 1 or k == (p - 1) // 2:
+        print("[$] I'm not that dumb...")   # BUG2 : note that there is no return, hence execution continues
+
+    Ak = pow(A, k, p)           # Spurious step. Not used
+    b = randint(2, p - 1)       # second random number
+    B = pow(g, b, p)            # B = pow(g, b, p)  Diffie Hellman step #2
+    Bk = pow(B, k, p)           # We provide k - so the only thing we control
+    S = pow(Bk, a, p)           # Shared key - Diffie Hellman step #3
+
+    key = hashlib.md5(long_to_bytes(S)).digest()        # Hash of the shared key is the encryption key
+    cipher = AES.new(key, AES.MODE_ECB)
+    c = int.from_bytes(cipher.encrypt(pad(flag, 16)), "big")
+
+    print("[$] Ciphertext using shared 'secret' ;)")
+    print(f"[$]     {c = }")
+```
 
 
 #### Group Projection (todo)
@@ -108,17 +144,49 @@ $ multimon-ng -t wav -v 2 warning.wav -a EAS 2>/dev/null | grep part | cut -d: -
 b' ZCZC-UIUCTF{3RD_W0RST_TOR_OUTBRE@K_EV3R}S-\n'
 ```
 
-#### Vim Jails (todo)
-
-#### Crack the Safe (todo)
-
-Inspiration:  https://codegolf.stackexchange.com/a/36822
-
-
 * https://notebook.community/calebmadrigal/radio-hacking-scripts/fsk_modem_research
 * https://stackoverflow.com/questions/35759353/demodulating-an-fsk-signal-in-python
 * https://dsp.stackexchange.com/questions/29946/demodulating-fsk-audio-in-python
+* https://github.com/mobilinkd/afsk-demodulator/blob/master/afsk-demodulator.ipynb
+
+
+#### Vim Jails (todo)
+
+* https://ur4ndom.dev/posts/2023-07-02-uiuctf-vimjail/
+* https://github.com/Norske-Nokkelsnikere/writeups/blob/main/2023/uiuctf-2023/misc-vimjail.md
+
+#### Crack the Safe (todo)
+
+```python
+    from Crypto.Cipher import AES
+    from secret import key, FLAG
+
+    p = 4170887899225220949299992515778389605737976266979828742347
+    ct = bytes.fromhex("ae7d2e82a804a5a2dcbc5d5622c94b3e14f8c5a752a51326e42cda6d8efa4696")
+
+    def crack_safe(key):
+        return pow(7, int.from_bytes(key, 'big'), p) == 0x49545b7d5204bd639e299bc265ca987fb4b949c461b33759
+
+    assert crack_safe(key) and AES.new(key,AES.MODE_ECB).decrypt(ct) == FLAG
+```
+The challenge author cites this CodeGolf solution as the inspiration for this challenge:  https://codegolf.stackexchange.com/a/36822.
+
+This is a basic discrete algorithm challenge, where 
+$$
+    7^{key} = K \mod p \\\
+    key = log_7 {K} \mod p \\\
+$$
+
+Also, \\(p - 1\\) can be easily factored, giving the following prime factors.
+$$
+    p-1 = 2 \\cdot 19 \\cdot 151 \\cdot 577 \\cdot 67061 \\cdot 18279232319_{<11>} \\cdot 111543376699_{<12>}\\cdot 9213409941746658353293481_{<25>}
+$$
+
+* https://crypto.stackexchange.com/questions/32415/how-does-a-non-prime-modulus-for-diffie-hellman-allow-for-a-backdoor
+* https://risencrypto.github.io/PohligHellman/
+* https://bronson113.github.io/2023/07/03/uiuctf-2023-writeups.html#crack-the-safe
 * https://github.com/abhishekg999/UIUCTF-2023
+
 
 
 #### UIUC CTFd Theme
