@@ -243,8 +243,10 @@ There were a couple of other challenges that I could have solved if I had more t
 1. Extract the PNG image from the zip file
 1. Decrypt the hex string in the image using the password/iv from the key
 1. Get the original flag back
+1. To crack the zip and get back the original `flag.png`, we use a utility called [bkcrack](https://github.com/kimci86/bkcrack). This utility uses known plaintext or bytes to determine the keys for the zipfile. 
+1. In this instance, we would use the first 16bytes of the PNG file as the known bytes and get back the keys, which allow us to decrypt the zip file. 
 
-```
+```bash
 % ./bkcrack -x 0 89504e470d0a1a0a0000000d49484452 -C ~/ctf/2023/cryptoctf/blobfish/flag.zip -c flag.png  
 bkcrack 1.5.0 - 2022-07-07
 [14:16:10] Z reduction using 9 bytes of known plaintext
@@ -278,7 +280,7 @@ Wrote deciphered data.
 
 ```python
     enc = unhexlify('69f421d9e241933cbc62a9ffe937779c864ffa193de014aeb57046b16c40c7353910c61a2676f14f4c7737f038a6db53262c50')
-    key = unhexlify('ad6efb792aea5aaaad6efb792aea5aaa')
+    key = unhexlify('ad6efb792aea5aaaad6efb792aea5aaa')   #from bkcrack password recovery 
     iv = md5(key).digest()
 
     cipher = AES.new(key, AES.MODE_CFB, iv=iv)
@@ -287,7 +289,59 @@ Wrote deciphered data.
     # b'CCTF{d3ep-Zip_fi5h_0f_tH3_knOwN_pL4!n_7exT_ATtAcK!}'
 ```
 
+#### Insights
+`Boundary attacks on RSA involve manipulating the input values at specific boundaries to exploit vulnerabilities in the encryption system's implementation. As one of the most widely used encryption systems, RSA provides insights into secure communications through its reliance on the difficulty of factoring large prime numbers. However, it is crucial to implement RSA correctly with robust key management and secure implementations to ensure its effectiveness in protecting sensitive information.`
 
+We are given a Sagemath script that implements RSA and it's output file.  The most important part of the generator script is provided below. The script includes a number of red-herrings. However, one part stands out. Instead of generating or specifying `e`, the program generates a prime number based on `n` and inverts it to get `e`. So, by definition, the prime number is `d`, the decryption key.  If this `d` can be generating again given our inputs, we can crack this RSA encryption without having to factor `n`.
+
+```python
+def genKey(L, nbit):
+	p, q = [genPrime(L, nbit) for _ in '__']
+	n = p * q
+	d = next_prime(pow(n, 0.2919))
+	phi = (p - 1) * (q - 1)
+	e = inverse(d, phi)
+	pubkey, privkey = (n, e), (p, q)
+	return pubkey, privkey
+
+def encrypt(msg, pubkey):
+	n, e = pubkey
+	m = bytes_to_long(msg)
+	c = pow(m, e, n)
+	return c
+
+nbit = 1024
+L = bin(bytes_to_long(b'Practical'))[2:]
+pubkey, privkey = genKey(L, nbit)
+p, q = privkey
+c = encrypt(flag, pubkey)
+
+print('Information:')
+print('-' * 85)
+print(f'n = {p * q}')
+print(f'e = {pubkey[1]}')
+print(f'c = {c}')
+print(f'p = {bin(p)[2:len(L)]}...[REDACTED]')
+print(f'q = {bin(q)[2:len(L)]}...[REDACTED]')
+print('-' * 85)
+```
+1. We are given `n`, `c` and `e`
+1. Recreate `d` using `n`
+1. Decrypt `c`
+1. I don't know if this was the intended solution or not. 
+
+```ipython
+# we are given n, c and e
+# Use the logic from the challenge program to regenerate d
+sage: d = next_prime(pow(n, 0.2919))
+sage: d
+693984516363754919249700902493753051718166208912377865278483876234349619419200560616162942304659132290614866566556420934365717915837808485622613368180482591406570741380374249603517
+sage: long_to_bytes(pow(c, d, n))
+b'CCTF{RSA_N3w_rEc0rd5_4Nd_nEw_!nSi9h75!}'
+```
+
+#### Keymoted
+`Combining RSA and ECC in a cryptographic system does not necessarily guarantee security equivalent to that of the individual RSA or ECC systems. What about keymoted`
 
 ### Resources
 * https://ericrowland.github.io/papers/Known_families_of_integer_solutions_of_x%5E3+y%5E3+z%5E3=n.pdf
