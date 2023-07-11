@@ -186,6 +186,8 @@ $$
 * https://risencrypto.github.io/PohligHellman/
 * https://bronson113.github.io/2023/07/03/uiuctf-2023-writeups.html#crack-the-safe
 * https://github.com/abhishekg999/UIUCTF-2023
+* https://pseudoleon.github.io/uiuctf-23/
+
 
 
 

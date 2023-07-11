@@ -56,6 +56,41 @@ def check_next_seed(orig_seed, cur_seed, index):
                 d = reseed(d)
             print(f"Seed found : {orig_seed:08x} {flag}")
 ```
+As an alternative to bruteforcing the initial seed, some teams used Z3 to solve for the seed using symbolic execution. 
+
+```python
+# Solution by LiamoOo
+# Define Z3 variables
+s = BitVec("s", 32)
+d = BitVec("d", 32)
+flag = [BitVec(f"flag_{i}", 8) for i in range(len(enc))]
+
+solver = Solver()
+
+_flag = b"CCTF{"
+for i in range(len(_flag)):
+    solver.add(flag[i] == _flag[i])
+
+solver.add(s <= 2**32)  # Add constraints for the seed value
+solver.add(d == s)      # Initialize d with the seed value
+
+for i in range(len(enc)):  # Encrypt the message and add constraints
+    d = reseed(d)
+    # solver.add(flag[i] == (enc[i] ^ ((d >> 16) & 0xFF)))
+    solver.add((flag[i] ^ ((Extract(7, 0, d >> 16)))) == enc[i])
+
+if solver.check() == sat:       # Check if there is a solution
+    model = solver.model()
+
+    seed_value = model[s].as_long()     # Get the seed value
+    print(f"Seed: {seed_value}")
+
+    flag_value = "".join([chr(model[flag[i]].as_long()) for i in range(len(enc))])     # Get the flag
+    print(f"Flag: {flag_value}")
+else:
+    print("No solution found.")
+```
+
 #### Suction
 `The easy suction cryptosystem is designed with a primary focus on simplicity and user-friendliness, employing streamlined algorithms that make encryption straightforward and accessible even for individuals without extensive technical knowledge.`
 
@@ -111,6 +146,75 @@ with open("cube_sums.txt", 'w') as F:
                 break
             i -= 1
 ```
+
+#### Did It
+`Finding the intersection among subsets can sometimes be a challenging endeavor, as it requires meticulous comparison and analysis of overlapping elements within each set. But she did it! Try doing it yourself too.`
+
+This problem was solved by my team-mate during the CTF. Here's my attempt at solving it. 
+
+1. The challenge server generates 20 random numbers in the range [0..127]
+1. We are given \\(\frac {2 * N} {l-1} = 13\\) tries to guess the set of numbers. `N = 128 and l = 20`
+1. For every wrong guess, we get back \\(guess^2 \mod N \\) + a random noise of [`0 or 1`]
+1. The approach is to choose numbers whose \\(guess^2 \mod N \\) are not adjacent to each other. 
+![](2023-07-10-23-07-34.png)
+1. For instance, in the table above, if we have guessed `0`, whose square mod N is also 0, we should not include `1` in the same try. This will avoid the ambiguity if we received `1` from the server. 
+1. In this example, we selected 20 numbers [0, 16, 2, 32 .... etc]. The server returned 19 responses, but did not return `0` or `1`. This tells us that `0` was a correct guess.
+1. We remove all the numbers we have used in the guess from future consideration and we apply this logic again.
+1. The terminating conditions are if we have found the 20 correct guesses, or we have no valid numbers remaining. In both cases, we send the known good numbers and retrieve the flag. 
+1. The complete solution is as follows:
+```python
+from pwn import *
+context.log_level = 'debug'
+
+n, l = 127, 20
+N = set(list(range(0, n)))
+
+def print_reverse_as_matrix(rsq):
+    hdr = "    "+"{:3d}"*10
+    print(hdr.format(*[i for i in range(10)]))
+    print("-"*(4+3*10))
+    for i in range(0,n,10):
+        print("{:3d}|".format(i//10), end='')
+        print(("{:3d}"*10).format(*[len(rsq[x]) if x in rsq.keys() else 0 for x in range(i,i+10)]))
+
+squares = {i:pow(i, 2, n) for i in range(n)}
+reverse_squares = {s:[i for i,j in squares.items() if j==s] for s in set(squares.values)}
+
+known = []
+#with process(['python3', 'did.py']) as P:
+with remote("01.cr.yp.toc.tf", 11337) as P:
+    P.recvuntil(b'++++++++++++\n')
+    while(len(known) < l):
+        print_reverse_as_matrix(reverse_squares)
+
+        candidates=[]
+        for i in range(n):
+            # if i-1, i or i+1 does not have an entry in the candidates
+            if [c for c in candidates if squares[c] in  [i-1, i, i+1] ] :
+                continue 
+            # else:
+            if (i in reverse_squares.keys()):
+                candidates.append(reverse_squares[i].pop(0))
+                if (len(reverse_squares[i]) == 0):
+                    del reverse_squares[i]
+            if (len(candidates) == l):
+                break
+
+        if (len(candidates)==0 or len(known) == l):
+            break
+        send_str = ','.join(str(x) for x in candidates)
+        P.sendline(send_str.encode())
+        P.recvuntil(b'DID = ')
+        ans = eval(P.recvline().decode())
+        print(f"{ans= }")
+        rejects = [i for i,j in squares.items() if (j in ans or j+1 in ans) and (i in candidates)]
+        print(f"{rejects= }")
+        known += [x for x in candidates if x not in rejects]
+        print(f"{known= }")
+    P.sendline((','.join(str(x) for x in known)).encode())
+    P.interactive()
+```
+
 ### After the CTF
 There were a couple of other challenges that I could have solved if I had more time. So, I will catalog them here as I solve them for future reference, along with interesting solutions from other writeups.
 
@@ -120,14 +224,20 @@ There were a couple of other challenges that I could have solved if I had more t
 * https://www.ams.org/journals/mcom/2007-76-259/S0025-5718-07-01947-3/S0025-5718-07-01947-3.pdf
 * https://gist.github.com/4yn/61af8672bed251e5366988e2efa6e658
 * https://en.wikipedia.org/wiki/Sums_of_three_cubes
+* https://gist.github.com/elliptic-shiho
+* https://ctfnote.leg.bzh/pad/s/SL4mIXF3b
+* http://matwbn.icm.edu.pl/ksiazki/aa/aa73/aa7331.pdf
+* https://www.quora.com/How-do-you-find-the-positive-integer-solutions-to-frac-x-y+z-+-frac-y-z+x-+-frac-z-x+y-4
+* https://shiho-elliptic.tumblr.com/post/722391959624433664/crypto-ctf-2023-writeup-en
+
 
 
 ### List of challenges
 |Category|Challenge|Description
 |----|----|----
-|Easy 😁|Blue Office|
-|Easy 😁|Did it!|
-|Easy 😁|Suction| RSA with obscured N and E
+|Easy 😁|Blue Office|byte-wise encryption, with a seed function
+|Easy 😁|Did it!| modular arith, programming, set intersections
+|Easy 😁|Suction| RSA with obscured C, N and E
 |Hard 😥|Big|
 |Hard 😥|Byeween|
 |Hard 😥|Marjan|
