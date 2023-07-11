@@ -218,6 +218,76 @@ with remote("01.cr.yp.toc.tf", 11337) as P:
 ### After the CTF
 There were a couple of other challenges that I could have solved if I had more time. So, I will catalog them here as I solve them for future reference, along with interesting solutions from other writeups.
 
+#### Blobfish
+
+```python
+    key = get_random_bytes(8) * 2           # Random 8 bytes, repeated once
+    iv = md5(key).digest()                  # IV is also random
+
+    cipher = AES.new(key, AES.MODE_CFB, iv=iv)  
+    # Flag bytes are encrypted using AES.MODE_CFB cipher feed back
+    enc = cipher.encrypt(flag)              
+
+    img = Image.new('RGB', (800, 50))
+    drw = ImageDraw.Draw(img)
+    # A PNG file is created with the hex value of encrypted flag bytes
+    drw.text((20, 20), enc.hex(), fill=(255, 0, 0)) 
+    img.save("flag.png")
+
+    # First 10 bytes of key is converted to a string
+    hkey = ''.join('\\x{:02x}'.format(x) for x in key[:10]) 
+
+    # used as the password for protecting the zip file that has the PNG image
+    os.system(f'/bin/zip -0 flag.zip flag.png -e -P \"$(/bin/echo -en \"{hkey}\")\"')   
+```
+1. Extract the PNG image from the zip file
+1. Decrypt the hex string in the image using the password/iv from the key
+1. Get the original flag back
+
+```
+% ./bkcrack -x 0 89504e470d0a1a0a0000000d49484452 -C ~/ctf/2023/cryptoctf/blobfish/flag.zip -c flag.png  
+bkcrack 1.5.0 - 2022-07-07
+[14:16:10] Z reduction using 9 bytes of known plaintext
+100.0 % (9 / 9)
+[14:16:10] Attack on 697990 Z values at index 6
+Keys: 03492be6 b81a5123 24d7b146
+4.3 % (30016 / 697990)
+[14:17:09] Keys
+03492be6 b81a5123 24d7b146
+
+ % ./bkcrack -k 03492be6 b81a5123 24d7b146 -r 10 "?b"                   
+bkcrack 1.5.0 - 2022-07-07
+[14:19:42] Recovering password
+length 0-6...
+length 7...
+length 8...
+length 9...
+length 10...
+41.8 % (27362 / 65536)
+[14:19:44] Password
+as bytes: ad 6e fb 79 2a ea 5a aa ad 6e 
+as text: ny*Zn
+
+% ./bkcrack -k 03492be6 b81a5123 24d7b146 -C ~/ctf/2023/cryptoctf/blobfish/flag.zip -c flag.png -d flag.png
+bkcrack 1.5.0 - 2022-07-07
+[14:26:43] Writing deciphered data flag.png (maybe compressed)
+Wrote deciphered data.
+```
+
+![](flag.png)
+
+```python
+    enc = unhexlify('69f421d9e241933cbc62a9ffe937779c864ffa193de014aeb57046b16c40c7353910c61a2676f14f4c7737f038a6db53262c50')
+    key = unhexlify('ad6efb792aea5aaaad6efb792aea5aaa')
+    iv = md5(key).digest()
+
+    cipher = AES.new(key, AES.MODE_CFB, iv=iv)
+    flag = cipher.decrypt(enc)
+    print(flag)
+    # b'CCTF{d3ep-Zip_fi5h_0f_tH3_knOwN_pL4!n_7exT_ATtAcK!}'
+```
+
+
 
 ### Resources
 * https://ericrowland.github.io/papers/Known_families_of_integer_solutions_of_x%5E3+y%5E3+z%5E3=n.pdf
@@ -229,7 +299,6 @@ There were a couple of other challenges that I could have solved if I had more t
 * http://matwbn.icm.edu.pl/ksiazki/aa/aa73/aa7331.pdf
 * https://www.quora.com/How-do-you-find-the-positive-integer-solutions-to-frac-x-y+z-+-frac-y-z+x-+-frac-z-x+y-4
 * https://shiho-elliptic.tumblr.com/post/722391959624433664/crypto-ctf-2023-writeup-en
-
 
 
 ### List of challenges
