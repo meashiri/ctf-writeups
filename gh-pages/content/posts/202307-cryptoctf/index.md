@@ -292,7 +292,7 @@ Wrote deciphered data.
 #### Insights
 `Boundary attacks on RSA involve manipulating the input values at specific boundaries to exploit vulnerabilities in the encryption system's implementation. As one of the most widely used encryption systems, RSA provides insights into secure communications through its reliance on the difficulty of factoring large prime numbers. However, it is crucial to implement RSA correctly with robust key management and secure implementations to ensure its effectiveness in protecting sensitive information.`
 
-We are given a Sagemath script that implements RSA and it's output file.  The most important part of the generator script is provided below. The script includes a number of red-herrings. However, one part stands out. Instead of generating or specifying `e`, the program generates a prime number based on `n` and inverts it to get `e`. So, by definition, the prime number is `d`, the decryption key.  If this `d` can be generating again given our inputs, we can crack this RSA encryption without having to factor `n`.
+We are given a Sagemath script that implements RSA and it's output file.  The most important part of the generator script is provided below. The script includes a number of red-herrings. However, one part stands out. Instead of generating or specifying `e`, the program generates a prime number based on `n` and inverts it to get `e`. So, by definition, the prime number is `d`, the decryption key.  If this `d` can be generating again given our inputs, we can crack this RSA encryption by \\(C^d \mod N\\). There is no need to factor `N`.
 
 ```python
 def genKey(L, nbit):
@@ -327,7 +327,7 @@ print('-' * 85)
 ```
 1. We are given `n`, `c` and `e`
 1. Recreate `d` using `n`
-1. Decrypt `c`
+1. Decrypt `c` to get the flag.
 1. I don't know if this was the intended solution or not. 
 
 ```ipython
@@ -342,6 +342,9 @@ b'CCTF{RSA_N3w_rEc0rd5_4Nd_nEw_!nSi9h75!}'
 
 #### Keymoted
 `Combining RSA and ECC in a cryptographic system does not necessarily guarantee security equivalent to that of the individual RSA or ECC systems. What about keymoted`
+
+#### Trex
+`The study of Diophantine equations over trex can be significantly more challenging than over the real numbers.`
 
 ### Resources
 * https://ericrowland.github.io/papers/Known_families_of_integer_solutions_of_x%5E3+y%5E3+z%5E3=n.pdf
@@ -359,13 +362,13 @@ b'CCTF{RSA_N3w_rEc0rd5_4Nd_nEw_!nSi9h75!}'
 |Category|Challenge|Description
 |----|----|----
 |Easy 😁|Blue Office|byte-wise encryption, with a seed function
-|Easy 😁|Did it!| modular arith, programming, set intersections
+|Easy 😁|Did it!|* modular arith, programming, set intersections
 |Easy 😁|Suction| RSA with obscured C, N and E
 |Hard 😥|Big|
-|Hard 😥|Byeween|
-|Hard 😥|Marjan|
+|Hard 😥|Byeween|*
+|Hard 😥|Marjan|*
 |Hard 😥|Shevid|
-|Hard 😥|Vinefruit|
+|Hard 😥|Vinefruit|*
 |Medium 🤔|ASIv1|
 |Medium 🤔|Barak|
 |Medium 🤔|Bertrand|
@@ -375,9 +378,9 @@ b'CCTF{RSA_N3w_rEc0rd5_4Nd_nEw_!nSi9h75!}'
 |Medium 🤔|Keymoted|
 |Medium 🤔|Resuction|
 |Medium 🤔|Risk|
-|Medium 🤔|Roldy|
-|Medium 🤔|TPSD| Sum of 3 cubes Diophantine equation
-|Medium 🤔|Trex|
+|Medium 🤔|Roldy|* 
+|Medium 🤔|TPSD|* Sum of 3 cubes Diophantine equation
+|Medium 🤔|Trex|* 
 |Tough 🔥|ASIv2|
-|Tough 🔥|Slowsum|
+|Tough 🔥|Slowsum|* 
 |Warm-up 🤑|Welcome!|
