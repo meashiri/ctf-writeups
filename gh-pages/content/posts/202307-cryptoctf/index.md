@@ -340,11 +340,50 @@ sage: long_to_bytes(pow(c, d, n))
 b'CCTF{RSA_N3w_rEc0rd5_4Nd_nEw_!nSi9h75!}'
 ```
 
+This solution seems to be too simple for a Medium complexity challenge. In the writeups channel, `TheSavageTeddy` clued me into the fact that this is intended to be solved through [Boneh-Durfee attack](https://cryptohack.gitbook.io/cryptobook/untitled/low-private-component-attacks/boneh-durfee-attack). So, I read up on it and implemented the attack.
+
+
+
+
+
+
+
+
+
 #### Keymoted
 `Combining RSA and ECC in a cryptographic system does not necessarily guarantee security equivalent to that of the individual RSA or ECC systems. What about keymoted`
 
 #### Trex
 `The study of Diophantine equations over trex can be significantly more challenging than over the real numbers.`
+
+```python
+    def check_inputs(a, b, c):
+        if not all(isinstance(x, int) for x in [a, b, c]):
+            return False
+        if a == 0 or b == 0 or c == 0:
+            return False
+        if a == b or b == c or a == c:
+            return False
+        return True
+
+
+    equation = f'x^2 + y^2 - xy = {a}*z^3'
+```
+
+
+$$
+    x^2 + y^2 - xy = a \cdot z^3\\
+    x,y,z\not= 0\\
+    x\not=y, y\not=z, x\not=z\\
+    
+    let~~y = x + m ~~~ where ~~ m \not= 0\\
+    x^2 + (x+m)^2 - x(x+m) = a \cdot z^3\\
+    x^2 + x^2 + m^2 + 2xm -x^2 -xm = a \cdot z^3\\
+    x^2 + xm + m^2 = a \cdot z^3\\
+    
+
+
+$$
 
 ### Resources
 * https://ericrowland.github.io/papers/Known_families_of_integer_solutions_of_x%5E3+y%5E3+z%5E3=n.pdf
@@ -356,6 +395,8 @@ b'CCTF{RSA_N3w_rEc0rd5_4Nd_nEw_!nSi9h75!}'
 * http://matwbn.icm.edu.pl/ksiazki/aa/aa73/aa7331.pdf
 * https://www.quora.com/How-do-you-find-the-positive-integer-solutions-to-frac-x-y+z-+-frac-y-z+x-+-frac-z-x+y-4
 * https://shiho-elliptic.tumblr.com/post/722391959624433664/crypto-ctf-2023-writeup-en
+* https://math.stackexchange.com/questions/3068288/find-all-integer-solutions-to-x2xyy2-xy-3-13
+
 
 
 ### List of challenges
