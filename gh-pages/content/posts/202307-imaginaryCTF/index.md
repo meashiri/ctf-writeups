@@ -88,12 +88,16 @@ The challenge source shows that the challenge server is doing the following proc
 The steps used are : 
 
 ```ipython
-In [2]: PASSWORD = b"give me the flag!!!"
-In [3]: crc32(PASSWORD)
-Out[3]: 3542523789
-In [4]: assert 87619 * 40431 == crc32(PASSWORD)
-In [5]: print(87619 * 40431 == crc32(PASSWORD) )
-True
+    In [2]: PASSWORD = b"give me the flag!!!"
+    In [3]: crc32(PASSWORD)
+    Out[3]: 3542523789
+    In [4]: assert 87619 * 40431 == crc32(PASSWORD)
+    In [5]: print(87619 * 40431 == crc32(PASSWORD) )
+    True
+    In [6]: crc32(b'BeSqrm')
+    Out[6]: 87619
+    In [7]: crc32(b'ZJWWgU')
+    Out[7]: 40431
 ```
 
 ```bash
@@ -165,3 +169,5 @@ with remote('signer.chal.imaginaryctf.org',  1337) as P:
 ```
 
 
+### References
+* https://github.com/maple3142/My-CTF-Challenges/tree/master/ImaginaryCTF
