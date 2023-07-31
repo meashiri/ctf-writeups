@@ -2,7 +2,7 @@ baseURL: 'https://meashiri.github.io/ctf-writeups/'
 languageCode: en-us
 title: CTF notepad
 theme: PaperModX
-paginate: 6
+paginate: 12
 ShowToc: true
 googleAnalytics: G-JNJE77L6VW
 
