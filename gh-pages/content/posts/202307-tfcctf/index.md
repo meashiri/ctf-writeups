@@ -100,10 +100,8 @@ XOR the hex string with the flag header to get the 3-character key. Then, get th
 ```python
 from pwn import *
 b = unhex("030a111418142c783b39380d397c0d25293324231c66220d367d3c23133c6713343e343b3931")
-print(xor(b, b'TFCCTF{'))
-print(xor(b, b'WLR'))
-
-# b'TFCCTF{4int_n0_reasoN1n_a1nt_n0_fixin}'
+print(xor(b, b'TFCCTF{'))       # b'WLRWLRW,}z{Y\x7f\x07Ycjppeg2dNu)zXGz$P`xOo\x7fr'
+print(xor(b, b'WLR'))           # b'TFCCTF{4int_n0_reasoN1n_a1nt_n0_fixin}'
 ```
 
 
@@ -127,31 +125,31 @@ print(xor(b, b'WLR'))
 ### Challenges
 |Category|Difficulty|Challenge|Description
 |----|----|----|----
-|Crypto|warmup|Dizzy|
-|Crypto|warmup|Mayday!|
+|Crypto|warmup|Dizzy|re-order letters of the flag
+|Crypto|warmup|Mayday!| transcribe NATO phonetics and numbers
 |Crypto|medium|AES CTF TOOL V1|
 |Crypto|medium|AES CTF TOOL V2|
 |Crypto|medium|CypherehpyC|
 |Crypto|hard|Fermentation|
-|Crypto|easy|Alien Music|
+|Crypto|easy|Alien Music|Music notes to hex digits
 |Crypto|easy|Rabid|
 |misc|warmup|Rules|
 |misc|medium|Broken Crypto|
 |misc|medium|My First Calculator|
 |misc|medium|My Third Calculator|
 |misc|hard|mcclaustrophobia|
-|misc|easy|DISCORD SHENANIGANS V3|
+|misc|easy|DISCORD SHENANIGANS V3|Flag in profile image, but cropped
 |reverse|warmup|pass|
 |reverse|medium|Losedows|
 |reverse|medium|process-monitor|
 |reverse|insane|c3|
 |reverse|insane|mcIOR|
-|reverse|hard|C--|
+|reverse|hard|C - -|
 |reverse|hard|obf|
 |forensics|warmup|Down Bad|
-|forensics|medium|Some traffic|
+|forensics|medium|Some traffic|images in HTTP + zsteg
 |forensics|medium|mcELLA|
-|forensics|medium|mcteenX|
+|forensics|medium|mcteenX|bkcrack to crack a zip using bash header, zsteg, XOR with flag header to get the key
 |forensics|easy|list|
 |pwn|warmup|diary|
 |pwn|warmup|shello-world|
