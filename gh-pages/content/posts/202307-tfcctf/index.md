@@ -145,6 +145,91 @@ print(xor(b, b'TFCCTF{'))       # b'WLRWLRW,}z{Y\x7f\x07Ycjppeg2dNu)zXGz$P`xOo\x
 print(xor(b, b'WLR'))           # b'TFCCTF{4int_n0_reasoN1n_a1nt_n0_fixin}'
 ```
 
+#### AES CTF Tool V1
+
+1. Make one-line change to main.py to return `remote("<server name>", port_num)` 
+1. Run the program. 
+1. This challenge implements CBC scheme, which is attacked using a Chosen Plaintext Attack
+
+```
+    % python3 main.py
+    [INFO] Starting initial cryptanalysis.
+    [INFO] Determining block size.
+    [X] Found block size: 16.
+    [INFO] Determining block cipher category.
+    [X] Found block cipher category: ECB_CBC.
+    [INFO] Starting fingerprinting.
+    [INFO] Determining block cipher mode.
+    [X] Found block cipher mode: ECB.
+    ======= Probabilities =======
+    ECB: 100%
+    CBC: 0%
+    CFB: 0%
+    OFB: 0%
+    CTR: 0%
+    =============================
+    [INFO] ECB/CBC detected. Determining padding method.
+    [X] Found padding method: Block.
+    [INFO] Fingerprinting complete.
+    Would you like to perform a Chosen Plaintext Attack? (Y/n) 
+
+    Optimize search space for printable ascii? (Y/n) 
+
+    [INFO] Starting Chosen Plaintext Attack.
+    Offset: 8 bytes
+    Block number: 7
+    Found: T
+    Found: TF
+    Found: TFC
+    ...
+    ...
+    Found: TFCCTF{gu355_th4t_w4s_345y...Wh4T-AboUt_Th3_0th3r_0n3
+    Found: TFCCTF{gu355_th4t_w4s_345y...Wh4T-AboUt_Th3_0th3r_0n3?
+    Found: TFCCTF{gu355_th4t_w4s_345y...Wh4T-AboUt_Th3_0th3r_0n3?}
+
+    [INFO] Chosen Plaintext Attack complete.
+```
+
+#### AES CTF Tool V2
+1. Make one-line change to main.py to return `remote("<server name>", port_num)` 
+1. Run the program. 
+1. This challenge implements CBC scheme, which is attacked using a Padding Oracle Attack
+
+```
+    % python3 main_vol2.py 
+    [INFO] Starting initial cryptanalysis.
+    [INFO] Determining block size.
+    [X] Found block size: 16.
+    [INFO] Determining block cipher category.
+    [X] Found block cipher category: ECB_CBC.
+    [INFO] Starting fingerprinting.
+    [INFO] Determining block cipher mode.
+    [X] Found block cipher mode: CBC.
+    ======= Probabilities =======
+    CBC: 100%
+    ECB: 0%
+    CFB: 0%
+    OFB: 0%
+    CTR: 0%
+    =============================
+    [INFO] ECB/CBC detected. Determining padding method.
+    [X] Found padding method: Block+.
+    [INFO] Checking if the IV is reused for each encryption.
+    [INFO] Reuses IV: True.
+    [INFO] Fingerprinting complete.
+    Would you like to perform a Padding Oracle Attack? (Y/n) 
+
+
+    [INFO] Starting Padding Oracle Attack.
+    Enter the ciphertext to decrypt (in hexadecimal): e7a7615846ca468d7bd0410f1004f9d131768b3f44c29cb9aff919f9ae6e122cd9ba37a00336910fd0abbccaba75e357a7119004a3036725147bd2b8ef5c12ae
+    ...
+    ...
+    Found byte: 163
+    Intermediate value: 179
+    Decrypted: b'TFCCTF{W3ll..._th15_0n3_w4s_4ls0_easy!}\t\t\t\t\t\t\t\t\t'
+    [INFO] Padding Oracle Attack complete.
+```
+
 
 #### Writeups, Resources
 * https://vnhacker.blogspot.com/2014/06/why-javascript-crypto-is-useful.html
