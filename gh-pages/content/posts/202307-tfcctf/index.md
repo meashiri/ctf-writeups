@@ -66,6 +66,47 @@ print()
 
 `b8,g,lsb,yx         .. text: "FCCTF{H1dd3n_d4t4_1n_p1x3ls_i5n't_f4n_4nd_e4sy_to_f1nd!}TFCCTF{H1dd3n_d4t4_1n_p1x3ls_i5n't_f4n_4nd_e4sy_to_f1nd!}TFCCTF{H1dd3n_d4t4_1n_p1x3ls_i5n't_f4n_4nd_e4sy_to_f1nd!}TFCCTF{H1dd3n_d4t4_1n_p1x3ls_i5n't_f4n_4nd_e4sy_to_f1nd!}TFCCTF{H1dd3n_d4t4_1n_p1x3ls_"`
 
+#### Down Bad
+
+```bash
+    root@stego:/input/2023/tfcctf/for# pngcheck -c -t -v down_bad.png 
+    File: down_bad.png (2620079 bytes)
+    chunk IHDR at offset 0x0000c, length 13
+        1920 x 1168 image, 32-bit RGB+alpha, non-interlaced
+    CRC error in chunk IHDR (computed 1d9c52c0, expected a9d5455b)
+    ERRORS DETECTED in down_bad.png
+
+    root@stego:/input/2023/tfcctf/for# xxd -g 28 down_bad_original.png | more
+    00000000: 89504e470d0a1a0a0000000d49484452  .PNG........IHDR
+    00000010: 00000780000004900806000000a9d545  ...............E
+    00000020: 5b                                [
+
+```
+
+1. We are given a PNG file which will not open due a CRC error in the IHDR chunk.
+1. Running `pngcheck` on the image shows that image has a header that is coded to be 1920 x 1168 sized image, but has a CRC of `0x1d9c52c0` instead of the expected CRC of `0xa9d5455b`
+1. The two alternatives here are that either the CRC is wrong or the IHDR data is incorrect. 
+1. Since the height of the image is not any of the normal values, I chose to see if I can determine what height of the image would produce the expected CRC value. 
+1. The following script tests the CRC for a IHDR chunk with by gradually increasing the height of the image.
+1. It is found that the image height of 1344 pixels produces the expected CRC value
+1. Updating the IHDR with this value and displaying the resulting image shows a taller image, with the flag at the bottom of the image. 
+
+```python
+    from binascii import crc32, unhexlify
+
+    ihdr_a = "4948445200000780"
+    ihdr_b = "0806000000"
+
+    ht = 0x00000490
+
+    for h in range(ht, 0x780):
+        ihdr = f"{ihdr_a}{h:08x}{ihdr_b}"   #create a new IHDR bytestream with the new height
+        crc = crc32(unhexlify(ihdr))        # calculate the CRC
+        if (crc == 0xa9d5455b):             # If it matches the original CRC, we found the original height 
+            print(f"{h:08x}: {ihdr} {crc32(unhexlify(ihdr)):x}") # 00000540  : 4948445200000780000005400806000000 a9d5455b
+            break
+```
+
 
 #### MCTEENX
 `I fly in the sky, I got wings on my feet.`
@@ -146,7 +187,7 @@ print(xor(b, b'WLR'))           # b'TFCCTF{4int_n0_reasoN1n_a1nt_n0_fixin}'
 |reverse|insane|mcIOR|
 |reverse|hard|C - -|
 |reverse|hard|obf|
-|forensics|warmup|Down Bad|
+|forensics|warmup|Down Bad|Update height in IHDR to match CRC
 |forensics|medium|Some traffic|images in HTTP + zsteg
 |forensics|medium|mcELLA|
 |forensics|medium|mcteenX|bkcrack to crack a zip using bash header, zsteg, XOR with flag header to get the key
