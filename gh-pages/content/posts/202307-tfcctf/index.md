@@ -230,6 +230,53 @@ print(xor(b, b'WLR'))           # b'TFCCTF{4int_n0_reasoN1n_a1nt_n0_fixin}'
     [INFO] Padding Oracle Attack complete.
 ```
 
+#### CypherehpyC
+
+```python
+    from Crypto.Cipher import AES
+    from Crypto.Util.Padding import pad, unpad
+
+    KEY = b"redacted" * 2
+
+    FLAG = "redacted"
+
+    initial_cipher = bytes.fromhex(input("Initial HEX: ").strip())
+
+    cipher = AES.new(KEY, AES.MODE_ECB).encrypt(pad(initial_cipher, 16))
+    print(cipher.hex())
+    cipher = AES.new(KEY, AES.MODE_ECB).encrypt(pad(cipher, 16))
+    print(cipher.hex())
+
+    cipher = AES.new(KEY, AES.MODE_ECB).encrypt(pad(cipher, 16))
+    result = bytes.fromhex(input("Result HEX: ").strip())
+
+    if cipher == result:
+        print(FLAG)
+    else:
+        print("Not quite...")
+```
+
+As can be seen in the challenge source, we are allowed to supply a input which is encrypted twice (in AES-ECB mode) and we are asked to guess the output of the 3rd round of encryption to get the flag. AES ECB uses the same key and padding techniques for each block of data 
+
+Pictorially, the challenge looks like the following: 
+
+![](cypherehpyc.png)
+
+The solution is to start with any arbitrary input and solve the challenge in three tries.  After the first try, use the output of step 1 as the input string. In the second try, save the output of step 2. This will be the final encrypted value that we can provide as our prediction.   This approach works only because with ECB, the same key is used for encrypting each block. 
+
+Try.step|Input|Output||
+----|----|----|----
+1.1|`cafebabe`| E(`cafebabe`)| <-- use this in step 2.1
+1.2|E(`cafebabe`) | E(E(`cafebabe`))|
+1.3| E(E(`cafebabe`)) | Guess ? |
+2.1|E(`cafebabe`)|E(E(`cafebabe`))|
+2.2|E(E(`cafebabe`))|E(E(E(`cafebabe`)))| <-- Use this in step 3.3
+2.3|E(E(E(`cafebabe`))) | Guess ? |
+3.1|`cafebabe`| E(`cafebabe`)|
+3.2|E(`cafebabe`) | E(E(`cafebabe`))|
+3.3| E(E(`cafebabe`)) | Guess: E(E(E(`cafebabe`)))| <-- from 2.2
+
+
 
 #### Writeups, Resources
 * https://vnhacker.blogspot.com/2014/06/why-javascript-crypto-is-useful.html

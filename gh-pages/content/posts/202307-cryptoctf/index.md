@@ -371,19 +371,13 @@ This solution seems to be too simple for a Medium complexity challenge. In the w
 ```
 
 
-$$
-    x^2 + y^2 - xy = a \cdot z^3\\
+$$ x^2 + y^2 - xy = a \cdot z^3\\
     x,y,z\not= 0\\
     x\not=y, y\not=z, x\not=z\\
-    
     let~~y = x + m ~~~ where ~~ m \not= 0\\
     x^2 + (x+m)^2 - x(x+m) = a \cdot z^3\\
     x^2 + x^2 + m^2 + 2xm -x^2 -xm = a \cdot z^3\\
-    x^2 + xm + m^2 = a \cdot z^3\\
-    
-
-
-$$
+    x^2 + xm + m^2 = a \cdot z^3\\$$
 
 ### Resources
 * https://ericrowland.github.io/papers/Known_families_of_integer_solutions_of_x%5E3+y%5E3+z%5E3=n.pdf
