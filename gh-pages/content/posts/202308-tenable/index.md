@@ -8,7 +8,7 @@ cover:
     image: tenable_banner.png
 ---
 
-ToDo: Put the summary here
+Tried a few challenges in Tenable's CTF. 
 
 <!--more-->
 
@@ -71,6 +71,10 @@ print(''.join([chr(int(x)) for x in ("102 108 97 1" +  "03 123 105 " + "115 95 1
 # 37 should be 97 ... giving the flag as 
 # flag{is_e_irratonal?}
 ```
+
+#### GPT prompts
+`tldr`
+
 
 
 |Category|Challenge|Description
