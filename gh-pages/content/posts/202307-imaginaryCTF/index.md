@@ -171,3 +171,4 @@ with remote('signer.chal.imaginaryctf.org',  1337) as P:
 
 ### References
 * https://github.com/maple3142/My-CTF-Challenges/tree/master/ImaginaryCTF
+* https://github.com/ImaginaryCTF/ImaginaryCTF-2023-Challenges

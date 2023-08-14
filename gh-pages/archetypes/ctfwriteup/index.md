@@ -3,6 +3,7 @@ title: "{{ replace .Name "-" " " | title }}"
 date: {{ .Date }}
 categories: [ctf, writeup]
 tags:
+math: true
 cover:
     image:
 ---
