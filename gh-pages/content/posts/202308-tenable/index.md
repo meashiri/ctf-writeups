@@ -2,7 +2,7 @@
 title: "Tenable CTF"
 date: 2023-08-11T11:47:24-04:00
 categories: [ctf, writeup]
-tags:
+tags: [digits_of_e, zodiac, quantum]
 math: true
 cover:
     image: tenable_banner.png
