@@ -119,7 +119,7 @@ $$
 
 $$
     {P_2 - P_1} = a_{lcg} * {P_1 - P_0} \\\
-    \therefore a_{lcg} = {(P_1 - P_0)}.discrete\\_log({P_2 - P_1})
+    \therefore a_{lcg} = {(P_1 - P_0)}\text{.discrete\\_log}({P_2 - P_1})
 $$
 
 $$
@@ -202,6 +202,7 @@ f = open("flag.txt",'rb').read().strip()
 enc = cipher.encrypt(pad(f,16))
 print(enc.hex())    # prints ciphertext
 ```
+
 
 
 

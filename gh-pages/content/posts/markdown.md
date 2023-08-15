@@ -1,9 +1,9 @@
-+++
-title = "Markdown Syntax"
-date = "1999-05-11"
-description = "Markdown Syntax test page"
-tags = ["markdown", "css", "html", "themes"]
-+++
+---
+title: "Markdown Syntax"
+date: "1999-05-11"
+description: "Markdown Syntax test page"
+tags: ["markdown", "css", "html", "themes"]
+---
 
 This article offers a sample of basic Markdown syntax that can be used in Hugo content files, also it shows whether basic HTML elements are decorated with CSS in a Hugo theme.
 
@@ -125,3 +125,26 @@ X<sup>n</sup> + Y<sup>n</sup> = Z<sup>n</sup>
 Press <kbd><kbd>CTRL</kbd>+<kbd>ALT</kbd>+<kbd>Delete</kbd></kbd> to end the session.
 
 Most <mark>salamanders</mark> are nocturnal, and hunt for insects, worms, and other small creatures.
+
+
+## Latex support
+
+| To get | Use | 
+| ------------------------ | -------------------------- | 
+| \\(a^2 + b^2 = c^2\\)  | `\\(a^2 + b^2 = c^2\\)`          | 
+| \\({(a+b)}^2 = a^2 + 2ab + b^2\\)  | `\\({(a+b)}^2 = a^2 + 2ab + b^2\\)`          | 
+| \\( {(a+b)} \mod n = a \mod n + b \mod n \\)|`\\( {(a+b)} \mod n = a \mod n + b \mod n \\)`|
+| \\( n \equiv 0 \pmod n \\)|`\\( n \equiv 0 \pmod n  \\)`|
+| \\( \frac {a}{b} ~\quad {a}/{b^3}  \space \quad \dfrac{a}{b}\\)|`\\( \frac {a}{b} ~\quad {a}/{b^3}  \space \quad \dfrac{a}{b}\\)`|
+| \\( \fcolorbox{red}{aqua}{$F=ma$} \\)|`\\( \fcolorbox{red}{aqua}{$F=ma$} \\)`|
+| \\( \Z \R \N \Reals \Complex \\)|`\\( \Z \R \N \Reals \Complex \\)`|
+|$$ \Z \R \N \Reals \Complex $$ | `$$ \Z \R \N \Reals \Complex $$`|
+|\\( \text{This is a sentence with under\\_score}\\)|`\\( \text{This is a sentence with under\\_score}\\)`|
+|$$ \tag{mod N} x+y^{2x} $$ |`$$ \tag{mod N} x+y^{2x} $$`|
+|\\( \stackrel {?}{=} \overset {!}{=} \underset {\\$}{=} \\)|`\\( \stackrel {?}{=} \overset {!}{=} \underset {\\$}{=} \\)`|
+| \\( \forall \therefore \because \in \notin \subset \supset \exist \\)|`\\( \forall \therefore \because \in \notin \subset \supset \exist \\)`|
+|\\(A\oplus B = P \bigoplus Q\\)|`\\(A\oplus B = P \bigoplus Q\\)`|
+|∀∴∁∵∃∣∈∈/∋⊂⊃∧∨↦→←↔¬ ℂ ℍ ℕ ℙ ℚ ℝ|∀∴∁∵∃∣∈∈/∋⊂⊃∧∨↦→←↔¬ ℂ ℍ ℕ ℙ ℚ ℝ|
+
+
+
