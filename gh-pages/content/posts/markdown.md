@@ -144,7 +144,7 @@ Most <mark>salamanders</mark> are nocturnal, and hunt for insects, worms, and ot
 |\\( \stackrel {?}{=} \overset {!}{=} \underset {\\$}{=} \\)|`\\( \stackrel {?}{=} \overset {!}{=} \underset {\\$}{=} \\)`|
 | \\( \forall \therefore \because \in \notin \subset \supset \exist \\)|`\\( \forall \therefore \because \in \notin \subset \supset \exist \\)`|
 |\\(A\oplus B = P \bigoplus Q\\)|`\\(A\oplus B = P \bigoplus Q\\)`|
+|\\(\tiny Aa \scriptsize Aa \footnotesize Aa \small Aa \normalsize Aa \\)|`\\(\tiny Aa \scriptsize Aa \footnotesize Aa \small Aa \normalsize Aa \\)`|
+|\\(\large Aa \Large Aa \LARGE Aa \huge Aa \Huge Aa \normalsize \\)|`\\(\large Aa \Large Aa \LARGE Aa \huge Aa \Huge Aa \normalsize \\)`|
+|$$<br>\Z<br>\R$$||
 |∀∴∁∵∃∣∈∈/∋⊂⊃∧∨↦→←↔¬ ℂ ℍ ℕ ℙ ℚ ℝ|∀∴∁∵∃∣∈∈/∋⊂⊃∧∨↦→←↔¬ ℂ ℍ ℕ ℙ ℚ ℝ|
-
-
-

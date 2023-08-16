@@ -202,15 +202,125 @@ f = open("flag.txt",'rb').read().strip()
 enc = cipher.encrypt(pad(f,16))
 print(enc.hex())    # prints ciphertext
 ```
+$$
+LCG_1: \quad \large L = \normalsize \\{ {L_0, L_1, L_2, L_3, L_4, ... } \\}  \\\
+LCG_2: \quad \large M = \normalsize \\{ {M_0, M_1, M_2, M_3, M_4, ... } \\} \\\
+L_0 = x_1 \\\
+L_1 = a * L_0 + b \mod {p} \\\
+L_2 = a * L_1 + b \mod {p} \\\
+\text{... etc.} \\\
+\newline 
+M_0 = L_0 * x_2 + b_2 \mod {p} \\\
+M_1 = L_1 * x_2 + b_2 \mod {p} \\\
+M_2 = L_2 * x_2 + b_2 \mod {p} \\\
+\text{... etc.} \\\
+$$
+
+#### ILoveRegex
+
+We are given a regular expression, which presumably matches with the flag. 
+
+```regex
+^LITCTF\{(?<=(?=.{42}(?!.)).(?=.{24}greg).(?=.{30}gex).{5})(?=.{4}(.).{19}\1)(?=.{4}(.).{18}\2)(?=.{6}(.).{2}\3)(?=.{3}(.).{11}\4)(?=.{3}(.).{3}\5)(?=.{16}(.).{4}\6)(?=.{27}(.).{4}\7)(?=.{12}(.).{4}\8)(?=.{3}(.).{8}\9)(?=.{18}(.).{2}\10)(?=.{4}(.).{20}\11)(?=.{11}(.).{2}\12)(?=.{32}(.).{0}\13)(?=.{3}(.).{24}\14)(?=.{12}(.).{9}\15)(?=.{7}(.).{2}\16)(?=.{0}(.).{12}\17)(?=.{13}(.).{5}\18)(?=.{1}(.).{0}\19)(?=.{27}(.).{3}\20)(?=.{8}(.).{17}\21)(?=.{16}(.).{6}\22)(?=.{6}(.).{6}\23)(?=.{0}(.).{1}\24)(?=.{8}(.).{11}\25)(?=.{5}(.).{16}\26)(?=.{29}(.).{1}\27)(?=.{4}(.).{9}\28)(?=.{5}(.).{24}\29)(?=.{15}(.).{10}\30).*}$
+```
+Formatting the string shows the following sub-expressions ...
+```regex
+% sed -e 's/(?/\n(?/g' regex.txt 
+^LITCTF\{
+(?<=
+(?=.{42}
+(?!.))
+.
+(?=.{24}greg)
+. 
+(?=.{30}gex).{5})
+(?=.{4}(.).{19}\1)
+(?=.{4}(.).{18}\2)
+(?=.{6}(.).{2}\3)
+(?=.{3}(.).{11}\4)
+... etc ...
+(?=.{15}(.).{10}\30).*}$
+```
+|Expr|current position|
+|---|---|
+|`^LITCTF\{`|0
+|`(?<=`|0
+|`(?=.{42}`|0
+|`(?!.))`|0
+|`.`|0
+|`(?=.{24}greg)`|1
+|`.`|1
+|`(?=.{30}gex).{5})`|2
+|`(?=.{4}(.).{19}\1)`|7
+|`(?=.{4}(.).{18}\2)`|7
+|`(?=.{6}(.).{2}\3)`|7
 
 
+```python
+S = Solver()
+x = makeIntVector(S, 'X', 42, 33, 127)
 
+for i,c in enumerate('LITCTF{'):
+    S.add(x[i] == ord(c))
+S.add(x[41] == ord('}'))
 
+L=1     # base for relative positioning
+S.add(x[L+24] == ord('g'))
+S.add(x[L+25] == ord('r'))
+S.add(x[L+26] == ord('e'))
+S.add(x[L+27] == ord('g'))
 
+L=2     # base for relative positioning
+S.add(x[L+30] == ord('g'))
+S.add(x[L+31] == ord('e'))
+S.add(x[L+32] == ord('x'))
+
+L=7     # base for relative positioning
+S.add(x[L+4] == x[L + 4 + 1 +19])       # created from:  (?=.{4}(.).{19}\1)
+S.add(x[L+4] == x[L + 4 + 1 +18])  
+S.add(x[L+6] == x[L + 6 + 1 +2])  
+S.add(x[L+3] == x[L + 3 + 1 +11]) 
+S.add(x[L+3] == x[L + 3 + 1 +3])
+S.add(x[L+16] == x[L + 16 + 1 +4])
+S.add(x[L+27] == x[L + 27 + 1 +4])
+S.add(x[L+12] == x[L + 12 + 1 +4])
+S.add(x[L+3] == x[L + 3 + 1 +8])
+S.add(x[L+18] == x[L + 18 + 1 +2])
+S.add(x[L+4] == x[L + 4 + 1 +20])
+S.add(x[L+11] == x[L + 11 + 1 +2])
+S.add(x[L+32] == x[L + 32 + 1 +0])
+S.add(x[L+3] == x[L + 3 + 1 +24])
+S.add(x[L+12] == x[L + 12 + 1 +9])
+S.add(x[L+7] == x[L + 7 + 1 +2])
+S.add(x[L+0] == x[L + 0 + 1 +12])
+S.add(x[L+13] == x[L + 13 + 1 +5])
+S.add(x[L+1] == x[L + 1 + 1 +0])
+S.add(x[L+27] == x[L + 27 + 1 +3])
+S.add(x[L+8] == x[L + 8 + 1 +17])
+S.add(x[L+16] == x[L + 16 + 1 +6])
+S.add(x[L+6] == x[L + 6 + 1 +6])
+S.add(x[L+0] == x[L + 0 + 1 + 1])
+S.add(x[L+8] == x[L + 8 + 1 +11])
+S.add(x[L+5] == x[L + 5 + 1 +16])
+S.add(x[L+29] == x[L + 29 + 1 +1])
+S.add(x[L+4] == x[L + 4 + 1 +9])
+S.add(x[L+5] == x[L + 5 + 1 +24])
+S.add(x[L+15] == x[L + 15 + 1 +10])
+
+if S.check() == sat:
+    M = S.model()
+    f = ''
+    for i in range(42):
+        f+= chr(M[x[i]].as_long())
+    print(f'Found Solution: {f}')
+    # Found Solution: LITCTF{rrregereeregergegegregegggexexexxx}
+```
 ### Writeups and resources
 * https://en.wikipedia.org/wiki/Elliptic_curve
 * https://andrea.corbellini.name/2015/05/17/elliptic-curve-cryptography-a-gentle-introduction/
 * https://crypto.stackexchange.com/questions/91989/large-prime-numbers-in-ecc-and-discrete-logarithm
+* https://regex101.com/
+
 
 ### Challenges 
 |Challenge|Category|Difficulty|Description
