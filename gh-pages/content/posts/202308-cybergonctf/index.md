@@ -77,7 +77,7 @@ print(p_encode)
 print(q_encode)
 ```
 
-Since we have a small search space for the random number, we can bruteforce the search in `[100 - 999]` to see which values yield values between `ord('0') and ord('9')`, since the contents of `p` and `q` should only be digits. Once we determine `num`, we can reverse-engineer `p` and `q` and decode the cipher. 
+Since we have a small search space for the random number, we can bruteforce the search in `[100 - 999]` to see which values yield values between `ord('0') and ord('9')`, with the consraints that the contents of `p` and `q` should only be digits. Once we determine `num`, we can reverse-engineer `p` and `q` and decode the cipher. 
 
 The solution is as follows: 
 ```python
@@ -102,6 +102,7 @@ The solution is as follows:
             d = inverse(e, phi)
             m = pow(c, d, n)
             print(f"{num}: {long_to_bytes(m).decode()}")
+            # 563: CyberGonCTF{345y_p34sy_R54_c1ph3R}
 ```
 
 #### dO nOT aCCESS
@@ -119,7 +120,10 @@ CTTCTTTGAA
 
 `Column-wise reading order` : ATATCCGTGTTCTGTTGGTCCAGTTGTAGTTTACTACTTGGCTCATCCGA
 
+The encoding uses the following scheme to translate a letter into a DNA codon-triplet. 
 ![](dna_codes.png)
+
+Reversing the lookup is pretty straight-forward.
 
 ```python
     import string
@@ -136,7 +140,7 @@ CTTCTTTGAA
             flag += decoder_dict[STR[i-3:i]]
         print(f"{STR} ===> {flag}")
 
-#ACTTCGTAGTTGCGATTCCCATTGGAATTCTGGTTGCTCGCTTCTTTGAA ===> h3Y y0u G07 DN4 
+#ACTTCGTAGTTGCGATTCCCATTGGAATTCTGGTTGCTCGCTTCTTTGAA ===> h3Y y0u G07 DN4   <--- correct flag
 #ATATCCGTGTTCTGTTGGTCCAGTTGTAGTTTACTACTTGGCTCATCCGA ===> m2U0872l8l9CFP12
 ```
 
@@ -163,6 +167,10 @@ We are given a file with PNG extension, which looks to be malformed and does not
 * OSInt enumeration : https://whatsmyname.app/
 * https://www.youtube.com/watch?v=sZAVLJTHtj4
 * Sloppy Joe Pirates: https://www.youtube.com/watch?v=bFAElPXPB4w
+* https://learn-cyber.net/writeup/What-Is-It
+* https://learn-cyber.net/writeup/Super-Secure-Encryption
+* https://learn-cyber.net/writeup/Old-Obfuscation
+* https://learn-cyber.net/writeup/Hollywood
 
 
 ### Challenges
