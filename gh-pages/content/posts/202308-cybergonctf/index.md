@@ -42,8 +42,48 @@ B14cKP4n7h3R
 
 At this point, I was stuck and could not figure out how to apply the key. It was 24-bytes long, 12 in each line. I tried various combinations of AES, but was not able to solve the cipher. 
 
-After the CTF was complete, I learned that it is the Vigenere cipher with `B14cKP4n7h3R` as the key, with `A-Za-z0-9!@` as the alphabets.
+After the CTF was complete, I learned that it is the Vigenere cipher with `B14cKP4n7h3R` as the key, with `A-Za-z0-9!@` as the alphabets. I modified a python implementation to cement my understanding of the Vigenere cipher. 
 
+```python
+    import string
+    # borrowed from https://gist.github.com/dssstr/aedbb5e9f2185f366c6d6b50fad3e4a4
+
+    def vigenere(
+        text: str,
+        key: str,
+        alphabet=string.ascii_lowercase + string.ascii_uppercase + string.digits + "!@" ,
+        encrypt=True):
+
+        result = ''
+        ki = 0  # need a separate index for the Key to prevent it being incremented if we encounter a strange character that is not in the alphabet
+        for i in range(len(text)):
+            if (text[i] in alphabet):
+                letter_n = alphabet.index(text[i])
+                key_n = alphabet.index(key[ki % len(key)])
+
+                if encrypt:
+                    value = (letter_n + key_n) % len(alphabet)
+                else:
+                    value = (letter_n - key_n) % len(alphabet)
+                    # print(f"[{letter_n:2d} - {key_n:2d}] %{len(alphabet):2d} = {value:2d} : {alphabet[letter_n]} {key[i % len(key)]}  --> {alphabet[value]}")
+                result += alphabet[value]
+                ki += 1
+            else: 
+                print(f"{text[i]} not found in the alphabet ... passing it through as-is")
+                result += text[i]
+        return result
+
+    def vigenere_encrypt(text, key):
+        return vigenere(text=text, key=key, encrypt=True)
+
+    def vigenere_decrypt(text, key):
+        return vigenere(text=text, key=key, encrypt=False)
+
+    text = '3n5g1jgAx0w{Bt@WPbH_9bm!mIgZ2aI}'
+    key =  "B14cKP4n7h3R"
+    print(vigenere_decrypt(text, key))
+    # CyberGonCTF{W4k4ND4_f0r3v3R!!!!}
+```
 
 #### EZ-RSA
 We are given the following source for the challenge, with my annotation:
@@ -116,14 +156,14 @@ ATTGGAATTC
 TGGTTGCTCG
 CTTCTTTGAA
 ```
-`Row-wise reading order` : ACTTCGTAGTTGCGATTCCCATTGGAATTCTGGTTGCTCGCTTCTTTGAA
+`Row-wise reading order` : `ACTTCGTAGTTGCGATTCCCATTGGAATTCTGGTTGCTCGCTTCTTTGAA`
 
-`Column-wise reading order` : ATATCCGTGTTCTGTTGGTCCAGTTGTAGTTTACTACTTGGCTCATCCGA
+`Column-wise reading order` : `ATATCCGTGTTCTGTTGGTCCAGTTGTAGTTTACTACTTGGCTCATCCGA`
 
 The encoding uses the following scheme to translate a letter into a DNA codon-triplet. 
 ![](dna_codes.png)
 
-Reversing the lookup is pretty straight-forward.
+Reversing the encoding is pretty straight-forward lookup.
 
 ```python
     import string
@@ -161,6 +201,13 @@ We are given a file with PNG extension, which looks to be malformed and does not
 |4|The width of the image in pixels. Supported range is 1 to 30,000.(**PSB** max of 300,000)|
 |2|Depth: the number of bits per channel. Supported values are 1, 8, 16 and 32.|
 |2|The color mode of the file. Supported values are: Bitmap = 0; Grayscale = 1; Indexed = 2; RGB = 3; CMYK = 4; Multichannel = 7; Duotone = 8; Lab = 9.|
+
+
+#### Other solves
+* DTMF in `Captured.m4a` : 
+* Morse code in `Help_me.mp4` : {SOS_SOS_SOS}
+* Base64 string in Excel sheet 
+* 
 
 
 ### Resources, Writeups
