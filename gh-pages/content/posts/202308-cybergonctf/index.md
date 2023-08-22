@@ -2,7 +2,7 @@
 title: "CyberGon CTF"
 date: 2023-08-18T15:52:43-04:00
 categories: [ctf, writeup]
-tags: [Braille, Vigenere, DNA, RSA, SNOW, ]
+tags: [Braille, Vigenere, DNA, RSA, SNOW, docx, xlsx]
 math: true
 cover:
     image: cybergon_banner.png
@@ -18,6 +18,31 @@ We are given an image with dots. Using Dcode, we can see that it is a representa
 ![](2023-08-18-15-58-15.png)
 Using the site to decode the symbols gives us the flag. 
 **Flag:** `CybergonCTF{the_eyes_are_useless_when_the_mind_is_blind}`
+
+#### Game
+```bash
+% echo "enolaerauoynehwyrramydoolbyalptonod" | rev
+donotplaybloodymarrywhenyouarealone
+```
+
+#### Now you see me 1
+Given: A file with whitespaces (`space, tab, CR and LF`)
+```bash
+% cat Now_You_See_Me.txt | tr ' \t' '01' | sed -e 's/^00//g'  | sed -e 's/^000/0/g' | egrep -e ".{8}" | tr -d '\r\n' | perl -lpe '$_=pack"B*",$_'
+Congratulations this is for you !!
+
+CybergonCTF{Always_Look_Beyond_What_You_Can_See}
+```
+Steps:
+1. Replace `<space>` with `0` and `<tab>` with `1`
+1. Trim leading zeros in each line, so that there is only one `0` at the beginning of the line
+1. Treat this as a binary string and convert to ASCII.
+
+#### Captured
+`Our intels captured some conversation between Mr.Yit and his friend. Do you find some useful information ?`
+
+
+
 
 
 #### All in One
@@ -185,33 +210,100 @@ Reversing the encoding is pretty straight-forward lookup.
 ```
 
 #### Hide and Seek
-We are given a file with PNG extension, which looks to be malformed and does not open. Viewing the file in an hex editor shows that the file has none of the expected fields from a PNG file. The content has many strings that reference Adobe and Layers. So, I guessed it might be a photoshop image file. Looking for the fileformat of the Photoshop image file, showed that except for the first 4 bytes, the image follows the Adobe `8BPS` file format exactly.  So, changing the magic bytes of the file and opening it GIMP showed the flag in one of the layers of the image. 
+We are given a MS Word document file in `.docx` format. Knowing that `.docx` is zipped XML, we can unzip the files, first.
+```
+% unzip -l Secret_File.docx 
+Archive:  Secret_File.docx
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+     1704  01-01-1980 00:00   [Content_Types].xml
+      590  01-01-1980 00:00   _rels/.rels
+     9252  01-01-1980 00:00   word/document.xml
+     1209  01-01-1980 00:00   word/_rels/document.xml.rels
+     3021  01-01-1980 00:00   word/footnotes.xml
+     3015  01-01-1980 00:00   word/endnotes.xml
+     8390  01-01-1980 00:00   word/header1.xml
+     8393  01-01-1980 00:00   word/theme/theme1.xml
+     3724  01-01-1980 00:00   word/settings.xml
+    31761  01-01-1980 00:00   word/styles.xml
+      894  01-01-1980 00:00   word/webSettings.xml
+     1919  01-01-1980 00:00   word/fontTable.xml
+      747  01-01-1980 00:00   docProps/core.xml
+      984  01-01-1980 00:00   docProps/app.xml
+---------                     -------
+    75603                     14 files
+```
+
+Extracting the archive and checking each file for suspicious content, showed the following content in `word/header1.xml`.
+
+```brainfuck
+++++++++++[>+>+++>+++++++>++++++++++<<<<-]>>>---.>+++++++++++++++++++++.-----------------------.   +++.+++++++++++++.<++++.>---.-.<----.+++++++++++++++++.--------------.>+++++++++++++.<----------   -------.--.>------------------------.-----------------.<.++++.>+++++++++++++.<+++++++++++++.----   ------------.+++.---.>.<---.>+++++++++++++++.---------------.<+++++++++++++++++++++++.<+++++++++   ++++++++++++.+.>>+++++.<<-.>++++++++++.>+++++++++++++++++++++++++.
+```
+
+
+#### Data Exfiltration
+
+We are given a file with PNG extension, which looks to be malformed and does not open. Viewing the file in an hex editor shows that the file has none of the expected fields from a PNG file. The content has many strings that reference Adobe and Layers. Also, it shows that the tool used to create the file is Adobe Photoshop.
+` <xmp:CreatorTool>Adobe Photoshop CS6 (Windows)</xmp:CreatorTool>`
+
+So, I guessed it might be a photoshop image file. Looking for the fileformat of the Photoshop image file, showed that except for the first 4 bytes, the image follows the Adobe `8BPS` file format exactly.  So, changing the magic bytes of the file and opening it GIMP showed the flag in one of the layers of the image.
 
 * Reference : https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/
 
 `The file header contains the basic properties of the image.`
 
-|Length|Description|
-|----|----|
-|4|Signature: always equal to '8BPS' . Do not try to read the file if the signature does not match this value.|
-|2|Version: always equal to 1. Do not try to read the file if the version does not match this value. (**PSB** version is 2.)
-|6|Reserved: must be zero.|
-|2|The number of channels in the image, including any alpha channels. Supported range is 1 to 56.|
-|4|The height of the image in pixels. Supported range is 1 to 30,000.(**PSB** max of 300,000.)|
-|4|The width of the image in pixels. Supported range is 1 to 30,000.(**PSB** max of 300,000)|
-|2|Depth: the number of bits per channel. Supported values are 1, 8, 16 and 32.|
-|2|The color mode of the file. Supported values are: Bitmap = 0; Grayscale = 1; Indexed = 2; RGB = 3; CMYK = 4; Multichannel = 7; Duotone = 8; Lab = 9.|
+File Data|Length|Description in the Standard|
+|----|----|----|
+|`8950 4e47`|4|Signature: always equal to '8BPS' . Do not try to read the file if the signature does not match this value.|
+|`0001`|2|Version: always equal to 1. Do not try to read the file if the version does not match this value. (**PSB** version is 2.)
+|`0000 0000 0000`|6|Reserved: must be zero.|
+|`0003`|2|The number of channels in the image, including any alpha channels. Supported range is 1 to 56.|
+|`0000 05dc`|4|The height of the image in pixels. Supported range is 1 to 30,000.(**PSB** max of 300,000.)|
+|`0000 05dc`|4|The width of the image in pixels. Supported range is 1 to 30,000.(**PSB** max of 300,000)|
+|`0008`|2|Depth: the number of bits per channel. Supported values are 1, 8, 16 and 32.|
+|`0003`|2|The color mode of the file. Supported values are: Bitmap = 0; Grayscale = 1; Indexed = 2; RGB = 3; CMYK = 4; Multichannel = 7; Duotone = 8; Lab = 9.|
+
+So, we can deduce that the file is a PSD file and we change the first four bytes (magic bytes) to be `3842 5053`, which is `8BPS`. We also change the file extension to be `.psd` and open the file in Photoshop or Gimp.
+
+One of the layers of the image has the flag. 
+![](2023-08-22-18-31-50.png)
+
+#### Catch me if you can
+We are given a file with `.gif` extension. But it would not open and seems to have bad magic bytes. Looking into it further, we can see that the magic byte of the given file is `9a` instead of the traditional `GIF89a`. So, we fix the gif file by inserting the characters `GIF8` at the beginning. The new file correctly identifies as a `500 x 500 GIF` file and shows the flag when opened. 
+
+```bash
+% file Stegano1.gif 
+Stegano1.gif: data
+
+% xxd Stegano1.gif | head -1
+00000000: 3961 f401 f401 f700 0003 0303 7f81 8092  9a..............
+
+% echo -n GIF8 > fixed.gif; cat Stegano1.gif >> fixed.gif
+
+% file fixed.gif 
+fixed.gif: GIF image data, version 89a, 500 x 500
+
+% xxd fixed.gif| head -1
+00000000: 4749 4638 3961 f401 f401 f700 0003 0303  GIF89a..........
+```
+
+#### 8Cel
+
+For this forensics challenge, we are given a zip file called `8cel.zip`. Looking through the contents, we can see that it is a XLSX format MS Office Excel workbook.
+
+
+
 
 
 #### Other solves
 * DTMF in `Captured.m4a` : 
 * Morse code in `Help_me.mp4` : {SOS_SOS_SOS}
 * Base64 string in Excel sheet 
-* 
 
 
 ### Resources, Writeups
 * OSInt enumeration : https://whatsmyname.app/
+* https://www.spammimic.com/decode.shtml
 * https://www.youtube.com/watch?v=sZAVLJTHtj4
 * Sloppy Joe Pirates: https://www.youtube.com/watch?v=bFAElPXPB4w
 * https://learn-cyber.net/writeup/What-Is-It
@@ -221,6 +313,7 @@ We are given a file with PNG extension, which looks to be malformed and does not
 
 
 ### Challenges
+{{< collapse summary="List of challenges" >}}
 |Category|Challenge|Description
 |----|----|----
 |CRYPTO|All in One|Vigenere with Wakanda text cipher
@@ -239,12 +332,14 @@ We are given a file with PNG extension, which looks to be malformed and does not
 |FORENSICS|Hide and Seek|
 |FORENSICS|Malfunctioning File|
 |IR|Basic - 1|
+|IR|Bonus|
 |IR|Try Hard|
 |IR|Victim Info|
 |MISC|BMW for Sale|
 |MISC|Back Door|
 |MISC|Captured|
 |MISC|Discord|
+|MISC|Feedback|
 |MISC|Find Me|
 |MISC|Help Me|
 |MISC|Memory|
@@ -260,6 +355,7 @@ We are given a file with PNG extension, which looks to be malformed and does not
 |OSINT|Country|
 |OSINT|Let`s Track Him|
 |OSINT|Singer|
+|OSINT|This is not the end ;)|
 |OSINT|Time To Rest|
 |OSINT|Warm Up 1|
 |OSINT|Where Is His Next Point ?|
@@ -282,3 +378,4 @@ We are given a file with PNG extension, which looks to be malformed and does not
 |reversing|Old Obfuscation|
 |reversing|Super Secure Encryption|
 |reversing|What is it|
+{{< /collapse >}}
