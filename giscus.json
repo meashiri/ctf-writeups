@@ -1,0 +1,10 @@
+{
+  "origins": [
+    "https://meashiri.github.io/ctf-writeups/",
+    "https://meashiri.github.io"
+  ],
+  "originsRegex": [
+    "http://localhost:[0-9]+"
+  ],
+  "defaultCommentOrder": "oldest"
+}
