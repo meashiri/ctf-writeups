@@ -2,7 +2,7 @@
 title: "CyberGon CTF"
 date: 2023-08-18T15:52:43-04:00
 categories: [ctf, writeup]
-tags: [Braille, Vigenere, DNA, RSA, SNOW, docx, xlsx]
+tags: [Braille, Vigenere, DNA, RSA, SNOW, docx, xlsx, dtmf, PSD, PKZIP, stegsnow]
 math: true
 cover:
     image: cybergon_banner2.png
