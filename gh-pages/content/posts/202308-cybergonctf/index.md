@@ -11,6 +11,8 @@ cover:
 This was an interesting CTF hosted by a Myanmar-based cybersec firm.  My team was placed 5th in this CTF.
 
 <!--more-->
+![](WeakButLeet.jpg)
+
 ### Solves
 
 #### Dots
@@ -339,6 +341,7 @@ CyberGonCTF{Z1pp3R_4nD_573G5n0W}
 ### Resources, Writeups
 * OSInt enumeration : https://whatsmyname.app/
 * https://www.spammimic.com/decode.shtml
+* https://copy.sh/brainfuck/
 * https://www.youtube.com/watch?v=sZAVLJTHtj4
 * Sloppy Joe Pirates: https://www.youtube.com/watch?v=bFAElPXPB4w
 * https://learn-cyber.net/writeup/What-Is-It
@@ -346,6 +349,7 @@ CyberGonCTF{Z1pp3R_4nD_573G5n0W}
 * https://learn-cyber.net/writeup/Old-Obfuscation
 * https://learn-cyber.net/writeup/Hollywood
 * https://users.cs.jmu.edu/buchhofp/forensics/formats/pkzip.html
+
 
 
 
