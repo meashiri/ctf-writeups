@@ -41,9 +41,14 @@ Steps:
 #### Captured
 `Our intels captured some conversation between Mr.Yit and his friend. Do you find some useful information ?`
 
+This audio file has some audio, with a phone number that is in DTMF. As can be seen in the spectrogram below, the signal consists of two frequencies (Dual Tone Multiple Frequencies) and yields the numbers `09007007007`, which happens to be the flag.
 
+![](2023-08-22-19-36-36.png)
 
+#### Help Me
+`How many languages can you speak ?`
 
+We are given a video file that has 3 short flashes, 3 long flashes, followed by 3 short flashes again. This whole sequence is repeated two more times. This is a well known representation of `SOS` in morse code. So the flag is just `CyberGonCTF{SOS_SOS_SOS}`
 
 #### All in One
 
@@ -289,17 +294,46 @@ fixed.gif: GIF image data, version 89a, 500 x 500
 
 #### 8Cel
 
-For this forensics challenge, we are given a zip file called `8cel.zip`. Looking through the contents, we can see that it is a XLSX format MS Office Excel workbook.
+For this forensics challenge, we are given a zip file called `8cel.zip`. Looking through the contents, we can see that it is a XLSX format MS Office Excel workbook.  Exploring the workbook, we find that `Sheet 2` has a set of 175 `EMBED` formula with base64 encoded strings. Extracting these 175 strings and decoding them shows several fake flags and ONE actual flag. While I solved this problem manually, the following series of bash commands shows the steps in solving this chall.  
 
+```bash
+% unzip -c 8cel.zip xl/worksheets/sheet2.xml | sed -e 's/</\n</g' | grep EMBED | cut -d, -f2 | tr -d '\")' | python3 -m base64 -d | sed -e 's/}C/}\nC/g' | grep -v F14
+CyberGonCTF{y0u_G07_7h3_53cR37_1Nf0}
+```
+#### Frozen Xip
+`This file is something wrong. Can you open it before the winter season?`
 
+We are given a file called `xipper.PNG`
 
+![](2023-08-22-21-30-37.png)
 
+1. The magic bytes should be `504B0304` instead of `504B0403`
+1. The byte at the offset 0x1A should be `0x08` instead of `0x14`. This represents the length of the file name `flag.txt`
 
-#### Other solves
-* DTMF in `Captured.m4a` : 
-* Morse code in `Help_me.mp4` : {SOS_SOS_SOS}
-* Base64 string in Excel sheet 
+Doing these two changes will fix the zip file header and allows us to extract the file, which contains a line from Robert Frost's poem: 
+```
+% xxd -c 50 flag.txt
+00000000: 5468 6520 776f 6f64 7320 6172 6520 6c6f 7665 6c79 2c20 6461 726b 2061 6e64 2064 6565 7020 2f20 4275 7420 4920 6861 7665 2070  The woods are lovely, dark and deep / But I have p
+00000032: 726f 6d69 7365 7320 746f 206b 6565 7020 2f20 416e 6420 6d69 6c65 7320 746f 2067 6f20 6265 666f 7265 2049 2073 6c65 6570 2e0a  romises to keep / And miles to go before I sleep..
+00000064: e280 9420 526f 6265 7274 2046 726f 7374 2c20 e280 9c53 746f 7070 696e 6720 4279 2057 6f6f 6473 206f 6e20 6120 536e 6f77 7920  ... Robert Frost, ...Stopping By Woods on a Snowy 
+00000096: 4576 656e 696e 6722 0920 2020 2020 0920 0a20 2020 2020 2009 2009 0920 2020 2009 2020 2020 0920 2020 0920 2020 2020 2009 2020  Evening".     . .      . ..    .    .   .      .  
+000000c8: 0920 2020 2020 0920 0a09 2020 2020 0920 0920 2020 2009 2020 2020 2009 2009 2020 2020 2020 0920 2020 2020 0920 2020 2020 2009  .     . ..    . .    .     . .      .     .      .
+000000fa: 200a 2020 0920 0920 2020 2020 0920 2009 2020 2020 2020 0920 2020 0909 2020 0920 2020 2020 2009 2020 2020 200a 2020 2020 2020   .  . .     .  .      .   ..  .      .     .      
+0000012c: 2009 2020 0920 2009 2020 2020 2020 2009 0920 2020 2020 2009 0920 2009 2020 0920 2020 2020 0a20 2020 2020 2009 2020 0920 2020   .  .  .       ..      ..  .  .     .      .  .   
+0000015e: 2020 2009 2020 2020 2009 2020 2020 2020 0920 2020 2020 2020 0920 2020 0909 2020 2020 2009 2020 2020 0a20 0920 2020 2020 2009     .     .      .       .   ..     .    . .      .
+00000190: 2020 0920 2020 2020 2009 2020 2020 2020 0920 2020 2020 2009 2020 2020 2020 2009 2020 2009 2020 0920 2020 2020 2020 0a20 2020    .      .      .      .       .   .  .       .   
+000001c2: 2020 0920 2020 0920 0920 2020 2020 0920 2020 2009 2020 2020 0920 2009 2020 2020 2009 2020 2020 2009 200a 0920 2009 2020 2020    .   . .     .    .    .  .     .     . ..  .    
+000001f4: 2020 2009 2020 2020 2009 2020 2009 2020 2020 0920 2020 2009 0920 2009 2020 200a 2020 2020 0909 2009 2020 2020 2020 2009 2020     .     .   .    .    ..  .   .    .. .       .  
+00000226: 2020 2020 0920 2020 2020 0a   	      	     	    
+```
 
+The ample number of whitespaces, along with name, description of the challenge, alludes to `Snow` - a whitespace steganography tool. Simply feeding the text file to `snow` gives us the flag.
+
+```bash
+% snow -C flag.txt 
+CyberGonCTF{Z1pp3R_4nD_573G5n0W}
+
+```
 
 ### Resources, Writeups
 * OSInt enumeration : https://whatsmyname.app/
@@ -310,6 +344,8 @@ For this forensics challenge, we are given a zip file called `8cel.zip`. Looking
 * https://learn-cyber.net/writeup/Super-Secure-Encryption
 * https://learn-cyber.net/writeup/Old-Obfuscation
 * https://learn-cyber.net/writeup/Hollywood
+* https://users.cs.jmu.edu/buchhofp/forensics/formats/pkzip.html
+
 
 
 ### Challenges
