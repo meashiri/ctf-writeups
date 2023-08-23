@@ -400,6 +400,7 @@ $$
 
 
 ### List of challenges
+{{< collapse summary="List of challenges" >}}
 |Category|Challenge|Description
 |----|----|----
 |Easy 😁|Blue Office|byte-wise encryption, with a seed function
@@ -425,3 +426,4 @@ $$
 |Tough 🔥|ASIv2|
 |Tough 🔥|Slowsum|* 
 |Warm-up 🤑|Welcome!|
+{{</collapse>}}

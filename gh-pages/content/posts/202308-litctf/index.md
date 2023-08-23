@@ -323,6 +323,7 @@ if S.check() == sat:
 
 
 ### Challenges 
+{{< collapse summary="List of challenges" >}}
 |Challenge|Category|Difficulty|Description
 |----|----|----|----
 |crypto/Climbing Snowdon|crypto|5|
@@ -378,3 +379,4 @@ if S.check() == sat:
 |web/license-inject|web|3|
 |web/too much kirby|web|20|
 |web/unsecure|web|2|
+{{< /collapse >}}

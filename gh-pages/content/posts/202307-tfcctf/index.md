@@ -296,6 +296,7 @@ Try.step|Input|Output||
 
 
 ### Challenges
+{{< collapse summary="List of challenges" >}}
 |Category|Difficulty|Challenge|Description
 |----|----|----|----
 |Crypto|warmup|Dizzy|re-order letters of the flag
@@ -339,3 +340,4 @@ Try.step|Input|Output||
 |web|hard|Ducky Notes: Endgame|
 |web|easy|Baby Ducky Notes: Revenge|
 |web|easy|Cookie Store|
+{{</collapse>}}

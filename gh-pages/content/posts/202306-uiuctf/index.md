@@ -201,6 +201,7 @@ A pretty cool Win95 theme for CTFd by the organizers. They really went overboard
 
 
 ### Challenges
+{{< collapse summary="List of challenges" >}}
 |Category|Challenge|Description
 |----|----|----
 |crypto|At Home|
@@ -240,3 +241,4 @@ A pretty cool Win95 theme for CTFd by the organizers. They really went overboard
 |web|futuredisk|
 |web|futuredisk2|
 |web|peanut-xss|
+{{</collapse >}}
