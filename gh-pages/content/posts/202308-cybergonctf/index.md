@@ -5,7 +5,7 @@ categories: [ctf, writeup]
 tags: [Braille, Vigenere, DNA, RSA, SNOW, docx, xlsx]
 math: true
 cover:
-    image: cybergon_banner.png
+    image: cybergon_banner2.png
 ---
 
 This was an interesting CTF hosted by a Myanmar-based cybersec firm.  My team was placed 5th in this CTF.
