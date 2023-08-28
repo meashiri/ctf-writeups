@@ -17,21 +17,22 @@ Sekai CTF team's CTF tournament. We had very nice intermediate-to-hard level of 
 Attachment: `ilovethisworld.svp`
 
 ##### How I actually solved the challenge
-1. Examined the 
+
+1. Examined the attachment and found it to be a JSON format file. 
 1. Searching the internet for `SVP` and `I love this world` showed this page: https://www.bilibili.com/read/cv16383991/
 1. The article referenced `Synthesizer V` as the software that would play the `SVP` file
-1. Downloaded the software and realized that I needed the voice called `Eleanor Forte (Lite)`. Downloaded and installed the voice library too. 
+1. Downloaded the software and realized that I needed the voice database called `Eleanor Forte (Lite)`. Downloaded and installed the voice library too. 
 1. Changed the tempo (speed) of the sound from `120` to `45`. This gave me a speech that could be intepreted as english letters and numbers.
 1. Interpreting the sounds gets the flag.
 
 ##### How I ought to have solved it
 
-1. Examine the JSON file. We see a bunch of fields related to generating speech. 
-1. One of the fields is called `phonemes` and looks interesting
+1. Examine the `SVP` JSON file. We see a bunch of fields related to generating speech. 
+1. One of the fields is called `phonemes` and looks interesting.
 1. Use a tool like `jsonpath_ng` to extract all values of the field `phonemes`. Maintain the order that was in the file. 
-1. Extracting all the phonemes values show that it is the phonetic pronunciation guide of the flag
-1. Reference: https://github.com/cmusphinx/sphinxtrain/blob/master/test/res/communicator.dic.cmu
-1. Examples from that file:  `COLON`: `K OW L AX N`
+1. Extracting all the phonemes values show that it is the phonetic pronunciation of the flag
+1. Reference (from post-CTF writeups): https://github.com/cmusphinx/sphinxtrain/blob/master/test/res/communicator.dic.cmu
+1. Examples from that file:  `COLON` == `K OW L AX N`
 
 ```
 % jsonpath_ng "$..phonemes" ilovethisworld.json 
@@ -48,7 +49,7 @@ iy|E
 k ey|K
 ey|A
 ay|I
-ow p ax n k er l iy b r ae k ih t| `open curly brackets` {
+ow p ax n k er l iy b r ae k ih t| `open curly bracket` {
 eh s|s
 ow|o
 eh m|m
@@ -61,7 +62,7 @@ aa r|r
 ey|a
 d ah b ax l y uw|`double u` w
 ey|a
-w ay|w
+w ay|y
 t iy|t
 eh m|m
 aa r|r
@@ -95,7 +96,7 @@ k l ow  s k er l iy b r ae k ih t|`close curly bracket` }
 
 Attachment: `capture.pcapng`
 
-In addition to the network packet capture, we are also given a netcat info to a challenge server.
+In addition to the network packet capture, we are also given the netcat info to a challenge server.
 
 Connecting to the server via netcat, gives us this:
 ```
@@ -166,7 +167,7 @@ Using curl to pull down the script shows the following program.
 ```
 We can see that it is reading the flag from `flag.txt`, XOR-ing it with a key `s3k@1_v3ry_w0w` and sends the results one byte at a time to a remote server through a POST call with a JSON payload.
 
-Now, turning our attention to the PCAP file, we can see that it has 102 frames of JSON data from the protocol hierarchy stats. 
+Now, turning our attention to the PCAP file, we can see from the protocol hierarchy stats, that it has 102 frames of JSON data. 
 
 ```
 % tshark -r capture.pcapng -z io,phs
@@ -187,9 +188,10 @@ eth                                      frames:827 bytes:105559
         json                             frames:102 bytes:22797
   arp                                    frames:4 bytes:168
 ===================================================================
-
+```
 After examining the JSON data, we can see that it is one byte and can be extracted by the following command.
 
+```
 % tshark -r capture.pcapng -Tfields -ejson.value.string -Y "json"  | xargs
 20 76 20 01 78 24 45 45 46 15 00 10 00 28 4b 41 19 32 43 00 4e 41 00 0b 2d 05 42 05 2c 0b 19 32 43 2d 04 41 00 0b 2d 05 42 28 52 12 4a 1f 09 6b 4e 00 0f
 ```
