@@ -27,6 +27,26 @@ Attachment: `ilovethisworld.svp`
 
 ##### How I ought to have solved it
 
+```json
+    "notes": [
+        {
+            "onset": 2660700000,
+            "duration": 235200000,
+            "lyrics": "\u304d",
+            "phonemes": "eh f",     <<--- extract this field
+            "pitch": 68,
+            "detune": 0,
+            "attributes": {
+                "tF0Offset": -0.0,
+                "tF0Left": 0.06666667014360428,
+                "tF0Right": 0.06666667014360428,
+                "dF0Left": 0.0,
+                "dF0Right": 0.0,
+                "dF0Vbr": 0.0
+            }
+        },
+```
+
 1. Examine the `SVP` JSON file. We see a bunch of fields related to generating speech. 
 1. One of the fields is called `phonemes` and looks interesting.
 1. Use a tool like `jsonpath_ng` to extract all values of the field `phonemes`. Maintain the order that was in the file. 
