@@ -55,7 +55,14 @@ Attachment: `ilovethisworld.svp`
 1. Examples from that file:  `COLON` == `K OW L AX N`
 
 ```
-% jsonpath_ng "$..phonemes" ilovethisworld.json 
+% jsonpath_ng "$..phonemes" ilovethisworld.svp
+eh f
+eh l
+ey
+jh iy
+k ow l ax n
+... 
+... 
 ```
 Phonemes | Letters
 ----|----
