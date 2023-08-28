@@ -11,3 +11,11 @@ cover:
 ToDo: Put the summary here
 
 <!--more-->
+
+
+### Challenges
+{{< collapse summary="List of challenges" >}}
+|Category|Challenge|Description
+|----|----|----
+
+{{< /collapse >}}
