@@ -1,8 +1,8 @@
 ---
 title: "Sekai CTF"
 date: 2023-08-26T10:36:03-04:00
-categories: [ctf, writeup, QR, ]
-tags: [Synthesizer_V, Graph, GES]
+categories: [ctf, writeup, QR ]
+tags: [Synthesizer_V, Graph, GES, QR]
 math: true
 cover:
     image: sekai_banner.png
@@ -262,9 +262,9 @@ So, our solution would consist of the following steps:
 
 The next problem to solve is to figure out an algorithm/logic to read the bits from challenge QR code and write them in a different place according to the QR standard. The algo I came up with is to divide the bit-space into rectangles and read/write entries in the rectangle in a particular order. In the diagram below the left side depicts the reading order (L-R, T-B) and the right side shows the QR standard writing order. 
 
-The blue squares shows the starting point of the rectangle being processed, and the green square is the opposite end of the diagonal for the rectangle. The relative difference between the coordinates of Blue[\\(X_0, Y_0\\)] and Green [\\(X_1, Y_1\\)] will give us the direction in which we need to traverse.
-
 ![](2023-08-28-21-24-07.png)
+
+The blue squares shows the starting point of the rectangle being processed, and the green square is the opposite end of the diagonal for the rectangle. The relative difference between the coordinates of Blue[\\(X_0, Y_0\\)] and Green [\\(X_1, Y_1\\)] will give us the direction in which we need to traverse.
 
 Now for some coding. I used [Qrazybox](https://merri.cx/qrazybox/) to take the provided image of the QR code, fixed some errors and turned it into a text representation. This textual QR code was represented as a list of lists in the following program.
 
@@ -354,16 +354,6 @@ Now for some coding. I used [Qrazybox](https://merri.cx/qrazybox/) to take the p
 
     # format bit generation code borrowed from Project Nayuki
     # https://github.com/nayuki/QR-Code-generator/tree/master
-
-    def get_format_bits(error_formatbits, mask) -> int:
-        data: int = error_formatbits << 3 | mask  # errCorrLvl is uint2, mask is uint3
-        rem: int = data
-        for _ in range(10):
-            rem = (rem << 1) ^ ((rem >> 9) * 0x537)
-        bits: int = (data << 10 | rem) ^ 0x5412  # uint15
-        assert bits >> 15 == 0
-
-        return bits
 
     def get_format_bits(error_formatbits, mask) -> int:
         data: int = error_formatbits << 3 | mask  # errCorrLvl is uint2, mask is uint3
