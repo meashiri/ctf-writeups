@@ -419,6 +419,7 @@ Scanning this QR code will produce the flag: `SEKAI{G0d_Ch4mP}`
 * NoisyCRC : https://ctfnote.leg.bzh/pad/s/haum5HonP 
 * https://github.com/7Rocky/CTF-scripts/tree/main/Sekai%20CTF
 * https://github.com/deut-erium/auto-cryptanalysis
+* Official writeups: https://github.com/project-sekai-ctf/sekaictf-2023
 
 
 ### Challenges
