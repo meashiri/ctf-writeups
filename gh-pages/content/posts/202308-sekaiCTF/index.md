@@ -232,8 +232,10 @@ print(xor(unhex(s), KEY))
 # b'SEKAI{3v4l_g0_8rrrr_8rrrrrrr_8rrrrrrrrrrr_!!!_8483}'
 ```
 
-#### QR God (to do)
+#### QR God
 `My friend claims to be a QR God. So I tested his knowledge on reconstruction. I gave him the bits and he came up with this, perhaps he forgot that it doesn’t work like a Gutenberg Diagram.`
+
+`❖ Note: Fixed pattern is intact, format info is missing.`
 
 I struggled with this challenge and could not solve it in time. I missed the biggest clue in the challenge description. Which was to look up what a `Gutenberg Diagram` is. 
 
@@ -244,7 +246,7 @@ I struggled with this challenge and could not solve it in time. I missed the big
 With that background and contrasting that method to the reading order of the databits in the QR code standard, we can see what the challenge is. 
 ![](QRCode_Reading_Order.png) 
 
-We presume that the `QR code (?)` was constructed and laid our `L->R, T->B` within the data fields. Once the data is laid out, QR codes are masked with a XOR pattern to eliminate any grouping of like bits or long sequences of the same value. Since the problem description also contained this piece, we assume that the mask was applied properly using one of the 8 possible patterns before redistributing the bits according to the `Gutenberg reading order`.
+We presume that the `QR code (?)` was constructed and laid out `L->R, T->B` within the data fields. Once the data is laid out, QR codes are masked with a XOR pattern to eliminate any grouping of like bits or long sequences of the same value. Since the problem description also contained the note, we assume that the mask was applied properly using one of the 8 possible patterns before redistributing the bits according to the `Gutenberg reading order`.
 
 ![](8-possible-XOR-masks-QR.png)
 
@@ -411,7 +413,7 @@ Now for some coding. I used [Qrazybox](https://merri.cx/qrazybox/) to take the p
             print(f"F:{formats} M:{masks}")     # Format 2 (High)   Mask 4 produces a readable code
             bits = get_format_bits(formats, masks)
             setQR(bits)
-            printQR()
+            printQR()   #pick the correct font so that there is no gap between the blocks in successive lines
             input()     #pause after printing each variation
 
 ```
