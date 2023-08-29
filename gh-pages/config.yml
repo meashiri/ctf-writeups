@@ -28,7 +28,7 @@ params:
   TocOpen: true
   TocSide: 'left'
   description: "My CTF writeups, links, learnings and reflections.                                                                 "
-  images: ["meashiri-cover.png"]
+  cover.image: ["meashiri-cover.png"]
   
         
   homeInfoParams:
