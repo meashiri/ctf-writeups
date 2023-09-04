@@ -2,7 +2,7 @@
 title: "Downunder CTF"
 date: 2023-09-02T14:52:12-04:00
 categories: [ctf, writeup]
-tags: [punycode,]
+tags: [punycode,DNS,RSA]
 math: true
 cover:
     image: ductf-cover.png
@@ -180,15 +180,43 @@ So, we will determine `q` by bruteforcing \\((a_1, a_2)\text{  in [0 .. }2^{12}]
 ```
 #### abpq rsa ii
 
+
 ### Misc 
 #### Mini DNS Server
+`This mini DNS server hands out free flags to fellow mini DNS enthusiasts. [Author: joseph, pix]`
 
+We are given the source of a DNS server, from which we can discern the following information. 
+1. The DNS server uses the Python `dnslib` module
+1. To get the flag we need to send a DNS query to the server that meets the following conditions
+1. The query type should be `TXT`
+1. The name to be queries should be `'free.flag.for.flag.loving.flag.capturers.downunderctf.com'`
+1. The length of the request can at most be 72 bytes.
+1. The server sends a `REFUSED` message if the request is longer than 72 bytes or if the query type is not `TXT`
+1. If the name does not match what is expected, we get back a `NOPE` message.
+1. After downloading the `dnslib` module, I ran the Server locally and was able to connect to it via `dig`, `dnslib` client and other means.
+1. A straight-forward `TXT` query from `dig` for the given name is 86 bytes. 
+1. So, I went down the path of hand-constructing the DNS Query packet. 
+```
+% dig @127.0.0.1 -p 8053 free.flag.for.flag.loving.flag.capturers.downunderctf.com TXT  
+REQUEST: b'\x18\x92\x01 \x00\x01\x00\x00\x00\x00\x00\x01\x04free\x04flag\x03for\x04flag\x06loving\x04flag\tcapturers\x0cdownunderctf\x03com\x00\x00\x10\x00\x01\x00\x00)\x10\x00\x00\x00\x00\x00\x00\x00' 86
+2023-09-03 22:51:23 [DNSHandler:Resolver] Reply: [127.0.0.1:54312] (udp) / 'free.flag.for.flag.loving.flag.capturers.downunderctf.com.' (TXT) / REFUSED
+```
+* Constructing the packet using online guides[^1] with absolutely the minimum required fields needed 75 bytes. 
+![](2023-09-03-23-02-32.png)
+* I searched the internet and found references[^2] to DNS compression, where if a name is repeated, its subsequent occurrences can be replaced with a pointer to the first occurrence. Since, the name we were querying has 3 instances of the word `flag`, I thought I could replace 2 occurrences with reference to the first one. So, I constructed a packet like this: 
+![](2023-09-03-23-14-46.png)
+It was only 69 bytes long and had two references to `flag` which was at the offset `0x11`. Just one small problem. It did not work. The server rejected the packet as malformed and causing recursion errors.
 
-* https://cabulous.medium.com/dns-message-how-to-read-query-and-response-message-cfebcb4fe817
+* After the CTF, I discovered the author's solution, which used the transaction id and operand fields to setup the `.com` part of the name and referencing it to bring the request size to be exactly 72 bytes. 
+![](2023-09-03-23-13-47.png)
 
+[^1]: https://cabulous.medium.com/dns-message-how-to-read-query-and-response-message-cfebcb4fe817
+[^2]: https://spathis.medium.com/how-dns-got-its-messages-on-diet-c49568b234a2
 
 #### Simple FTP Server
+`It always confused me why python had a simple HTTP server, but never a simple FTP server. So I made my own! I hope I didn't leave secrets open to the global internet...[Author: BootlegSorcery@]`
 
+We are given a purported FTP server address and nothing else. Connecting to the FTP server gives us a normal looking FTP server. We can interact using standard verbs in the FTP protocol.
 ```bash
 % nc 2023.ductf.dev 30029
 220 vsFTPd (v2.3.4) ready...
@@ -219,6 +247,10 @@ RETR pwn
 Retrieving the `pwn` file gives the source code of the FTP server. It is a light-weight FTP server that is written in Python, which uses python's reflection features to map commands to methods. The reflection is done by the line: `func=operator.attrgetter(cmd)(self)`
 
 ```python
+    f = open("/chal/flag.txt", "r")
+    FLAG = f.read()   # This variable is not referenced any further
+    f.close()
+
     def run(self):
         sys.stdout.buffer.write('220 vsFTPd (v2.3.4) ready...\r\n'.encode(ENCODING)) # Red Herring
 
@@ -240,6 +272,7 @@ Retrieving the `pwn` file gives the source code of the FTP server. It is a light
                     sys.stdout.buffer.write(f'500 Sorry. {e}\r\n'.encode(ENCODING))
 
 ```
+So, we need to treat this challenge like a pyjail challenge, where we can only invoke methods on the `FTPServerThread` object and must read the value of the `FLAG` variable. 
 
 ```bash
 % nc 2023.ductf.dev 30029
@@ -250,7 +283,6 @@ DUCTF{15_this_4_j41lbr34k?}
 __init__.__globals__.get FLAG
 ```
 
-#### 
 ### Resources and writeups
 * Official writeups: https://github.com/DownUnderCTF/Challenges_2023_Public
 
