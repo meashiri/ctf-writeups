@@ -77,6 +77,10 @@ k ey|K
 ey|A
 ay|I
 ow p ax n k er l iy b r ae k ih t| `open curly bracket` {
+
+{{< collapse "Expand this section to see the rest of the flag" >}}
+Phonemes (contd) | Letters (contd)
+----|----
 eh s|s
 ow|o
 eh m|m
@@ -115,7 +119,7 @@ t iy|t
 d iy|d
 w ay|y
 k l ow  s k er l iy b r ae k ih t|`close curly bracket` }
-
+{{</ collapse>}}
 `FLAG: SEKAI{some1zfarawaytmr15sequeltoourdreamtdy}`
 
 #### Eval Me
@@ -423,7 +427,7 @@ Scanning this QR code will produce the flag: `SEKAI{G0d_Ch4mP}`
 
 
 ### Challenges
-{{< collapse summary="List of challenges" >}}
+{{< collapse "List of challenges" >}}
 |Category|Challenge|Description
 |----|----|----
 |Cryptography |Diffecientwo|

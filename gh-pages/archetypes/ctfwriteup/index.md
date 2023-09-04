@@ -14,7 +14,7 @@ ToDo: Put the summary here
 
 
 ### Challenges
-{{< collapse summary="List of challenges" >}}
+{{< collapse "Expand to see the list of challenges" >}}
 |Category|Challenge|Description
 |----|----|----
 
