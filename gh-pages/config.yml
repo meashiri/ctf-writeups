@@ -30,9 +30,10 @@ params:
   description: "My CTF writeups, links, learnings and reflections.                                                                 "
   cover.image: true
   images: ["meashiri-cover.png"]
-  
+  favicon: "ashiri.svg"
+  apple_touch_icon: "ashiri.svg"
+
   assets:
-    favicon: "ashiri.svg"
     favicon16x16: "ashiri16x16.png"
     favicon32x32: "ashiri32x32.png"
     apple_touch_icon: "ashiri.svg"
