@@ -31,6 +31,12 @@ params:
   cover.image: true
   images: ["meashiri-cover.png"]
   
+  assets:
+    favicon: "ashiri.svg"
+    favicon16x16: "ashiri16x16.png"
+    favicon32x32: "ashiri32x32.png"
+    apple_touch_icon: "ashiri.svg"
+    safari_pinned_tab: "ashiri.svg"
         
   homeInfoParams:
     Title: "Ashiri's CTF notepad"

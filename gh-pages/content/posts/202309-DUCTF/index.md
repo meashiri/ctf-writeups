@@ -1,5 +1,5 @@
 ---
-title: "202309 DUCTF"
+title: "Downunder CTF"
 date: 2023-09-02T14:52:12-04:00
 categories: [ctf, writeup]
 tags: [punycode,]
@@ -115,7 +115,8 @@ To get the flag,
 ### Crypto
 #### apbq rsa i
 `Just a simple RSA problem with some extra equations.`
-We are given this challenge source
+
+We are given this challenge source, showing standard RSA, with two hints about private factors `p` and `q`.
 
 ```python
 p = getPrime(1024)     # strong prime
@@ -177,6 +178,7 @@ So, we will determine `q` by bruteforcing \\((a_1, a_2)\text{  in [0 .. }2^{12}]
             break
 # 410 761 | b'DUCTF{gcd_1s_a_g00d_alg0r1thm_f0r_th3_t00lbox}'
 ```
+#### abpq rsa ii
 
 ### Misc 
 #### Mini DNS Server
