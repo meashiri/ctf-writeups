@@ -190,6 +190,7 @@ So, we will determine `q` by bruteforcing \\((a_1, a_2)\text{  in [0 .. }2^{12}]
 * https://eprint.iacr.org/2011/388.pdf 
 * https://eprint.iacr.org/2020/461.pdf
 * https://www.youtube.com/watch?v=LXWtgl54Eos
+* https://eprint.iacr.org/2023/032.pdf
 
 
 ### Misc 
@@ -220,6 +221,8 @@ It was only 69 bytes long and had two references to `flag` which was at the offs
 
 * After the CTF, I discovered the author's solution, which used the transaction id and operand fields to setup the `.com` part of the name and referencing it to bring the request size to be exactly 72 bytes. 
 ![](2023-09-03-23-13-47.png)
+
+* More details here (https://justinapplegate.me/2023/ductf-minidns/) on why `flag` cannot be used as the pointer
 
 [^1]: https://cabulous.medium.com/dns-message-how-to-read-query-and-response-message-cfebcb4fe817
 [^2]: https://spathis.medium.com/how-dns-got-its-messages-on-diet-c49568b234a2
@@ -296,6 +299,7 @@ __init__.__globals__.get FLAG
 
 ### Resources and writeups
 * Official writeups: https://github.com/DownUnderCTF/Challenges_2023_Public
+* https://www.skullsecurity.org/2015/how-i-nearly-almost-saved-the-internet-starring-afl-fuzz-and-dnsmasq
 
 
 ### Challenges
