@@ -49,6 +49,12 @@ In [2]: exec(open('pyny.py', 'rb').read()[17:].decode('punycode'))
 Enter the flag: DUCTF{python_warmup}
 Correct!
 ```
+Smart solution from the community writeups, using `ltrace`
+```bash
+% echo | ltrace -f -s9999 python3 pyny.py 2>&1 | grep -Pi 'ductf\{.*\}'
+[... SNIP ...]
+[pid 35996] memcpy(0x7fe612c29c50, "\001\0\0\0\0\0\0\0\200\211\225\0\0\0\0\0m\0\0\0\0\0\0\0\377\377\377\377\377\377\377\377\344\377\377\377\0\377\377\377\0\0\0\0\0\0\0\0DUCTF{python_warmup}\0", 69) = 0x7fe612c29c50
+```
 
 #### Needle in IAM
 `I've been told the flag I need is in description of this role, but I keep getting an error with the following command. Surely there's another way? Author:[BootlegSorcery@]`
@@ -179,6 +185,11 @@ So, we will determine `q` by bruteforcing \\((a_1, a_2)\text{  in [0 .. }2^{12}]
 # 410 761 | b'DUCTF{gcd_1s_a_g00d_alg0r1thm_f0r_th3_t00lbox}'
 ```
 #### abpq rsa ii
+
+
+* https://eprint.iacr.org/2011/388.pdf 
+* https://eprint.iacr.org/2020/461.pdf
+* https://www.youtube.com/watch?v=LXWtgl54Eos
 
 
 ### Misc 
