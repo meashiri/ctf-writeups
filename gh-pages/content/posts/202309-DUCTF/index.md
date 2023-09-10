@@ -55,6 +55,33 @@ Smart solution from the community writeups, using `ltrace`
 [... SNIP ...]
 [pid 35996] memcpy(0x7fe612c29c50, "\001\0\0\0\0\0\0\0\200\211\225\0\0\0\0\0m\0\0\0\0\0\0\0\377\377\377\377\377\377\377\377\344\377\377\377\0\377\377\377\0\0\0\0\0\0\0\0DUCTF{python_warmup}\0", 69) = 0x7fe612c29c50
 ```
+Another smart solution, using coredump (adapted to MacOS by me)
+```bash
+# Run the program in the background
+% python3 pyny.py &
+[1] 6210
+# Trigger the generation of the core file 
+% sudo gcore -o ./core 6210  
+# Search the core file for the string 'DUCTF'
+% xxd core | grep -A5 -B5 -i DUCTF   
+--
+01c7f1f0: 00b6 1808 0100 0000 d0b5 1808 0100 0000  ................
+01c7f200: 0000 0000 0000 0000 3f81 bfe1 b597 2827  ........?.....('
+01c7f210: 0046 8279 f07f 0000 b920 6966 20e1 b5a2  .F.y..... if ...
+01c7f220: e281 bfe1 b596 e1b5 98e1 b597 2827 456e  ............('En
+01c7f230: 7465 7220 7468 6520 666c 6167 3a20 2729  ter the flag: ')
+01c7f240: 203d 3d20 2744 5543 5446 7b25 737d 2720   == 'DUCTF{%s}' 
+01c7f250: 2520 e1b5 96ca b8e1 b597 cab0 c2ba e281  % ..............
+01c7f260: bf5f cab7 c2aa cab3 e1b5 90e1 b598 e1b5  ._..............
+01c7f270: 962e 5f5f e281 bfc2 aae1 b590 e1b5 895f  ..__..........._
+01c7f280: 5f20 656c 7365 2027 5772 6f6e 6721 2729  _ else 'Wrong!')
+01c7f290: 0a00 0a08 0100 0000 70b6 0a08 0100 0000  ........p.......
+--
+# 0x01c7f230  = 29880880
+# print 100 UTF-8 characters starting for offset
+% xxd -p -l100 -s 29880880 ./core | xxd -p -r 
+ter the flag: ') == 'DUCTF{%s}' % ᵖʸᵗʰºⁿ_ʷªʳᵐᵘᵖ.__ⁿªᵐᵉ__ else 'Wrong!')
+```
 
 #### Needle in IAM
 `I've been told the flag I need is in description of this role, but I keep getting an error with the following command. Surely there's another way? Author:[BootlegSorcery@]`
