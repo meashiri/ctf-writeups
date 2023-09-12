@@ -490,7 +490,10 @@ After confirming that the first approach does not work, we can see that using th
     % tail -c50  poke.jpg  | od -An -t u1 | tr ' ' '\n' | gawk '{if (length) printf "%c",xor(255,$0)}'
     PCTF{Who's_that_pokemon?_ITS_PIKACHU!_9ce06f19a25}
 ```
-
+### Certificate
+{{< collapse "Expand to see the certificate" >}}
+![](pctf-cert.png)
+{{< /collapse >}}
 
 ### Challenges
 {{< collapse "Expand to see the list of challenges" >}}
