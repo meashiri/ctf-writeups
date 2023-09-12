@@ -2,20 +2,20 @@
 title: "PatriotCTF - George Mason U"
 date: 2023-09-08T23:44:50-04:00
 categories: [ctf, writeup]
-tags: [blender, pcap]
+tags: [blender, pcap, awk, tshark]
 math: true
 cover:
     image: patriotctf_banner.png
 ---
 
-A very interesting beginner-intermediate level CTF from the CyberSec club of George Mason University. 
+A very interesting beginner-intermediate level CTF from the CyberSec club of George Mason University. I played with **Weak But Leet** and we solved all but one challenge, which placed us 10th in a field of over 1274 teams, with 2904 players. 
 <!--more-->
-
+![](2023-09-11-21-02-01.png)
 ### Crypto
 #### Multi-numeral
 `Much numbers, many wows.`
 
-We are given a text file with a string of binary numbers.
+We are given a text file with a string of binary numbers. A series of transformations gets us the flag.
 ```
    Convert Binary -> Decimal -> Hex -> Base64 -> Flag
     PCTF{w0w_s0_m4ny_number5}
@@ -54,6 +54,10 @@ This was in essence a straight forward RSA challenge, with the private keys disc
 
 * https://youtu.be/eQZSSRImJdw?t=4622
 * https://www.youtube.com/watch?v=bYXi9evimPs
+
+There are much better writeups for this challenge than what I can write. I will just link them here.
+* Original author : https://github.com/MasonCompetitiveCyber/PatriotCTF2023/tree/main/Crypto/Secret%20Wall%20Code
+* Impossible Terminal's fantastic solve: https://discord.com/channels/958195827933855854/970069048706613258/1150551861376598037
 
 #### Mason Competitive Cyber 
 `A member of our cyber club tried to be clever and send us a secret messed encoded using our club's name. We want to make sure it can't be deciphered if someone managed to get ahold of our message, can you try breaking the encoding for us?`
@@ -330,30 +334,161 @@ From this point, for a while, I went on a wild-goose chase to understand what th
 The flag is `PCTF{13.37.13.37_1738}`
 
 #### Elbonia 
+`The Kingdom of Elbonia has intercepted a transfer of an encoded message, but they can't seem to break the code. They have tasked you with recovering the hidden message, it is of the utmost importance that you crack it. Good luck brave warrior!`
+
+We are given a pcap file. Looking at the protocol details, we can see that the pcap file contains 1663 UDP packets. However, some of the packets are identified as a different protocol, but malformed. This is usually because of the port used, which tricks Wireshark into thinking that this is a packet for a specific protocol. For example, `kerberos=88, xyplex=173, ntp=123 etc.`
+
+```bash
+% tshark -r message.pcapng -qz io,phs
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+eth                                      frames:1663 bytes:71509
+  ip                                     frames:1663 bytes:71509
+    udp                                  frames:1663 bytes:71509
+      data                               frames:1554 bytes:66822
+      _ws.malformed                      frames:54 bytes:2322
+      echo                               frames:6 bytes:258
+      kerberos                           frames:6 bytes:258
+        _ws.malformed                    frames:6 bytes:258
+      tftp                               frames:2 bytes:86
+        _ws.malformed                    frames:2 bytes:86
+      xyplex                             frames:8 bytes:344
+        _ws.malformed                    frames:8 bytes:344
+      chargen                            frames:7 bytes:301
+      ntp                                frames:6 bytes:258
+        _ws.malformed                    frames:6 bytes:258
+      daytime                            frames:3 bytes:129
+      rpc                                frames:7 bytes:301
+      time                               frames:5 bytes:215
+      nbdgm                              frames:5 bytes:215
+        _ws.malformed                    frames:5 bytes:215
+===================================================================
+```
+So, we look at the ports used and notice that the destination ports are used between 1-255, while the data packets are in the range of 33-127 (printable ascii) as shown by this scatter chart.
 
 ![](2023-09-10-17-03-59.png)
 
-After getting distracted by the UDP payload for am embarassingly long time, we found the flag in the byte values of the `udp.dstport` field, which contains the destination port.
+After getting distracted by the UDP data payload for am embarassingly long time, we found the flag in the byte values of the `udp.dstport` field, which contains the destination port.
 
 ```
 % tshark -r message.pcapng -T fields -e udp.dstport | awk '{printf "%x",$0}' | xxd -p -r | strings -n 25
 'MPCTF{53cr3t_c0d3_1n_p0rt5}/7e[c/TQh(Sd
+
+# a much better approach.
+% tshark -r message.pcapng -T fields -e udp.dstport | awk '{if ($1>32 && $0<128) printf "%x",$0}' | xxd -p -r | grep -Eo "PCTF{.*?}"
+PCTF{53cr3t_c0d3_1n_p0rt5}
 ```
 
 #### Gotta Ping Em All
+`Our SOC has recently discovered thousands of unusual packets being sent into our network from an unknown source. We have since traced the origin to a known APT group, however are still unable to determine the meaning behind the packets. You have been contracted to help investigate significance of the packets.`
+
+We are given a pcap file. Looking at the protocols used, we can see that there are 43798 packets, but nearly 300 protocols are shown with only 1 packet each. This indicates that the destination port is being used to signal some information. 
+
+```bash
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+eth                                      frames:43798 bytes:3864373
+  ip                                     frames:43798 bytes:3864373
+    tcp                                  frames:43798 bytes:3864373
+      data                               frames:43518 bytes:3839652
+        tpkt                             frames:1 bytes:91
+      ipsictl                            frames:1 bytes:84
+      bittorrent                         frames:9 bytes:788
+      isakmp                             frames:1 bytes:87
+        _ws.malformed                    frames:1 bytes:87
+      vnc                                frames:4 bytes:350
+      beep                               frames:1 bytes:86
+      ssh                                frames:2 bytes:181
+      gift                               frames:1 bytes:90
+      lpd                                frames:1 bytes:92
+      wow                                frames:1 bytes:89
+      <------- snip ---- >
+
+# every packet has a unique destination port
+% tshark -r poke.pcapng -T fields -e tcp.dstport | wc
+   43798   43798  251682
+# it is a sequential list of numbers from 1 .. 43798
+% tshark -r poke.pcapng -T fields -e tcp.dstport | sort -n | head -5 
+1
+2
+3
+4
+5
+% tshark -r poke.pcapng -T fields -e tcp.dstport | sort -n | tail -5
+43794
+43795
+43796
+43797
+43798
+```
+After confirming that we know that the destination port used is some kind of an ordering system, we turn our attention to the payload. The challenge title and the data in the payload indicates that we are dealing with Pokemon names. In the Pokedex, we have about 1010 unique pokemons. Initially I thought it could be some kind of a linked-list or a substitution cipher. The payload of each of the 43K packets was in the format `<pokemon name>_<numbers+lowercase>_<pokemon name>`. Looking closely as the middle part of the data packets, showed that this is an anagram of another pokemon name, with scrambled digits 0-9, each appearing exactly once. 
+For example, the first packet in the order is : `luxray_8e37g94t2i506odpto1_yveltal`, which has the scrambled data of `8e37g94t2i506odpto1`. If we extract all the numbers, we can see that it is `8379425061` and the remaining letters are `egtiodpto`, which is an anagram of `pidgeotto`. So, unless we have some complicated substitution cipher, the datapackets seem to be meaningless. More importantly, the middle part seems to be a jumble of random data and not binary data for a JPEG, as the challenge hint was stating. 
+
+So I went back to wireshark to dump the first packet (with `dstport == 1`).  There were not too many fields other than the Data packets, destination port that were under the control of the sender. The one thing that stood out was the checksum, especially with a status code of `2`, which means that it is unverified. 
+
+```json
+% tshark -r poke.pcapng -T json -Y "tcp.dstport==1"      
+[
+  {
+    "_index": "packets-2023-08-31",
+    "_type": "doc",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "frame": {
+          "frame.section_number": "1",
+          "frame.interface_id": "0",
+          "frame.interface_id_tree": {
+            "frame.interface_name": "lo"
+          },
+    <snip>
+          "tcp.window_size_value": "8192",
+          "tcp.window_size": "8192",
+          "tcp.checksum": "0x6666",    <----  "FF"  sus !  
+          "tcp.checksum.status": "2",  <----  Unverified
+          "tcp.urgent_pointer": "0",
+    <snip>
+```
+Knowing that the magic bytes for a JPEG file is `FFD9`, it seems to indicate the first byte of a JPEG file. So, we dump all the checksum bytes in the right order (as indicated by the destination port), and convert them from hex to ascii twice, we get a cute little picture of Pikachu!
 
 ```bash
     % tshark -r poke.pcapng -T fields -e tcp.dstport -e tcp.checksum | sort -n | cut -f2 | cut -c3- | tr -d '\n' | xxd -p -r | xxd -p -r > poke.jpg
 
     % file poke.jpg
     poke.jpg: JPEG image data, JFIF standard 1.01, resolution (DPI), density 72x72, segment length 16, progressive, precision 8, 600x378, components 3
+```
+Using steg detection techniques on the image file, showed that there are 50 bytes appended to the end of the image file. Looking at those 50 bytes show that all of them to be greater than 0x7F, which is suspicious.
 
+```bash
+    % stegdetect poke.jpg 
+    poke.jpg : appended(50)<[random][Non-ISO extended-ASCII text, with no line terminators][................]> 
+    
+    %tail -c50 poke.jpg | xxd 
+    00000000: afbc abb9 84a8 9790 d88c a08b 979e 8ba0  ................
+    00000010: 8f90 949a 9290 91c0 a0b6 abac a0af b6b4  ................
+    00000020: bebc b7aa dea0 c69c 9acf c999 cec6 9ecd  ................
+    00000030: ca82                                     ..
+```
+
+So, we have two ways to make the most-significant-bit to be `0` as required for ASCII characters. 
+1. Set the bit to zero by bitwise-AND   (& 0x7F)
+1. XOR the entire byte with FF          (^ 0XFF)
+
+After confirming that the first approach does not work, we can see that using the XOR approach gives us the flag. 
+
+```bash
     % tail -c 50 poke.jpg | xxd -p -c0 | python3 -c "from pwn import xor, unhex; print(xor(0xff, unhex(input())))"
     b"PCTF{Who's_that_pokemon?_ITS_PIKACHU!_9ce06f19a25}"
 
     # we can do it in one step too !!!
     % tshark -r poke.pcapng -T fields -e tcp.dstport -e tcp.checksum | sort -n | cut -f2 | cut -c3- | tr -d '\n' | xxd -p -r | tail -c 100 | python3 -c "from pwn import xor, unhex; print(xor(0xff, unhex(input())))"
     b"PCTF{Who's_that_pokemon?_ITS_PIKACHU!_9ce06f19a25}"
+
+    # Wait! That Python program looks ugly in the middle of the pure bash magnificance. Let's get rid of it.
+    % tail -c50  poke.jpg  | od -An -t u1 | tr ' ' '\n' | gawk '{if (length) printf "%c",xor(255,$0)}'
+    PCTF{Who's_that_pokemon?_ITS_PIKACHU!_9ce06f19a25}
 ```
 
 
