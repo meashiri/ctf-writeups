@@ -497,16 +497,16 @@ After confirming that the first approach does not work, we can see that using th
 |Category|Challenge|Description
 |----|----|----
 Crypto |Breakfast club|
-Crypto |Mason Competitive Cyber 2|
-Crypto |Mason Competitive Cyber|
-Crypto |Multi-numeral|
-Crypto |My phone!|
-Crypto |ReReCaptcha|
-Crypto |Secret Wall Code|
+Crypto |Mason Competitive Cyber 2|zero width space + math
+Crypto |Mason Competitive Cyber|zero width space cipher
+Crypto |Multi-numeral|series of transformations
+Crypto |My phone!|Gravity Falls Bill cipher
+Crypto |ReReCaptcha|OCR data and RSA
+Crypto |Secret Wall Code|Friday night at freddy's wall cipher
 Forensics |Capybara|
 Forensics |Congratulations|
-Forensics |Elbonia|
-Forensics |Evil Monkey 1|
+Forensics |Elbonia|dstport -> flag
+Forensics |Evil Monkey 1|Blender data
 Forensics |Evil Monkey 2|
 Forensics |Gotta Ping Em All|
 Forensics |Read The EULA|
@@ -523,7 +523,7 @@ OSINT |Bad Documentation|
 OSINT |Karter|
 OSINT |Marketing Campaign|
 OSINT |Name That Plane|
-OSINT |Rouge Access Point|
+OSINT |Rouge Access Point|Look up in wigle.net 
 OSINT |Satellite Killer|
 PWN |Note Taker|
 PWN |bookshelfv2|
