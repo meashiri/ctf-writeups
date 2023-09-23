@@ -184,7 +184,7 @@ I implemented this solution after the CTF ended. Primarily, this challenge boile
 
 ![](lottery_tickets.jpg)
 
-In summary, out strategy is to 3 pairs of numbers along the connected lines in the Fano plane, so that any two numbers are in atleast one of the six numbers selected.
+In summary, out strategy is to take 3 pairs of numbers along the 7 connected lines in the Fano plane, so that any two numbers are in atleast one of the six numbers selected. By creating 5 sets of these tickets, we can cover any two numbers in the range `1..70`. The total number of tickets used is `7 x 5 = 35`, costing a total of 35. The minimum prize guaranteed in each turn for a pair of matches is 36. Hence there is a minimum, positive expected outcome of 1 for every turn. 
 
 ```python
 from pwn import *
@@ -202,19 +202,18 @@ See https://arxiv.org/pdf/2307.12430.pdf for the explanation
               /|\                  A   0   7      |     ABC  = [0,7,1,8,2,9]  
              / | \                 B   1   8      |     AGD  = [0,7,6,13,3,10]
             /  |  \                C   2   9      |     AFE  = [0,7,5,12,4,11]
-           /   |   \               D   3   10     |     CGF  = [2,9,6,13,5,12]
-          /  ,***,  \              E   4   11     |     CDE  = [2,9,3,10,4,11]
-         / *'  |  `* \             F   5   12     |     EGB  = [4,11,6,13,1,8]
-     (F)+*     |     *+(B)         G   6   13     |     BDF  = [1,8,3,10,5,12]
-       *  \__  |   _/**\      
-      *      \_|__/    *\       We can see that any two numbers in the range of [0..13] is in atleast one of the
-     /*      _(G)\_    * \          7 tickets above.  Repeat this for all numbers from [1..70], which takes 35 tickets.
-    / *  ___/  |    \__*  \  
-   /  _**      |      **__ \ 
-  /__/   **    |    **    \_\
-(E)-----------***------------(C)
+           /  .|.  \               D   3   10     |     CGF  = [2,9,6,13,5,12]
+          / .  |  . \              E   4   11     |     CDE  = [2,9,3,10,4,11]
+         /.    |    .\             F   5   12     |     EGB  = [4,11,6,13,1,8]
+     (F)+.     |     .+(B)         G   6   13     |     BDF  = [1,8,3,10,5,12]
+       / . \__ |   _/ .\      
+      /  .   \_|__/   . \       We can see that any two numbers in the range of [0..13] is in atleast one of the
+     /    .  _(G)\_  .   \      7 tickets above.  Repeat this for all numbers from [1..70], which takes 35 tickets.
+    /   __._/  |    \.__  \  
+   /  _/   .   |    .  \__ \ 
+  /__/      .  |  .        \_\
+(E)------------.-------------(C)
               (D)         
-
 '''
 
 def generateTicketCombos(s):
@@ -271,7 +270,9 @@ did_i_win()
 ### Resources and writeups
 * https://github.com/ahershy/Mega_Millions_Simulator/blob/master/Lucky%20Scenario%20MM.ipynb
 * https://arxiv.org/pdf/2307.12430.pdf
-* 
+* https://eprint.iacr.org/2023/305.pdf   (Blocky nonce)
+* https://austinstitz-hacking.github.io/csaw23qual/
+* Official repo: https://github.com/osirislab/CSAW-CTF-2023-Quals
 
 ### Challenges
 {{< collapse "Expand to see the list of challenges" >}}
