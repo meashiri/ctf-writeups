@@ -26,18 +26,39 @@ Using a MD5 [reverse lookup site](https://md5.gromweb.com/?md5=8f163b472e2164f66
 ```
 
 #### Real Smooth
+`I know you're not supposed to leave passwords in plain text so I encrypted them. The flag is in the format btcf, not bctf due to a typo.`
+
+We are given a text file that consists of 11,430 passwords that are encoded with the `ChaCha20` stream cipher scheme. However, we can see that the `key` and `nonce` are reused for encoding, which means that every one of the passwords is XORed with the same random material.  We also can see that each password is padded on the right with spaces until it reaches the length of 18 characters. 
+
+```python
+    def main():
+        lines = open("passwords.txt", "rb").readlines()
+        key = get_random_bytes(32)
+        nonce = get_random_bytes(8)
+        lines = [x.ljust(18) for x in lines]
+        lines = [encrypt(key, nonce, x) for x in lines]
+        open("database.txt", "wb").writelines(lines)
+```
+
+First, we do some optimization as we notice that several of the entries in the database are duplicates. So, we need to keep only the unique values. Also, we can see that the right half (actually 22 hex characters) are the same for a large number of entries. This seems to indicate that these are encoded values of the spaces that are used to pad a password that is shorter than 18 characters. 
+
+```bash
+# we only need to keep 1298 unique entries out of 11,430 entries in the database
+% sort database.txt| uniq  | wc
+    1298    1298   48026
+
+# search and catalog the last 22 hex characters and see that nearly half of them share the same values.
+% cut -c 15-  database.txt | sort | uniq -c | sort -r -n
+4844 24f2dc11e8510fc249ad48         <=== this should be all spaces
+2975 0ef2dc11e8510fc249ad48
+ 297 61d8dc11e8510fc249ad48
+```
 
 ```python
 from pwn import *
 
 '''
-% cut -c 15-  database.txt | sort | uniq -c | sort -r -n
-4844 24f2dc11e8510fc249ad48         <=== this should be all spaces
-2975 0ef2dc11e8510fc249ad48
- 297 61d8dc11e8510fc249ad48
-
-% sort database.txt| uniq  | wc
-    1298    1298   48026
+# store unique values in a db_uniq.txt file. 
 % sort database.txt| uniq > db_uniq.txt
  
 keys = [167, 78, 245, 199, 198, 76, 2, 4, 210, 252, 49, 200, 113, 47, 226, 105, 141, 104]
@@ -67,11 +88,14 @@ with open('db_uniq.txt', 'r') as F:
 
 print(f"Read {len(hex_lines)} lines from file")
 
+# initialize the last 11 bytes of the key using space as the padding character. 
 for i, x in enumerate(spaces_CT):
     keys[7+i] = x ^ ord(' ')
 
 print(keys)
 
+# work backwards by guessing the next character of any password that is easy to guess. 
+# I used a password that was all sevens.
 while (first_known_key > 0):
     print(f"First known key position : {first_known_key}")
     for x in hex_lines:
@@ -87,8 +111,10 @@ print(f"Keys: {keys}")
 for x in hex_lines:
     passwd = xor(x, keys)
     if (b'btcf' in passwd or b'}' in passwd):
-        print(passwd)
+        print(passwd)           # btcf{w3_d0_4_l1773_kn0wn_pl41n73x7}
 
+# b'3_kn0wn_pl41n73x7}'
+# b'btcf{w3_d0_4_l177l'
 ```
 
 #### Needle in the Wifi Stack
