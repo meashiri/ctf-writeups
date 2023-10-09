@@ -438,12 +438,3 @@ Scripting |SimonProgrammer 3|
 Web |BeepBoop Blog|
 Web |Hotdog Stand|
 {{< /collapse >}}
-
-```
-[*] Misc/ Knowledge Repository
-[*] Crypto/ Beep Boop Cryptography
-[*] Forensics/ Low Effort Wav
-[*] Reverse/ Dill
-[*] Reverse/ First Date
-[*] Scripting/ DDR
-```
