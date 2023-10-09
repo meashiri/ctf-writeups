@@ -2,13 +2,13 @@
 title: "Sunshine CTF - UCF"
 date: 2023-10-05T23:27:34-04:00
 categories: [ctf, writeup]
-tags: [git, gitbundle, playdate, acropolypse]
+tags: [git, gitbundle, playdate, acropalypse]
 math: true
 cover:
     image: sunshinectf_banner.png
 ---
 This was a companion CTF challenge to `Bsides Orlando`, with challenges in the beginner to intermediate level. I participated as part of `Weak But Leet` and we solved all the challenges and were placed second among all teams. 
-
+![](2023-10-09-11-08-28.png)
 <!--more-->
 ### Misc
 #### Knowledge Repository
@@ -39,7 +39,7 @@ data: RIFF (little-endian) data, WAVE audio, Microsoft PCM, 8 bit, mono 11050 Hz
 % morse-audio-decoder ./data
 ECHO QUEBEC UNIFORM ALFA LIMA SIERRASIERRA INDIA GOLF NOVEMBER
 ```
-6. So, we have learnt that we can indeed decode morse and the message is made up of [NATO Phonetic Alphabet](https://en.wikipedia.org/wiki/NATO_phonetic_alphabet), like `ALFA, BRAVO, CHARLIE, etc`
+6. So, we have learnt that we can indeed decode morse from command-line and the message is made up of [NATO Phonetic Alphabet](https://en.wikipedia.org/wiki/NATO_phonetic_alphabet), like `ALFA, BRAVO, CHARLIE, etc`
 6. Obviously, we need more data to figure out out the flag. Given that we have a `git` repository, we should look at the commit history. 
 ```
     % git log                   
@@ -106,7 +106,7 @@ This step generates a list of checksums for the audio file for each commit.
 JULIETT
 ```
 11. Doing this for the 33 unique checksums, and interpreting the phonetic alphabets gives us this lookup table
-{{< collapse "Expand to see the checksum to alphabet mapping" >}}
+{{< collapse "Expand to see the checksum to alpha-num mapping" >}}
 |Checksum|Symbol
 |----|----
 33937|2
@@ -145,7 +145,7 @@ JULIETT
 {{< /collapse >}}
 We can see that the symbols used are `A-Z2-7` and the padding character `=`. This indicates that we are using Base 32, which consists of 32 alpha-numeric symbols and a padding character. 
 
-11. Now that we know what letter each audio file stands for, let's go through the all 3016 of them in order and translate them to the corresponding alpha-numeric symbol. The resulting string needs to be reversed, as the padding character, which comes from the last commit, should always be in the end. So, we surmise that the order is oldest commit to the newest. 
+11. Now that we know what letter each distinct audio file stands for, let's go through the all 3016 of them in order and translate them to the corresponding alpha-numeric symbol. The resulting string needs to be reversed, as the padding character, which comes from the last commit, should always be in the end. So, we surmise that the order is oldest commit to the newest. 
 ```python
 # part 1 - populate the lookup table, key=checksum,  value = alphanum symbol
 lookups = {}
@@ -174,7 +174,7 @@ print(out[::-1])    # reverse the string, so that the oldest commit is first, St
 % cat 3016_b32.txt                      
 D6FQQAA5ZP6GIAH7RVL67D63GYJP3TV7QIPVHQHRO2B3W ..... NR7BBP2MPSOD2L7MWYJHGX7IXIWPPVQCOB4AAA===
 
-% cat 3016_b32.txt | base32 -d > 3016.file
+% base32 -d <3016_b32.txt >3016.file
 
 % file 3016.file
 3016.file: gzip compressed data, last modified: Sat Sep  9 19:44:29 2023
@@ -194,7 +194,7 @@ CHAPTER I.
 
 ... <snip> ...
 ```
-And there is the flag. This was a pretty interesting challenge. The last bit of figuring out that the binary data is a gzip stream seemed a bit guessy. Otherwise, pretty interesting challenge that emphasizes creative thinking.  
+And there is the flag. This was a pretty interesting challenge. The last bit of figuring out that the binary data is a gzip stream seemed a bit guessy. Otherwise, pretty interesting challenge that emphasizes creative thinking and practical scripting.  
 
 ### Crypto
 #### Beep Boop Cryptography
