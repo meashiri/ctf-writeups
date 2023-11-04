@@ -299,6 +299,15 @@ $$
 ```
 #### RSA School - 5th Grade
 
+```python
+from Crypto.Util.number import *
+from gmpy2 import iroot 
+# we are given n, e and c
+
+croot, found = iroot(c, e)
+if(found):
+    print(long_to_bytes(croot))     # b'UDCTF{0k_m4yb3_d0nt_u5e_e_3qu4l5_3}'
+```
 #### RSA School - 6th Grade
 
 #### RSA School - 7th Grade
