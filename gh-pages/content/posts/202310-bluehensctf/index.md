@@ -1,8 +1,8 @@
 ---
-title: "202310 UD Bluehens CTF"
+title: "UD Bluehens CTF"
 date: 2023-10-30T19:38:39-04:00
 categories: [ctf, writeup]
-tags:
+tags: [rsa]
 math: true
 cover:
     image: bluehensctf_banner.png
@@ -309,6 +309,28 @@ if(found):
     print(long_to_bytes(croot))     # b'UDCTF{0k_m4yb3_d0nt_u5e_e_3qu4l5_3}'
 ```
 #### RSA School - 6th Grade
+
+```python
+    from Crypto.Util.number import *
+    msg=b'UDCTF{REDACTED}'
+    pt=bytes_to_long(msg)
+    p1=getPrime(512)
+    q1=getPrime(512)
+    N1=p1*q1
+    e=3
+    ct1=pow(pt,e,N1)
+    p2=getPrime(512)
+    q2=getPrime(512)
+    N2=p2*q2
+    ct2=pow(pt,e,N2)
+    p3=getPrime(512)
+    q3=getPrime(512)
+    N3=p3*q3
+    ct3=pow(pt,e,N3)
+    # we are given N1, N2, N3, e, ct1, ct2, ct3
+```
+In this case, the same plaintext is encrypted using the same small exponent. This can be solved by `Hastad's broadcast attack`
+
 
 #### RSA School - 7th Grade
 
