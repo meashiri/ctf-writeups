@@ -5,7 +5,7 @@ categories: [ctf, writeup]
 tags: [rsa]
 math: true
 cover:
-    image: bluehensctf_banner.png
+    image: bluehensctf_banner2.png
 ---
 
 CTF from University of Delaware.
@@ -331,7 +331,27 @@ if(found):
 ```
 In this case, the same plaintext is encrypted using the same small exponent. This can be solved by `Hastad's broadcast attack`
 
+```python
+from Crypto.Util.number import *
+import gmpy2 
+from functools import reduce
 
+# we are given N1, N2, N3, e, ct1, ct2, ct3
+
+def crt(a, n):
+    sum = 0
+    prod = reduce(lambda a,b: a*b, n)
+
+    for n_i, a_i in zip(n, a):
+        p = prod // n_i
+        sum += a_i * gmpy2.invert(p, n_i) * p
+    return sum % prod
+
+m_cubed = crt([ct1, ct2, ct3],[N1, N2, N3])
+m,found = gmpy2.iroot(m_cubed, e)
+if (found):
+    print(long_to_bytes(m))     # b'UDCTF{ch1n3se_r3m4ind3r_th30r3m_f0r_th4_w1n!}'
+```
 #### RSA School - 7th Grade
 
 #### RSA School - 8th Grade
