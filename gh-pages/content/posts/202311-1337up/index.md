@@ -108,6 +108,64 @@ print(f"INTIGRITI{{{flag}}}")       # INTIGRITI{3a8a32c7f6}
 
 #### Over The Wire 1
 
+```bash
+% tshark -r otw_pt1.pcapng -Y ftp
+  391 12.744331723 192.168.16.213 → 192.168.16.131 FTP 94 Response: 220 pyftpdlib 1.5.9 ready.
+  393 15.196182853 192.168.16.131 → 192.168.16.213 FTP 76 Request: USER cat
+  395 15.196741120 192.168.16.213 → 192.168.16.131 FTP 99 Response: 331 Username ok, send password.
+ 1880 29.104247242 192.168.16.131 → 192.168.16.213 FTP 99 Request: PASS 5up3r_53cur3_p455w0rd_2022
+ 1881 29.104830281 192.168.16.213 → 192.168.16.131 FTP 89 Response: 230 Login successful.
+ 1883 29.104963402 192.168.16.131 → 192.168.16.213 FTP 72 Request: SYST
+ 1884 29.105391488 192.168.16.213 → 192.168.16.131 FTP 85 Response: 215 UNIX Type: L8
+ 1886 31.382247948 192.168.16.131 → 192.168.16.213 FTP 94 Request: PORT 192,168,16,131,179,47
+ 1890 31.383328861 192.168.16.213 → 192.168.16.131 FTP 107 Response: 200 Active data connection established.
+ 1892 31.383468068 192.168.16.131 → 192.168.16.213 FTP 72 Request: LIST
+ 1893 31.384060881 192.168.16.213 → 192.168.16.131 FTP 120 Response: 125 Data connection already open. Transfer starting.
+ 1897 31.384532055 192.168.16.213 → 192.168.16.131 FTP 90 Response: 226 Transfer complete.
+ 1920 40.286258848 192.168.16.131 → 192.168.16.213 FTP 74 Request: TYPE I
+ 1921 40.286895128 192.168.16.213 → 192.168.16.131 FTP 92 Response: 200 Type set to: Binary.
+ 1922 40.287052904 192.168.16.131 → 192.168.16.213 FTP 95 Request: PORT 192,168,16,131,203,181
+ 1926 40.287994097 192.168.16.213 → 192.168.16.131 FTP 107 Response: 200 Active data connection established.
+ 1927 40.288122906 192.168.16.131 → 192.168.16.213 FTP 81 Request: RETR flag.zip
+ 1928 40.288639205 192.168.16.213 → 192.168.16.131 FTP 120 Response: 125 Data connection already open. Transfer starting.
+ 1930 40.288815994 192.168.16.213 → 192.168.16.131 FTP 90 Response: 226 Transfer complete.
+ 2827 69.110963242 192.168.16.131 → 192.168.16.213 FTP 94 Request: PORT 192,168,16,131,132,11
+ 2831 69.111993482 192.168.16.213 → 192.168.16.131 FTP 107 Response: 200 Active data connection established.
+ 2832 69.112088552 192.168.16.131 → 192.168.16.213 FTP 85 Request: RETR reminder.txt
+ 2833 69.112560314 192.168.16.213 → 192.168.16.131 FTP 120 Response: 125 Data connection already open. Transfer starting.
+ 2835 69.112995479 192.168.16.213 → 192.168.16.131 FTP 90 Response: 226 Transfer complete.
+ 3122 86.464355501 192.168.16.131 → 192.168.16.213 FTP 95 Request: PORT 192,168,16,131,162,139
+ 3126 86.465531985 192.168.16.213 → 192.168.16.131 FTP 107 Response: 200 Active data connection established.
+ 3127 86.465625183 192.168.16.131 → 192.168.16.213 FTP 82 Request: RETR README.md
+ 3128 86.466159467 192.168.16.213 → 192.168.16.131 FTP 120 Response: 125 Data connection already open. Transfer starting.
+ 3132 86.466378449 192.168.16.213 → 192.168.16.131 FTP 90 Response: 226 Transfer complete.
+ 3180 112.467181791 192.168.16.131 → 192.168.16.213 FTP 72 Request: QUIT
+ 3181 112.467823434 192.168.16.213 → 192.168.16.131 FTP 80 Response: 221 Goodbye.
+```
+
+Frame # 2834 contains the instructions to get the flag
+```bash
+% tshark -r otw_pt1.pcapng -Y "frame.number == 2834"  -Tfields -e data | xxd -p -r    
+Hi cat,
+
+This flag is really important so I had to encrypt it in case it falls into the wrong hands.
+
+You already know the FTP password.. Just use the same here, but update it accordingly ;)
+```
+Frame # 1929 provides the content of the `flag.zip` file, which can be unzipped using the FTP password (from frame #1880), after updating the year to 2023.
+
+```bash
+% tshark -r otw_pt1.pcapng -Y "frame.number == 1929"  -Tfields -e data | xxd -p -r > flag.txt
+
+% unzip -P 5up3r_53cur3_p455w0rd_2022 -c flag.zip
+Archive:  flag.zip
+   skipping: flag.txt                incorrect password
+
+% unzip -P 5up3r_53cur3_p455w0rd_2023 -c flag.zip
+Archive:  flag.zip
+ extracting: flag.txt                
+INTIGRITI{1f_0nly_7h3r3_w45_4_53cur3_FTP}
+```
 #### Over The Wire 2
 
 ### Misc
