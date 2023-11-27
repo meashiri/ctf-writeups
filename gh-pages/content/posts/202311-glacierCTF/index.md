@@ -2,7 +2,7 @@
 title: "Glacier CTF by LosFuzzys"
 date: 2023-11-25T21:59:40-05:00
 categories: [ctf, writeup]
-tags: [RSA, DER, CloneHero]
+tags: [RSA, DER, ascon, CloneHero]
 math: true
 cover:
     image: "gctf_banner.png"
@@ -136,6 +136,8 @@ print(f"{d:0x}")        # matches the private exponent in the partial RSA key
 
 #### SLCG
 
+The most relevant parts of the challenge source is as follows. In summary, the challenge constructs a pair of PRNG (using the linear congruential scheme). These pairs of LCGs are used to generate a pseudo-random value that is used to represent each `binary 1` or `binary 0` in the ascii value of the characters in the flag. While the first LCG in each chain is constructed out of random values, the subsequent generations use 4 consecutive values created by the previous LCG. Thus the LCGs are chained, making it so that the first LCG determines all the subsequent LCGs. 
+
 ```python
 
 class LCG:
@@ -198,7 +200,7 @@ The encryption function does the following, which will help us craft a solution 
 1. We are given a series of 364 ciphertext values, which correspond to 364 // 7 = 52 characters. 
 1. We know that the flag starts with `gctf{`.
 1. We can use this known text to determine which ciphertext correspond to which LCG, which will help us crack the LCG and recreate the sequence. 
-1. Note that we need to only crack one of the LCGs, as it is a binary sequence. 
+1. Note that we need to only crack one of the LCGs, as it is a binary sequence. So, if the next value from that LCG does not match the ciphertext, assume that the ciphertext corresponds to the second, (uncracked) LCG. 
 
 The complete solution is as follows: 
 
@@ -240,9 +242,11 @@ def crack_unknown_modulus(states):
     #return modulus
     return crack_unknown_multiplier(states, modulus)
 
+# Start with the letter 'g'
 # First character 'g' ==> 103  --> [1, 1, 0, 0, 1, 1, 1]
-states = [ct[0], ct[1], ct[4], ct[5], ct[6]]
+states = [ct[0], ct[1], ct[4], ct[5], ct[6]]    # We know these values are from the same LCG
 mod, mult, incr = crack_unknown_modulus(states)
+# Use the first value from this LCG to calculate the seed. 
 seed = ((ct[0] - incr) * pow(mult, -1, mod) ) % mod
 
 lcg1 = LCG(mod, mult, incr, seed)  # this is the LCG we will use for the '1' bit
@@ -259,13 +263,69 @@ for i in range(0, len(ct), 7):      # for each character
             char_bits += '0'
     print(flag, char_bits)
     flag += chr(int(char_bits, 2))  # convert the bits to a character, add to flag
-    lcg1 = LCG(n, next(lcg1), next(lcg1), next(lcg1))   # new LCG for the next character
+    lcg1 = LCG(n, next(lcg1), next(lcg1), next(lcg1))   # derive a new LCG for the next character
 
 print(flag)     # gctf{th15_lcg_3ncryp710n_w4sn7_s0_5s3cur3_aft3r_4ll}
 ```
 
-
 #### Glacier Spirit
+
+In this challenge, we have an implementation of a stream cipher using the Ascon package, which provides a lighweight encryption and hashing functions. This package is not relevant to the challenge except as a means to encrypt a block of message using a randomly generated key. 
+
+Examining the source provided, we can discern the following. 
+1. The server creates a nonce for each call to encrypt and uses the same encryption key for the duration of the session. 
+1. As the first step, the server encrypts the flag after padding it to 16-byte boundary and provides us the `nonce`, `ciphertext` and the `MAC tag`. 
+1. The `nonce` is 15 bytes long, `ciphertext` is 16 bytes for each block of padded message, and the `tag` is 16 bytes in length. 
+1. After providing us with the triplet of information for the flag, the server provides us 8 chances to provide our own message and provides us the calculated triplet values for that message.
+1. Note that a different nonce is used for each message, but the same encryption key is reused. 
+
+Pictorially, the encryption method can be shown as in the following diagram. The items shaded in red are disclosed for each message encrypted (including the flag)
+![](2023-11-27-11-25-15.png)
+
+The vulnerabilities in this encryption method are that: 
+* The nonce used only once per message, but it is disclosed 
+* There is no padding if the message is exactly fitting into the block boundary. Ideally, the message length should be prepended to the message and an empty block should be created along with the message.
+
+We will exploit these errors in our solution. 
+
+![](2023-11-27-11-25-46.png)
+
+1. we know the `nonce` used in handling the flag 
+1. we know that the ciphertext is the result of an XOR operation between the plaintext message and the encrypted value of the `[nonce||block number]`.
+1. if we can find the encrypted value of `[nonce||01]`, `[nonce||02]`, and so on, we can `XOR` it with the ciphertext block to recover the plaintext. 
+1. Note that if we construct our message as `nonce||01`, the following line in the `pad_message` function. 
+
+```python
+    return  (first_block_pad.to_bytes(length=1, byteorder='big') * (BLOCK_SIZE - first_block_pad)) + message
+    # first_block_pad = 16 == BLOCK_SIZE
+    # hence no padding when message_len is exactly equal to BLOCK_SIZE
+```
+The solution below, does exactly that. 
+
+```python
+from pwn import *
+
+# R = remote('')
+R = process(["python3", "glacier_spirit_challenge.py"])
+R.recvuntil(b'gifts you a flag!\n\n')
+
+# values for the flag
+nonce, ct, tag = map(unhex, R.recvline().strip().split(b', ')) 
+
+BS = 16
+ctr = 1
+flag = b""
+for i in range(0, len(ct), BS):
+    R.recvuntil(b'Offer your message:\n')
+    R.sendline(enhex(nonce + (ctr).to_bytes(1, 'little')))
+    ctr += 1
+    R.recvuntil(b'blessed your message!\n\n')
+    n, c, t = map(unhex, R.recvline().strip().split(b', '))
+    flag += xor(ct[i:i+BS], t)
+    print(flag)
+R.interactive()
+```
+Overall, it was a fun challenge to break down each individual step of the server-side program and identify the solution. 
 
 ### Misc
 #### IcyRiffs
@@ -358,6 +418,9 @@ Also, whoever thought of planting a fake steg clue in the album image, you are a
 ### References
 * https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md
 * https://hackmd.io/@Be2TrxAzSWeaqXGgoOwd2g/rkr4ZzWHT
+* https://flocto.github.io/writeups/2023/deadsecctf/lcg-writeup/
+* https://eprint.iacr.org/2022/847.pdf
+
 
 ### Challenges
 {{< collapse "Expand to see the list of challenges" >}}
