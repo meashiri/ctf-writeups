@@ -276,7 +276,7 @@ Examining the source provided, we can discern the following.
 1. The server creates a nonce for each call to encrypt and uses the same encryption key for the duration of the session. 
 1. As the first step, the server encrypts the flag after padding it to 16-byte boundary and provides us the `nonce`, `ciphertext` and the `MAC tag`. 
 1. The `nonce` is 15 bytes long, `ciphertext` is 16 bytes for each block of padded message, and the `tag` is 16 bytes in length. 
-1. After providing us with the triplet of information for the flag, the server provides us 8 chances to provide our own message and provides us the calculated triplet values for that message.
+1. After providing us with the triplet of information for the flag, the server provides us 8 chances to supply our own message and returns the calculated triplet values for that message.
 1. Note that a different nonce is used for each message, but the same encryption key is reused. 
 
 Pictorially, the encryption method can be shown as in the following diagram. The items shaded in red are disclosed for each message encrypted (including the flag)
@@ -293,20 +293,20 @@ We will exploit these errors in our solution.
 1. we know the `nonce` used in handling the flag 
 1. we know that the ciphertext is the result of an XOR operation between the plaintext message and the encrypted value of the `[nonce||block number]`.
 1. if we can find the encrypted value of `[nonce||01]`, `[nonce||02]`, and so on, we can `XOR` it with the ciphertext block to recover the plaintext. 
-1. Note that if we construct our message as `nonce||01`, the following line in the `pad_message` function. 
+1. Note that if we construct our message as `nonce||01`, it is exactly 16 bytes in length. Due to the following line in the `pad_message` function, no padding is applied (as the pad length is zero).
 
 ```python
     return  (first_block_pad.to_bytes(length=1, byteorder='big') * (BLOCK_SIZE - first_block_pad)) + message
     # first_block_pad = 16 == BLOCK_SIZE
     # hence no padding when message_len is exactly equal to BLOCK_SIZE
 ```
-The solution below, does exactly that. 
+The complete solution is given below. 
 
 ```python
 from pwn import *
 
-# R = remote('')
-R = process(["python3", "glacier_spirit_challenge.py"])
+R = remote('chall.glacierctf.com', 13379)
+# R = process(["python3", "glacier_spirit_challenge.py"])
 R.recvuntil(b'gifts you a flag!\n\n')
 
 # values for the flag
@@ -322,7 +322,7 @@ for i in range(0, len(ct), BS):
     R.recvuntil(b'blessed your message!\n\n')
     n, c, t = map(unhex, R.recvline().strip().split(b', '))
     flag += xor(ct[i:i+BS], t)
-    print(flag)
+    print(flag)     # b'\x0fgctf{CTr_M0d3_cbc_M4C_ASCON_DeF3AT$_TH3_$p1rIT}'
 R.interactive()
 ```
 Overall, it was a fun challenge to break down each individual step of the server-side program and identify the solution. 
@@ -423,7 +423,7 @@ Also, whoever thought of planting a fake steg clue in the album image, you are a
 
 
 ### Challenges
-{{< collapse "Expand to see the list of challenges" >}}
+{{< collapse summary="Expand to see the list of challenges" >}}
 |Category|Challenge|Description
 |----|----|----
 crypto |Glacier Spirit|

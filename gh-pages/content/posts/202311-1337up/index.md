@@ -157,6 +157,14 @@ Frame # 1929 provides the content of the `flag.zip` file, which can be unzipped 
 ```bash
 % tshark -r otw_pt1.pcapng -Y "frame.number == 1929"  -Tfields -e data | xxd -p -r > flag.txt
 
+% unzip -l flag.zip 
+Archive:  flag.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+       42  10-29-2023 08:43   flag.txt
+---------                     -------
+       42                     1 file
+
 % unzip -P 5up3r_53cur3_p455w0rd_2022 -c flag.zip
 Archive:  flag.zip
    skipping: flag.txt                incorrect password
@@ -168,6 +176,18 @@ INTIGRITI{1f_0nly_7h3r3_w45_4_53cur3_FTP}
 ```
 #### Over The Wire 2
 
+```
+% sed -n "36,20314 p" mail.txt | base64 -d > cat1.jpg
+% file cat1.jpg
+cat1.jpg: JPEG image data, JFIF standard 1.01, resolution (DPI), density 72x72, segment length 16, comment: "Something like this?", baseline, precision 8, 3456x2304, components 3
+
+% sed -n "34,2314 p" mail2.txt | base64 -d > cat2.jpg
+cat2.jpg: PNG image data, 325 x 211, 8-bit/color RGBA, non-interlaced 
+% zsteg cat2.jpg 
+imagedata           .. file: Tower/XP rel 2 object not stripped - version 258
+b1,rgb,lsb,xy       .. text: "INTIGRITI{H1dd3n_Crypt0Cat_Purr}\n"
+...
+```
 ### Misc
 
 
