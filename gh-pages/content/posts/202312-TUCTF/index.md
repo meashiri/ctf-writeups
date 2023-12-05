@@ -15,9 +15,9 @@ A really nice CTF hosted annually by the CTF club at the University of Tulsa.  I
 
 The CTF site went down before I had a chance to take screenshots. However, I recall that this challenge provided us descriptions of about 19 cities, distances between them and allowed direction of transport. i.e, you can go from `Attaya` to `Delato`, but not necessarily come back the same way. 
 
-So, in technical terms, this information can be represented as a directed graph, with weighted edges. In the end, we are asked to find a distance-optimized shorted path between `Attaya` and `Shariot`. 
+So, in technical terms, this information can be represented as a directed graph, with weighted edges. In the end, we are asked to find a distance-optimized shortest path between `Attaya` and `Shariot`. 
 
-I used the `networkx` package to represent the data as a directed graph and use the in-build Djikstra algorithm to find the shortest path.  The solution is visualized the following. The complete python implementation is also provided. 
+I used the `networkx` package to represent the data as a directed graph and use the built-in Djikstra algorithm to find the shortest path.  The solution is visualized in the following diagram. The complete python implementation is also provided. 
 
 ![](2023-12-04-12-17-34.png)
 
@@ -63,7 +63,7 @@ print(sl)
 # ['Attaya', 'Charity', 'Emell', 'Iyona', 'Kepliker', 'Osiros', 'Rhenora', 'Shariot']
 ```
 
-There was one additional stage to this challenge. We were given a morse code fragment and asked to convert it to a key phrase for the next level of the challenge. 
+There was one additional stage to this challenge. We were given a braille code fragment and asked to convert it to a key phrase for the next level of the challenge. 
 
 ```bash
 # Use https://www.dcode.fr/braille-alphabet to decode 
@@ -311,6 +311,9 @@ while True:
 
 ### Crypto
 #### Custom ECB Cipher
+
+
+
 
 ### Forensics
 #### Free Proxy
