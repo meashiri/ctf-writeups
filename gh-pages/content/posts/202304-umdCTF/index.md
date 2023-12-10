@@ -677,7 +677,6 @@ I had hacked together some scripts to solve the Beep Boop challenge during the C
 
     print(flag_low)
     print(flag_hi)
-
 ```
 
 

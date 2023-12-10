@@ -175,6 +175,10 @@ n33ha5nozixe6rrg71kgwyinmkusx2
 ![](2023-10-23-00-38-51.png)
 
 
+* https://cyberhacktics.com/deadface-ctf-sneaky-static-walkthrough/
+* https://cyberhacktics.com/deadface-ctf-host-busters-walkthrough/
+* https://cyberhacktics.com/deadface-ctf-end-of-the-road-walkthrough/
+
 ### Challenges
 {{< collapse "Expand to see the list of challenges" >}}
 |Category|Challenge|Description
@@ -234,7 +238,7 @@ Starter |Starter 1|
 Starter |Starter 2|
 Steganography |Electric Steel|
 Steganography |Fetching Secrets|
-Steganography |Sneaky Static|
+Steganography |Sneaky Static| https://cyberhacktics.com/deadface-ctf-sneaky-static-walkthrough/
 Steganography |Syncopated Beat|
 Steganography |Terms and Conditions May Apply|
 Steganography |The Pearl of Wisdom of Eliphaz|
