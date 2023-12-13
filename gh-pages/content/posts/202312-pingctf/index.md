@@ -96,6 +96,7 @@ Looking at the content of the files, we can see that there seems to be ascii hex
 Also, the value `40` appears exactly every 8 numbers. So, we can surmise some kind of a binary scheme.  The rest is a matter of translating `60` to `0` and `61` to `1` and converting it to a string of characters, which gives us a base64 string. Decoding that strings gives us the flag.
 
 ```bash
+# xxd -r -p task.txt| sed -e 's/[6 ]//g' -e 's/40/\n/g'| perl -lpe '$_=pack"B*",$_'| tr -d '\n'| xxd -r -p | base64 -d
 % xxd -r -p task.txt                    # convert hex to binary values
     | sed -e 's/[6 ]//g' -e 's/40/\n/g' # remove 6, 40 and spaces and insert a new line 
     | perl -lpe '$_=pack"B*",$_'        # binary to text
@@ -277,7 +278,7 @@ ping{enigma_ist_uahzpnieyend_einen_schonev_cag} E C A Q
 ping{enigma_ist_faszinierend_einen_schonen_tag} E C A U
 '''
 ```
-Of the three possibilities that started with `ping`,`ping{enigma_ist_faszinierend_einen_schonen_tag}` seemed to be in German. Putting the phrase into Google Translate seemed to think that it was valid German phrase that says - `Enigma is fascinating. Have a nice day`. 
+Of the three possibilities that started with `ping`,`ping{enigma_ist_faszinierend_einen_schonen_tag}` seemed to be a valid German phrase. Putting the phrase into Google Translate indeed indicates that it is a valid German phrase that means - `Enigma is fascinating. Have a nice day`. 
 
 #### noodle-nightmare
 ![](2023-12-10-12-41-54.png)
@@ -424,6 +425,55 @@ DECIMAL       HEXADECIMAL     DESCRIPTION
 ```bash
 % echo "cGluZ3tJX2Fsd2F5JF9jMG1lX2JAY2t9" | base64 -d
 ping{I_alway$_c0me_b@ck}
+```
+
+#### ancient-genius
+![](2023-12-11-23-10-18.png)
+The numbers on the grave are : 
+```
+      114059301025943970552219
+        3928413764606871165730
+       43566776258854844738105
+        1500520536206896083277
+    22698374052006863956975682
+                    7778742049
+          31940434634990099905
+     3311648143516982017180081
+                10610209857723
+      483162952612010163284885
+          31940434634990099905
+         135301852344706746049
+                    4807526976
+      298611126818977066918552
+       43566776258854844738105
+          31940434634990099905
+                    7778742049
+       43566776258854844738105
+          31940434634990099905
+        3928413764606871165730
+        3928413764606871165730
+                  139583862445
+                   53316291173
+          31940434634990099905
+      114059301025943970552219
+                    7778742049
+    14028366653498915298923761
+          83621143489848422977
+    59425114757512643212875125
+```
+Search the first number in [Online Encyclopedia of Integer Sequences](https://oeis.org/) and we will see that that number is in the Fibonacci series. We can confirm that is the case for other numbers too. This, combined with the diagram of the seashell on the gravestone indicates that all of these numbers belong to the Fibonacci series. 
+
+Using this table of [Fibnacci numbers](https://r-knott.surrey.ac.uk/Fibonacci/fibtable.html), we can see that the first number(`114059301025943970552219`) is 112th number on the list of Fibonacci numbers. 112 is `p` in decimal. 
+
+So, using the index of these numbers using the site, gives us a series of numbers, which can be converted to ascii to give us the flag. 
+
+```python
+seq = [ .... ]  # sequence of numbers from the challenge
+fib = [0, 1]    # create the sequence of 128 fibonacci numbers
+while len(fib) < 128:
+    fib.append(fib[-1] + fib[-2])
+
+print(''.join([chr(fib.index(s)) for s in seq])) #ping{1_w@s_b0rn_1n_ii75_p1za}
 ```
 
 ### Challenges
