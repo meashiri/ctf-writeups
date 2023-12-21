@@ -238,6 +238,58 @@ f = crt(R, N)
 print(ltb(ZZ(f).nth_root(3)))
 '''
 ```
+#### Knapsack
+
+
+This is a classic Knapsack subset problem. In this mode, given a set of values in the 'knapsack' you can choose each item either 0 or 1 times exactly once to create a subset sum of a given value. The intent in this challenge is to determine the sequence of 1s and 0s to form a binary value that form the basis of the encryption key. 
+
+I tried to solve this with LLL, but it failed due to the density of the matrix being too high (density approx = 1.1). This is the `Meet in the middle` approach to solving this challenge. 
+
+```python
+from collections import defaultdict
+import hashlib
+from Crypto.Util.number import long_to_bytes
+from Crypto.Cipher import AES
+
+# Given 
+c='af95a58f4fbab33cd98f2bfcdcd19a101c04232ac6e8f7e9b705b942be9707b66ac0e62ed38f14046d1cd86b133ebda9'
+nums    =[600848253359, 617370603129, 506919465064, 218995773533, 831016169202, 501743312177, 15915022145, 902217876313, 16106924577, 339484425400, 
+          372255158657, 612977795139, 755932592051, 188931588244, 266379866558, 661628157071, 428027838199, 929094803770, 917715204448, 103431741147, 
+          549163664804, 398306592361, 442876575930, 641158284784, 492384131229, 524027495955, 232203211652, 213223394430, 322608432478, 721091079509, 
+          518513918024, 397397503488, 62846154328, 725196249396, 443022485079, 547194537747, 348150826751, 522851553238, 421636467374, 12712949979]
+subset  = 7929089016814
+
+# dictionary for each half of the iterations.  Key -> subset sum, Value -> list of values (bit masks) that produced the subset
+left_dict = defaultdict(list)
+right_dict = defaultdict(list)
+
+def decrypt_cipher(c, bitmask):
+    secret = long_to_bytes(int(bitmask, 2))         # b'atTS4'
+    print(f"{bitmask=} | {int(bitmask,2)} | {secret=}")
+    key = hashlib.sha256(secret).digest()[:16]
+    cipher = AES.new(key, AES.MODE_ECB)
+    return cipher.decrypt(bytes.fromhex(c))
+
+for i in range(2**20):
+    left = [nums[20+x]  if (i & 1<<x) else 0 for x in range(20)]
+    left_dict[sum(left)].append(i)
+
+    right = [nums[x] if (i & 1<<x) else 0 for x in range(20)]
+    right_dict[sum(right)].append(i)
+
+    # for testing ---    
+    # if (bin(i).count('1') == 1):
+    #    print(f"{i:6d} {left} {right} = {sum(left)+sum(right):15d}")
+    
+# matching logic, for each sum in the left dictionary, see if there is a complement on the other dictionary, so that together they add up to the required subset
+for lsum in left_dict.keys():
+    if (subset - lsum) in right_dict.keys():
+        left_bits = f"{left_dict[lsum][0]:020b}"            # one half of the bit mask
+        right_bits = f"{right_dict[subset-lsum][0]:020b}"   # the other half
+        print(f"Match found {left_bits} + {right_bits}")
+        exit(decrypt_cipher(c, left_bits + right_bits ))    #b'flag{N0t_r34dy_f0r_M3rkl3-H3llman}\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+```
+
 ### Forensics
 #### Forenscript
 `It's thundering outside and you are you at your desk having solved 4 forensics challenges so far. Just pray to god you solve this one. You might want to know that sometimes too much curiosity hides the flag.`
