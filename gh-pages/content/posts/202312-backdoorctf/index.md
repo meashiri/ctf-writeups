@@ -251,7 +251,7 @@ We are given a binary file `a.bin`. Using XXD to dump the file shows that it mig
 ...
 
 # print as hex, take 8 chars (4 bytes), reverse their positions, assemble into one long hex, convert it back to binary, store as a.png
-% xxd -c0 -p a.bin | fold -w 8 | sed -E 's/(..)(..)(..)(..)/\4\3\2\1/g' | tr -d '\n' | xxd -r -p > a.png
+% xxd -c4 -p a.bin | sed -E 's/(..)(..)(..)(..)/\4\3\2\1/g' | tr -d '\n' | xxd -r -p > a.png
 
 # viewing this image shows a message stating `FAKE FLAG`. So, there is another layer to this onion
 
@@ -273,7 +273,7 @@ b.png: PNG image data, 3142 x 1189, 8-bit/color RGBA, non-interlaced
 ```
 So, in retrospect, we can solve this challenge with a single bash command pipeline.
 ```bash
-% xxd -c0 -p a.bin | fold -w 8 | sed -E 's/(..)(..)(..)(..)/\4\3\2\1/g' | tr -d '\n' | xxd -r -p | dd skip=60048 of=b.png ibs=1
+% xxd -c4 -p a.bin | sed -E 's/(..)(..)(..)(..)/\4\3\2\1/g' | tr -d '\n' | xxd -r -p | dd skip=60048 of=b.png ibs=1
 # open b.png and get the flag
 ```
 
