@@ -2,7 +2,7 @@
 title: "Glacier CTF by LosFuzzys"
 date: 2023-11-25T21:59:40-05:00
 categories: [ctf, writeup]
-tags: [RSA, DER, ascon, CloneHero]
+tags: [RSA, DER, ascon, CloneHero, multi-prime]
 math: true
 cover:
     image: "gctf_banner.png"

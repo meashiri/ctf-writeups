@@ -1,7 +1,7 @@
 ---
 title: "Backdoor CTF from IIT Roorkee"
 date: 2023-12-17T02:26:24-05:00
-categories: [ctf, writeup]
+categories: [ctf, writeup, RSA, Fernet, CRT, CRT_Strong, Vigenere, shakespeare]
 tags:
 math: true
 cover:
@@ -276,6 +276,26 @@ So, in retrospect, we can solve this challenge with a single bash command pipeli
 % xxd -c4 -p a.bin | sed -E 's/(..)(..)(..)(..)/\4\3\2\1/g' | tr -d '\n' | xxd -r -p | dd skip=60048 of=b.png ibs=1
 # open b.png and get the flag
 ```
+#### Drunk
+I solved this challenge after the CTF. We are given a encoded file that looks like a base64 string along with a text file with what looks to be octal or decimal characters. 
+
+```bash 
+% printf "$(sed -e 's/^/\\/' -e 's/ /\\/g' something.txt)" | xxd -r -p | base64 -d
+zlMg5K3TobbFh_8l7doDT_408rH7Md_W3Oc1yKX1FrA=  # <--- use this as the key
+```
+
+```python
+from cryptography.fernet import Fernet
+
+f = Fernet('zlMg5K3TobbFh_8l7doDT_408rH7Md_W3Oc1yKX1FrA=')
+output = f.decrypt(open('encoded.bin', 'r').readline())
+print(f"{len(output)} bytes decrypted")
+p = open('drunk.png', 'wb')
+p.write(output)
+p.close()
+```
+The resulting `drunk.png` has the flag.
+![](drunk.png)
 
 ### Resources
 * https://forthright48.com/chinese-remainder-theorem-part-2-non-coprime-moduli/
