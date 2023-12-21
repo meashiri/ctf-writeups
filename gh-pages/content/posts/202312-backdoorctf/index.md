@@ -277,12 +277,16 @@ So, in retrospect, we can solve this challenge with a single bash command pipeli
 # open b.png and get the flag
 ```
 #### Drunk
-I solved this challenge after the CTF. We are given a encoded file that looks like a base64 string along with a text file with what looks to be octal or decimal characters. 
+I solved this challenge after the CTF. We are given a encoded file that looks like a base64 string along with a text file with what looks to be octal or decimal characters.  I guess the fact that the key looked to be in base64, seems to indicate that it was a Fernet encryption scheme. 
+
+`Fernet (symmetric encryption) - looks like base64 but decodes to garbage, in two parts. First part (32 bytes) is the key. Uses 128-bit AES in CBC mode and PKCS7 padding, with HMAC using SHA256 for authentication. IV is created from os.random().` [^1]
+[^1]: https://zweilosec.gitbook.io/hackers-rest/os-agnostic/cryptography-and-encryption
 
 ```bash 
 % printf "$(sed -e 's/^/\\/' -e 's/ /\\/g' something.txt)" | xxd -r -p | base64 -d
 zlMg5K3TobbFh_8l7doDT_408rH7Md_W3Oc1yKX1FrA=  # <--- use this as the key
 ```
+Decode the `encoded.bin` file with the key.
 
 ```python
 from cryptography.fernet import Fernet
