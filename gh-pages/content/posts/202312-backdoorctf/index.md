@@ -79,17 +79,63 @@ phi = n - st + 1    # (p-1)(q-1) = pq - (p+q) + 1 = n - st + 1
 d = pow(RSA_E, -1, phi)
 print(long_to_bytes(pow(c, d, n)))      # b'flag{I_4m_5tuck_0n_Th3_pl4n3t_Eg0_s4ve_M3}'
 ```
+However, the reason as to why __s+t == p+q__ is an interesting one. Thanks to **ConnorM, Robin and grhkm** on the Cryptohack discord for helping me understand some of the concepts. 
 
-However, the reason as to why __s+t == p+q__ is an interesting one. (WIP)
+$$
+Given: \boxed {s + t = p^{(q^a \mod \phi)} + q^{(p^b \mod \phi)} \pmod n}\\\
+\quad{}\\\
+\text{ We will show: }\\\
+\bf{s + t} \overset{!}{=} \bf{p + q}\\\
+\quad\\\
+\implies {{(q^a \mod \phi)} = {(p^b \mod \phi)} = 1}
+$$
+
+$$
+\text{Proof:} \notag\\\
+\begin{align}
+    \text{Consider: }s &= p^{(q^a \mod \phi)} \pmod n \notag \\\ 
+    q^a \mod \phi &= x(p-1)(q-1) + q^a \notag \\\
+    \text{Let k}&= x(p-1) \notag \\\
+    s &= p ^ {k (q-1) + q^a} \pmod n \notag \\\
+\because \text{n = p * q, and by CRT,}& \notag \\\
+\text{consider cases} \mod p \text {  and} \mod q & \notag \\\
+    s \mod p &= p ^ {k (q-1) + q^a} \pmod p = 0 \\\
+    s \mod q &= p ^ {k (q-1) + q^a} \pmod q  \notag \\\
+    &= {p ^ k} ^ {(q-1)} \cdot p ^ {q^a} \pmod q \notag \\\
+\text{From Fermat's Little Theorem,  }x^{(y-1)} &\equiv 1 \pmod y \notag \\\ 
+\therefore     s \mod q &= 1 \cdot p ^ {q^a} \pmod q \notag \\\
+    &= p ^ {q^a} \pmod q \notag \\\
+\because p \text{ and } q \text{ are prime numbers, } \notag \\\
+\text{Case: a = 1}, \quad s \mod q &= p ^ q \pmod q \notag \\\
+& = p ^{(q-1)} \cdot p \pmod q \notag \\\
+& = p \pmod q \notag \\\
+\text{Case: a = k+1}, \quad s \mod q &= p ^{q^{(k+1)}}\pmod q \notag \\\
+& = {p ^{q^k * q}}  \pmod q \notag \\\
+& = {(p ^{q^k})}^q \pmod q \notag \\\
+& = {(p ^{q^k})}^{(q-1)} \cdot {(p ^{q^k})} \pmod q \notag \\\
+& = {p ^{q^k}} \pmod q \notag \\\
+& \implies \text{equal to Case: a = k} \notag \\\
+\therefore \underset{a= n}{(s \mod q)} = \underset{a= n-1}{(s \mod q)} &\cdots = \underset{a= 1}{(s \mod q)} = p \mod q \notag \\\
+\text{Thus by induction:  }\quad\forall{a}, \quad s \mod q & = p \pmod q \\\
+\quad \notag\\\
+\text{From (1), } {s \mod p} &= 0 \pmod p \notag \\\
+\tag*{from (1) and (2)}\therefore s \mod (p*q)= s\mod n &\equiv p \pmod n \notag \\\
+&= p \notag \\\
+\quad \notag\\\
+\text{By the same logic, }t\mod n &\equiv q \pmod n \notag \\\
+&= q \notag\\\
+\tag{Q.E.D}\therefore  \bf{s + t} &= \bf{p + q}\\\
+\end{align}
+$$
 #### Indecipherable-image-or-is-it?
 We are given a PNG image.
 
 1. Examine the image file using `zsteg`
 1. There are 5808 extra bytes at the end of the file. These have magic bytes showing it is a ZIP file. 
-1. The LSB 1 bit array gives us a text : "keka{1b0asx2w_hbin9K_Ah_6xwm0L}"
-1. Extracting and expanding the ZIP file gives us a jpeg image : SECRET/images.jpeg
+1. The LSB 1 bit array gives us a text : `keka{1b0asx2w_hbin9K_Ah_6xwm0L}`
+1. Extracting and expanding the ZIP file gives us a jpeg image : `SECRET/images.jpeg`
 1. Running `stegseek` on this JPEG image with the rockyou wordlist, gives us a small text file with `F4K5FL4G`
-1. Use the Vigenere decoder with the Key:= F4K5FL4G  and the ciphertext:=keka{1b0asx2w_hbin9K_Ah_6xwm0L} gives us the flag.
+1. Use the Vigenere decoder with the `Key:= F4K5FL4G`  and the `ciphertext:=keka{1b0asx2w_hbin9K_Ah_6xwm0L}` gives us the flag.
 
 During the competiion, I solved all but the last step, which was a bit guessy, IMO. Or, perhaps it is a skills issue :)
 
