@@ -97,7 +97,7 @@ $$
     q^a \mod \phi &= x(p-1)(q-1) + q^a \notag \\\
     \text{Let k}&= x(p-1) \notag \\\
     s &= p ^ {k (q-1) + q^a} \pmod n \notag \\\
-\because \text{n = p * q, and by CRT,}& \notag \\\
+\because \text{n = p * q, and to apply CRT,}& \notag \\\
 \text{consider cases} \mod p \text {  and} \mod q & \notag \\\
     s \mod p &= p ^ {k (q-1) + q^a} \pmod p = 0 \\\
     s \mod q &= p ^ {k (q-1) + q^a} \pmod q  \notag \\\
