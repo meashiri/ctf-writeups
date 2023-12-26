@@ -177,11 +177,11 @@ Let \quad g &= gcd(x, y)  \notag \\\
 \text{Note that }\quad m \nmid n,  n &\nmid m \text{, or gcd(m, n) = 1} \notag \\\
 a\cdot m &= -b \cdot n \notag \\\
 a &= \dfrac{-b \cdot n} {m} \\\
-\text{From Euclid's Lemma, }&\text{ since m and n are co-prime,}\quad m \mid b \notag \\\
-\implies b &= k * m, \\\
-b &= k * \dfrac{x}{g} \notag \\\
-\tag* {sub (2) in (1)}\implies a &= k * n, \notag \\\
-a &= k * \dfrac{y}{g} \quad \exists \quad k \in \Z \notag \\\
+\text{Since a }\in \Z,\text{ from Euclid's Lemma, }&\text{ since m and n are co-prime,}\quad m \mid b \notag \\\
+\implies b &= k \cdot m, \\\
+b &= k \cdot \dfrac{x}{g} \notag \\\
+\tag* {sub (2) in (1)}\implies a &= k \cdot n, \notag \\\
+a &= k \cdot \dfrac{y}{g} \quad \exists \quad k \in \Z \notag \\\
 \end{align}
 $$
 
