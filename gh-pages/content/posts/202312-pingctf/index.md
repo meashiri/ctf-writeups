@@ -165,6 +165,26 @@ aes = AES.new(sha256(f'{a}||{b}'.encode()).digest(), AES.MODE_CBC, iv=bytes(16))
 print(aes.decrypt(ct))  # b'ping{135str4_135str4_107v4sz_41g0r1thm_r0cks_sc41ing} 
 ```
 
+Additional explanation for the solution to a linear, homogenous diophantine equation: 
+$$
+\begin{align}
+a\cdot x + b \cdot y &= 0 \notag \\\
+a\cdot x &= -b \cdot y  \notag \\\
+Let \quad g &= gcd(x, y)  \notag \\\
+\implies \dfrac{a\cdot x}{g} &= \dfrac{-b\cdot y}{g}\text{, since }g\ne 0  \notag \\\
+\text{Let }\quad m &= \dfrac {x} {g} \notag \\\
+\quad n &= \dfrac {y} {g} \notag \\\
+\text{Note that }\quad m \nmid n,  n &\nmid m \text{, or gcd(m, n) = 1} \notag \\\
+a\cdot m &= -b \cdot n \notag \\\
+a &= \dfrac{-b \cdot n} {m} \\\
+\text{From Euclid's Lemma, }&\text{ since m and n are co-prime,}\quad m \mid b \notag \\\
+\implies b &= k * m, \\\
+b &= k * \dfrac{x}{g} \notag \\\
+\tag* {sub (2) in (1)}\implies a &= k * n, \notag \\\
+a &= k * \dfrac{y}{g} \quad \exists \quad k \in \Z \notag \\\
+\end{align}
+$$
+
 While this challenge could be solved without using LLL, I wanted to capture the author's intended solution
 
 ```python 
