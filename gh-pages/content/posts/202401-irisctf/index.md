@@ -25,11 +25,11 @@ We are given a radio broadcast as an mp3 file and a RF raw IQ signal file.  Just
 
 For this challenge, we are given a very wide image (`100 x 25000`) with what seems to be Amplitude Shift Keying wave form. In this scheme, the amplitude of a carrier signal is changed to represent a digital signal. Since the amplitude goes to zero when conveying the `zero`, this represents the simplest form of ASK called On-Off keying (OOK).
 
-During the CTF, I painstakingly transcribed the signal by hand. However, I wanted to automate the transcribing.  The approach used for transcribing the signal is to read the pixel value (specifically for the Blue channel) of the image on row 19. This is represented by the greay line is the small section of the signal image shown below. This allows us to read the pixel values and also count the apex of the sine waves (which gives us and indication of the number of consecutive `1` signals) and to capture the distance between two apexes (to indicate the number of consecutive `0` signals). 
+During the CTF, I painstakingly transcribed the signal by hand. However, I wanted to automate the transcribing.  The approach used for transcribing the signal is to read the pixel value (specifically for the Blue channel) of the image on row 19. This is represented by the gray line is the small section of the signal image shown below. This allows us to read the pixel values and also count the apex of the sine waves (which gives us and indication of the number of consecutive `1` signals) and to capture the distance between two apexes (to indicate the number of consecutive `0` signals). 
 
 ![](2024-01-10-22-15-00.png)
 
-Once we have the digital stream of the information from the signal image, we then need to decode the information. The encoding scheme is the Manchester encoding scheme which relies of the transition between states and not on the absolute value of the two states. From Wikipedia : `It is a self-clocking signal with no DC component. Consequently, electrical connections using a Manchester code are easily galvanically isolated.`
+Once we have the digital stream of the information from the signal image, we then need to decode the information. The encoding scheme is the Manchester encoding scheme which relies on the transition between states and not on the absolute value of the two states. From Wikipedia : `It is a self-clocking signal with no DC component. Consequently, electrical connections using a Manchester code are easily galvanically isolated.`
 
 The complete solution below reads and interprets the image to extract the binary stream, and uses Manchester coding scheme to decode it into a flag.
 ```python 
