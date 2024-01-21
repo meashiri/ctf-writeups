@@ -32,6 +32,7 @@ During the CTF, I painstakingly transcribed the signal by hand. However, I wante
 Once we have the digital stream of the information from the signal image, we then need to decode the information. The encoding scheme is the Manchester encoding scheme which relies on the transition between states and not on the absolute value of the two states. From Wikipedia : `It is a self-clocking signal with no DC component. Consequently, electrical connections using a Manchester code are easily galvanically isolated.`
 
 The complete solution below reads and interprets the image to extract the binary stream, and uses Manchester coding scheme to decode it into a flag.
+
 ```python 
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
@@ -39,7 +40,83 @@ The complete solution below reads and interprets the image to extract the binary
 import numpy as np
 from PIL import Image
 from Crypto.Util.number import long_to_bytes
+from manchester import Manchester       # from: https://github.com/ian-llewellyn/manchester-coding
 
+# Helper function to interpret the information gathered
+#   ^ ^ ^ ^ __      = 110   (four waves + standard space)
+#   ^ ^ ^ ^ ____    = 1100  (four waves + long space) 
+#   ^ ^ __          = 10    (two waves + standard space)
+#   ^ ^ ____        = 100   (two waves + long space) 
+def interpret_waves(wave_counter, zerocount):
+    segment = ''
+    if (wave_counter == 4):
+        segment += '11'
+    elif (wave_counter == 2):
+        segment += '1'
+    segment += '0'*zerocount
+    return segment
+
+def main():    
+    offset = 400 - 35       # start reading the message from the 365th column
+    row_num = 19            # Row 19 has the apex of the sine waveforms
+    SPACE_00 = 60           # distance for '00' = 2.5 cycles @ 24 pixels per cycle
+    SPACE_0  = 36           # distance for '0'  - 1.5 cycles @ 24 pixels per cycle
+    SPACE_WAVE = 12         # space between two wave peaks
+    PEAK_WAVE  = 3          # consecutive pixels at the top of the wave
+    ALLOWANCE = 5           # allowance for error/noise
+
+    # Open image with Pillow
+    image = Image.open('spicy-sines.png')
+    width, height = image.size
+    print(f"Image read : {height=}, {width=}")
+
+    # Convert Pillow image to NumPy array
+    img_array = np.array(image, dtype=np.uint8)
+
+    out         = ''        # Accumulation of the interpreted binary string
+    prev_val    = 0         # Value of the previous pixel        
+    current_val = 0         # current value of the pixel. White = 0, Blue = 1
+    d           = 0         # length of consecutive pixels of the same color
+    wave_counter = 0        # Count the number of wave peaks encountered so far
+    for j in range(offset, width - 30):         # stop before the right margin
+        pixel = img_array[row_num,j:j+1,2]    # take only the blue color 
+        current_val = 0 if pixel[0] >= 253 else 1
+        if (prev_val != current_val):
+            if (prev_val == 0):
+                if d > SPACE_00 - ALLOWANCE and d < SPACE_00 + ALLOWANCE : 
+                    out += interpret_waves(wave_counter, 2)
+                    wave_counter = 0
+                elif d > SPACE_0 - ALLOWANCE and d < SPACE_0 + ALLOWANCE : 
+                    out+= interpret_waves(wave_counter, 1)
+                    wave_counter = 0
+            elif d > PEAK_WAVE - ALLOWANCE and d < PEAK_WAVE + ALLOWANCE : 
+                wave_counter += 1
+            d = 0
+        else:
+            d += 1
+        prev_val = current_val
+
+    # add the bits for the very last wave 
+    if (wave_counter > 0):
+        out += '1'* (wave_counter //2)
+
+    # remove the leading '0's if any
+    out = out.lstrip('0')
+
+    M = Manchester(differential=False, invert=True)
+    # decode using Manchester ISO 802.4, convert to a long and then to bytes
+    print(long_to_bytes(int(M.decode(out), 2)))     # b'irisctf{c0ngrats_y0uv3_d3feat3d_ook_th3_m0st_b4sic_f0rm_of_ask}'
+
+if __name__ == "__main__":
+	main()
+```
+
+The manchester code implementation is from Github.
+```python
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+# manchester.py
 # from: https://github.com/ian-llewellyn/manchester-coding
 class Manchester(object):
     """
@@ -119,74 +196,7 @@ class Manchester(object):
                     bits += b
 
         return bits
-
-# Helper function to interpret the information gathered
-#   ^ ^ ^ ^ __      = 110   (four waves + standard space)
-#   ^ ^ ^ ^ ____    = 1100  (four waves + long space) ... etc
-#   ^ ^ __          = 10
-#   ^ ^ ____        = 100
-def interpret_waves(wave_counter, zerocount):
-    segment = ''
-    if (wave_counter == 4):
-        segment += '11'
-    elif (wave_counter == 2):
-        segment += '1'
-    segment += '0'*zerocount
-    return segment
-
-def main():    
-    offset = 400 - 35       # start reading the message from the 365th column
-    row_num = 19            # Row 19 has the apex of the sine waveforms
-    SPACE_00 = 60           # distance for '00' = 2.5 cycles @ 24 pixels per cycle
-    SPACE_0  = 36           # distance for '0'  - 1.5 cycles @ 24 pixels per cycle
-    SPACE_WAVE = 12         # space between two wave peaks
-    PEAK_WAVE  = 3          # consecutive pixels at the top of the wave
-    ALLOWANCE = 5           # allowance for error/noise
-
-    # Open image with Pillow
-    image = Image.open('spicy-sines.png')
-    width, height = image.size
-    print(f"Image read : {height=}, {width=}")
-
-    # Convert Pillow image to NumPy array
-    img_array = np.array(image, dtype=np.uint8)
-
-    out         = ''        # Accumulation of the interpreted binary string
-    prev_val    = 0         # Value of the previous pixel        
-    current_val = 0         # current value of the pixel. White = 0, Blue = 1
-    d           = 0         # length of consecutive pixels of the same color
-    wave_counter = 0        # Count the number of wave peaks encountered so far
-    for j in range(offset, width - 30):         # stop before the right margin
-        pixel = img_array[row_num,j:j+1,2]    # take only the blue color 
-        current_val = 0 if pixel[0] >= 253 else 1
-        if (prev_val != current_val):
-            if (prev_val == 0):
-                if d > SPACE_00 - ALLOWANCE and d < SPACE_00 + ALLOWANCE : 
-                    out += interpret_waves(wave_counter, 2)
-                    wave_counter = 0
-                elif d > SPACE_0 - ALLOWANCE and d < SPACE_0 + ALLOWANCE : 
-                    out+= interpret_waves(wave_counter, 1)
-                    wave_counter = 0
-            elif d > PEAK_WAVE - ALLOWANCE and d < PEAK_WAVE + ALLOWANCE : 
-                wave_counter += 1
-            d = 0
-        else:
-            d += 1
-        prev_val = current_val
-
-    if (wave_counter > 0):
-        out += '1'* (wave_counter //2)
-
-    out = out.lstrip('0')
-
-    M = Manchester(differential=False, invert=True)
-    # decode using Manchester ISO 802.4, convert to a long and then to bytes
-    print(long_to_bytes(int(M.decode(out), 2)))     # b'irisctf{c0ngrats_y0uv3_d3feat3d_ook_th3_m0st_b4sic_f0rm_of_ask}'
-
-if __name__ == "__main__":
-	main()
 ```
-
 
 ### Miscellaneous
 #### Sir Scope
@@ -223,7 +233,6 @@ The approach seems to be to read the `data` signal whenever the `clock` is held 
 
 For this challenge, we are given an video in the Matroska container (`.mkv`). This container format allows different related media files to be packaged together.  Playing the video shows Michael - the mascot of IrisCTF along with a subtitle in chinese. 
 
-
 ```bash 
 % ffmpeg -i chal.mkv 
 Input #0, matroska,webm, from 'chal.mkv':
@@ -241,7 +250,7 @@ Input #0, matroska,webm, from 'chal.mkv':
       title           : Imported font from Untitled.ass
   Stream #0:4: Attachment: none
     Metadata:
-      filename        : FakeFont_0.ttf                  <------  Interesting font embedded
+      filename        : FakeFont_0.ttf                  <------  Interesting embedded font
       mimetype        : font/ttf
       title           : Imported font from Untitled.ass
   Stream #0:5: Attachment: none
@@ -253,7 +262,7 @@ Input #0, matroska,webm, from 'chal.mkv':
 ![](2024-01-07-23-57-54.png)
 
 
-I remembered that `mpv` the command-line media player has tons of options. Reading through it's [documentation](https://mpv.io/manual/master/#video-filters), I found the following option to override the subtitle style and switch the font. Switching the subtitle to the embedded `FakeFont` gives us the flag on playback. 
+I remembered that `mpv` the command-line media player has tons of options. Reading through its [documentation](https://mpv.io/manual/master/#video-filters), I found the following option to override the subtitle style and switch the font. Switching the subtitle to the embedded `FakeFont` gives us the flag on playback. 
 
 ```bash
 # Play the media by overriding the subtitle style and switching to the FakeFont that was packaged 
@@ -262,8 +271,9 @@ I remembered that `mpv` the command-line media player has tons of options. Readi
 ```
 ![](2024-01-07-23-57-16.png)
 
-#### BuzzBuzz (todo)
+#### BuzzBuzz
 ![](2024-01-11-21-18-15.png)
+
 ```bash
 % tar -tvzf buzzbuzz.tar.gz 
 drwxr-xr-x  0 root   root        0 Dec 31 19:00 buzzbuzz/
@@ -359,8 +369,18 @@ PORT     STATE SERVICE
 ![](2024-01-07-23-53-14.png)
 
 #### Birdie (todo)
+![](2024-01-16-14-23-19.png)
 LoRa, SF=8
 
+![](2024-01-14-23-38-29.png)
+
+* https://www.youtube.com/watch?v=jHWepP1ZWTk
+* https://github.com/UW-CONNECT/OpenLora/blob/main/Dockerfile
+* https://www.youtube.com/watch?v=NoquBA7IMNc
+* https://dsp.stackexchange.com/questions/69244/demodulating-a-lora-data-symbol
+* https://dl.acm.org/doi/fullHtml/10.1145/3546869
+* https://www.epfl.ch/labs/tcl/resources-and-sw/lora-phy/
+* https://webthesis.biblio.polito.it/21315/1/tesi.pdf
 
 
 ### Resources, Writeups
