@@ -64,6 +64,70 @@ print(decrypt(enc, KEY))        # b'MAPNA{4Re_y0U_MT19937_PRNG_pr3d!cT0r_R3ven9E
 #### Be Fast
 ![](2024-01-21-13-07-56.png)
 
+The analysis of the given challenge source gives us: 
+```python
+def main():
+	border = "+"
+	pr(border*72)
+	pr(border, ".::        Hi all, you should be fast, I mean super fact!!       ::.", border)
+	pr(border, "You should send twenty 8-byte keys to encrypt the secret message and", border)
+	pr(border, "just decrypt the ciphertext to get the flag, Are you ready to start?", border)
+	pr(border*72)
+
+	secret_msg = b'TOP_SECRET:' + os.urandom(40)            # <--- Known plaintext, enough to fill the first block (8 bytes)
+	
+	cnt, STEP, KEYS = 0, 14, []             # <--- Even though the banner says to provide 20 keys, we only need 14 
+	md = 1
+
+	while True:
+		pr(border, "please send your key as hex: ")
+		alarm(md + 1)
+		ans = sc().decode().strip()
+		alarm(0)
+		try:
+			key = unhexlify(ans)
+			if len(key) == 8 and key not in KEYS:
+				KEYS += [key]
+				cnt += 1
+			else:
+				die(border, 'Kidding me!? Bye!!')
+		except:
+			die(border, 'Your key is not valid! Bye!!')
+		if len(KEYS) == STEP:
+			print(KEYS)
+			HKEY = KEYS[:7]			            # The first seven keys - not used for encryption ... only as a counter
+			shuffle(HKEY)			
+			NKEY = KEYS[-7:]                    # The last seven keys are shuffled.
+			shuffle(NKEY)
+			for h in HKEY: NKEY = [key, shift(key, 1)] + NKEY       # key = last (14th) key .. this key is shifted (rotated) 7 times
+
+            # the final key array is [14 rotated version of the last key] + shuffled permutation of the last 7 keys                
+			enc = encrypt(secret_msg, NKEY[0])
+			for key in NKEY[1:]:
+				enc = encrypt(enc, key)
+			pr(border, f'enc = {hexlify(enc)}')
+			pr(border, f'Can you guess the secret message? ')
+			alarm(md + 1)                   # we get 2 seconds to decrypt the secret message and send it over 
+			msg = sc().strip()
+			alarm(0)
+			if msg == hexlify(secret_msg):
+				die(border, f'Congrats, you deserve the flag: {flag}')
+			else:
+				die(border, f'Sorry, your input is incorrect! Bye!!')
+```
+
+So, our approach to solve the problem would be : 
+1. We need to provide 14 8-byte keys.
+1. The first 7 keys don't matter as they are not used in the encryption step
+1. The last 7 keys are shuffled in some random order. Permutations(7,7) = 5040 possibilities. 
+1. The last key is rotated/shifted for 14 rounds. 
+1. We can pick the last key so that the rotation/shifts shouldn't matter. I chose all ones : `1111111111111111`
+1. The encryption order is : 14 * [last_key] + [a permutation of the last seven keys]
+1. We can take the first block `b'TOP_SECR'` and run it through all possible permutations and store the resulting mapping for a reverse lookup
+1. We then connect to the server, send the keys and get the encrypted message back.
+1. Use the first 8 bytes to lookup the appropriate permutation used on the server. 
+1. Reverse the encryption function in the opposite order.  Reverse of the permutation order + 14 rounds with the [last_key]
+1. Send the resulting message to the server and receive the flag. You can confirm that the message indeed has the known header `TOP_SECRET:`
 
 ```python 
 from pwn import * 
