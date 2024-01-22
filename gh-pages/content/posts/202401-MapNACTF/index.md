@@ -95,9 +95,9 @@ def main():
 			die(border, 'Your key is not valid! Bye!!')
 		if len(KEYS) == STEP:
 			print(KEYS)
-			HKEY = KEYS[:7]			            # The first seven keys - not used for encryption ... only as a counter
+			HKEY = KEYS[:7]			     # The first seven keys - not used for encryption ... only as a counter
 			shuffle(HKEY)			
-			NKEY = KEYS[-7:]                    # The last seven keys are shuffled.
+			NKEY = KEYS[-7:]             # The last seven keys are shuffled.
 			shuffle(NKEY)
 			for h in HKEY: NKEY = [key, shift(key, 1)] + NKEY       # key = last (14th) key .. this key is shifted (rotated) 7 times
 
@@ -231,11 +231,11 @@ We are given the following source code to compile and run.
 ```c
 Welcome,to,MAPNA,CTF,Year_2k24;main(){for(++CTF;to=-~getchar();Welcome+=11==to,Year_2k24++)CTF=to>0xe^012>to&&'`'^to^65?!to:!CTF?++MAPNA:CTF;printf("MAPNA{%4d__%d__%d_!}\n",(to+20)^(Welcome+24)+1390,MAPNA+=(!CTF&&Year_2k24)+10,Year_2k24+31337);}
 ```
-Even though the challenge instructions ask us to provide the challenge source as the **argument**, what we need to provide is the name of the challenge source as the input to get the flag.
+Even though the challenge instructions ask us to provide the challenge source as the **argument**, what we need to provide it as the input to get the flag.
 ```bash
 % gcc -Wno-implicit-function-declaration -Wno-implicit-int -Wno-parentheses -o source source.c
-% echo "source.c" | ./source 
-MAPNA{1427__11__31346_!}
+% cat source.c| ./source
+MAPNA{1426__11__31582_!}
 ```
 
 ### Challenges
