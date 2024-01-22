@@ -388,6 +388,7 @@ LoRa, SF=8
 * https://docs.google.com/document/d/1jlPOFjZHWtFmuNNnvWhujF9oLjEl3B44i_UhuOHUpwE/edit#heading=h.780s3r1ysbk2
 * https://shawnd.xyz/blog/2023-01-26/IrisCTF-2023-Select-Forensics-RF-and-Networking-Writeups
 * https://irissec.xyz/
+* https://github.com/IrisSec/IrisCTF-2024-Challenges : Challenge repository
 ### Challenges
 {{< collapse summary="Expand to see the list of challenges" >}}
 |Category|Challenge|Description
