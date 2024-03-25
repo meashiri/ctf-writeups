@@ -117,7 +117,24 @@ Assembling entries 4,5,6 and 7 provides the flag.
 * Use `pcap2john.py` to generate the hash from the pcap file.
 * Use `john` and `rockyou` wordlist to find the WPA password for the SSID `bletchley_park`, which is `WinstonChurchill`
 * Add the password to Wireshark. `File -> Preferences -> Protocols -> IEEE 802.11 -> Decryption keys`
- 
+* Now, if we do the protocol_statics_hierarchy, we can see we have some TCP/HTTP traffic in the decrypted data
+* Use the `export_object` feature to extract the `flag.zip` file. 
+* Use JTR and the `rockyou.txt` wordlist (hint from the challenge title) to crack the hash and find the password.
+```
+% john --wordlist=~/ctf/tools/wordlists/rockyou.txt we_will_flag.zip.hash 
+Using default input encoding: UTF-8
+Loaded 1 password hash (PKZIP [32/64])
+Press 'q' or Ctrl-C to abort, almost any other key for status
+zipideedoodah    (we_will_flag.zip/flag.txt)
+
+# Use this password to extract the text file from the zip
+
+% unzip -P zipideedoodah -c we_will_flag.zip
+Archive:  we_will_flag.zip
+ extracting: flag.txt                
+jctf{p4ck3t_c4ptur3_ftw}
+```
+
 ### Forensics
 
 #### locked out
