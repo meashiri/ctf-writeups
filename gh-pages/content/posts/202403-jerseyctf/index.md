@@ -2,7 +2,7 @@
 title: "Jersey CTF 2024"
 date: 2024-03-23T20:13:23-04:00
 categories: [ctf, writeup]
-tags: [diff, nping, bkcrack, jtr, hashcat, wpa, ecdsa]
+tags: [diff, nping, bkcrack, jtr, hashcat, wpa, ecdsa, cupp, "infinite storage"]
 math: true
 cover:
     image: jerseyctf_2024.png
@@ -10,10 +10,9 @@ cover:
 
 Another edition of JerseyCTF, organized by NJIT. It is my third year of participating in this CTF and it was as much fun as the other years. 
 <!--more-->
-Interestingly, there were a number of challenges that were in crossover categories - i.e, combinations of OSINT, Misc and Forensics techniques were used in the same challenge. So, it brought some amount of novelty to the CTF. I participated as part of the team `Weak But Leet`. 
+Interestingly, there were a number of challenges that were in crossover categories - i.e, combinations of OSINT, Misc and Forensics techniques were used in the same challenge. So, it brought some amount of novelty to the CTF. I participated as part of the team `Weak But Leet`. We scored 12467 points and were placed 11th overall.
 
 Here are some of the challenges I solved and how I approached them. I came close to solving a couple more.
-
 ### Miscellaneous
 
 #### Data-Divergence-Discovery
@@ -110,7 +109,7 @@ RCVD (0.5894s) ICMP [3.87.129.162 > 192.168.1.225 Echo reply (type=0/code=0) id=
 
 Assembling entries 4,5,6 and 7 provides the flag.
 
-#### wi-will-wi-will...  (INCOMPLETE)
+#### wi-will-wi-will...
 ![](2024-03-24-20-47-53.png)
 
 * We are given a packet capture file. 
