@@ -1,8 +1,8 @@
 ---
-title: "202403 Jerseyctf"
+title: "Jersey CTF 2024"
 date: 2024-03-23T20:13:23-04:00
 categories: [ctf, writeup]
-tags:
+tags: [diff, nping, bkcrack, jtr, hashcat, wpa, ecdsa]
 math: true
 cover:
     image: jerseyctf_2024.png
@@ -110,6 +110,14 @@ RCVD (0.5894s) ICMP [3.87.129.162 > 192.168.1.225 Echo reply (type=0/code=0) id=
 
 Assembling entries 4,5,6 and 7 provides the flag.
 
+#### wi-will-wi-will...  (INCOMPLETE)
+![](2024-03-24-20-47-53.png)
+
+* We are given a packet capture file. 
+* Use `pcap2john.py` to generate the hash from the pcap file.
+* Use `john` and `rockyou` wordlist to find the WPA password for the SSID `bletchley_park`, which is `WinstonChurchill`
+* Add the password to Wireshark. `File -> Preferences -> Protocols -> IEEE 802.11 -> Decryption keys`
+ 
 ### Forensics
 
 #### locked out
@@ -152,8 +160,8 @@ jctf{dn57unn3l1n6}
 1. The TCP payload shows the following structure: `000400000006000600[03]00[66]`
 1. We are interested in the third byte from the end, which is the position and the last byte, which contains the data value.
 1. We also see that some times, the data value is `01` and a second message with the same position contains the actual data value. 
-1. Use the powerful string utilities to extract the payload, sort it in the right order and convert to ascii values. 
-1. It can be done in a single bash command as shown here:
+1. Use the powerful string utilities in bash to extract the payload, sort it in the right order and convert to ascii values. 
+1. It can be done in a single bash command pipeline as shown here:
 ```
 % tshark -r final.pcapng -Y "modbus && ip.src==10.0.2.7" -T fields -e "tcp.payload" | cut -c19- | sort | grep -Ev "01$" | cut -c 5- | xxd -r -p
 jctf{I_rEllAy_H0p3_thi$_i$nt_a_p0ol_sy$t3m_aGa1n}
@@ -245,8 +253,45 @@ UkghhRRSSCGFFFJIIYUUUkghhRRSSCGFFFJIIYUUUkghhRRSSCGFFFJIIYUUUkghhRRSSCGF1M2k
 
 Flag : `jctf{st0mping_4r0und_1n_th3_mud_4nd_l3aving_tr4c3s}`
 
-```wi-will-wi-will...  - SSID:Password ==> bletchley_park:WinstonChurchill
+### Crypto
+#### Crack-a-Mateo
+![](2024-03-24-19-54-35.png)
+We are given a password-protected PDF file and a screencap of a text conversation.
+![](challenge-image.png)
+The personal info is used to create a potential password list using a tool called [CUPP](https://github.com/Mebus/cupp)
+
+The known information that can be gathered from the text messages are:
 ```
+Victim: Mateo, DOB: 10 May 1979
+Spouse: Jennifer, DOB: 16 Sep 1979
+Daughter: Melia, DOB: 18 Sep 2010 (or could be 2011)
+Special keywords: Amazon, Luis Vuitton
+
+Use these parameters: 
+  Add special chars at the end of words?  Y
+  Add some random numbers at the end of words? N
+  Leet mode? (i.e. leet = 1337) Y
+```
+This generates a potential wordlist with 17232 potential passwords. Using `john` to crack the pdf hash, gives us the password: `m3l14!@'#'`
+```
+% wc mateo.txt 
+   17231   17232  175207 mateo.txt
+
+% john --wordlist=mateo.txt flag.pdf.hash
+Using default input encoding: UTF-8
+Loaded 1 password hash (PDF [MD5 SHA2 RC4/AES 32/64])
+Cost 1 (revision) is 3 for all loaded hashes
+Press 'q' or Ctrl-C to abort, almost any other key for status
+m3l14!@'#'       (flag.pdf)
+1g 0:00:00:00 DONE (2024-03-24 20:34) 4.545g/s 49763p/s 49763c/s 49763C/s m3l14!@$..m3l14!@'#'
+Use the "--show --format=PDF" options to display all of the cracked passwords reliably
+Session completed
+```
+![](2024-03-24-20-28-17.png)
+
+### Resources
+* https://github.com/DvorakDwarf/Infinite-Storage-Glitch
+
 
 ### Challenges
 {{< collapse summary="Expand to see the list of challenges" >}}
