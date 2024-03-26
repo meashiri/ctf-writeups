@@ -305,13 +305,123 @@ Session completed
 ```
 ![](2024-03-24-20-28-17.png)
 
+#### mutant-mayhem
+![](2024-03-25-22-20-48.png)
+
+The attachment to the challenge provides us two values
+```
+k:  18549227558159405545704959828455330521347940195552729233417641071946733850760 
+d:  85752879200026332776470151463649568914870763740738869194582948094216537381852
+```
+`k` is the nonce to be used for signing
+`d` is the private key (that must not be shared)
+
+We are asked to sign the message `Establishing a Secure Connection... :)` and return the hashed message along with the signature (which are two coordinates on the EC).  This is an implementation of ECDSA (Elliptic Curve Digital Signature Algorithm).  The algorithm is as follows: 
+
+1. To sign the message m, the server calculates the hash: h = Hash(m). 
+1. A cryptographically secure integer k is picked. In our case, this is provided in the challenge
+1. A random point on the curve is produced from R = k*G and an integer r = R.x mod n is caluclated.
+1. Finally we signs h by calculating s = k^-1(h + r*d) mod n. The signed message S(m) is the tuple (r,s).
+
+This is the implementation of this algo to derive the flag.
+
+```python
+import ecdsa
+from hashlib import sha256
+from Crypto.Util.number import inverse
+
+k= 18549227558159405545704959828455330521347940195552729233417641071946733850760 
+d= 85752879200026332776470151463649568914870763740738869194582948094216537381852
+m= b'Establishing a Secure Connection... :)'
+
+# SECP256k1 is the Bitcoin elliptic curve
+C = ecdsa.SECP256k1 
+G = C.generator
+R = k*G
+
+n = G.order()
+r = int(R.x()) % n 
+
+H = sha256(m)
+h = int(sha256(m).hexdigest(), 16)
+s = inverse(k,n)*(h+r*d)%n
+
+print(f"{h=}")
+print(f"{int(r)=}")
+print(f"{int(s)=}")
+
+print(f"{h}, ({int(r)}, {int(s)})")  # Assemble these values, wrap in jctf{} and submit as the flag.
+```
+
 ### Resources
 * https://github.com/DvorakDwarf/Infinite-Storage-Glitch
+* https://github.com/GiacomoPope/giacomopope.github.io/tree/master/redpwn
 
 
 ### Challenges
 {{< collapse summary="Expand to see the list of challenges" >}}
 |Category|Challenge|Description
 |----|----|----
-
+|*Feedback|JerseyCTF IV Feeback|
+|*Required|Rules for JerseyCTF IV|
+|bin/rev|MathTest|
+|bin/rev|PasswordManager|
+|bin/rev|Postage|
+|bin/rev|RunningOnPrayers|
+|bin/rev|StageLeft|
+|bin/rev|humble-beginnings|
+|bin/rev|searching-through-vines|
+|bin/rev|the-heist-1|
+|crypto|Attn-Agents|
+|crypto|Crack-a-Mateo|
+|crypto|HashCraft|
+|crypto|adveRSAry|
+|crypto|corporateEspionage |
+|crypto|cyber-artifacts|
+|crypto|its-not-greek-to-me|
+|crypto|mutant-mayhem|
+|forensics|All-Along-the-Watchtower|
+|forensics|digital-footprint|
+|forensics|groovy|
+|forensics|insecure-creds|
+|forensics|living-on-the-edge|
+|forensics|locked-out|
+|forensics|netrunner-detected|
+|forensics|open-notes|
+|forensics|rescue-mission|
+|forensics|secret-tunnels|
+|forensics|sticky-situation|
+|forensics|substitute-detail-torrent|
+|forensics|vibrations|
+|misc|Augmented-&-Fragmented|
+|misc|Unlocking Amnesia: The Password Puzzle|
+|misc|cloud-storage-chaos|
+|misc|data-divergence-discovery|
+|misc|future-packet|
+|misc|internal-tensions|
+|misc|lockbox|
+|misc|p1ng-p0ng|
+|misc|surf-n-turf|
+|misc|the-droid-youre-looking-for|
+|misc|welcome-hackers|
+|misc|what-council|
+|misc|wi-will-wi-will...|
+|osint|advised-on-a-novel-idea|
+|osint|beyond-the-packet|
+|osint|coasting-underground|
+|osint|cyber-daddy|
+|osint|dear-john|
+|osint|thanks-ray|
+|osint|the-golden-falcon-and-the-rugged-lands|
+|osint|the-internet-is-forever|
+|osint|the-only-way-out|
+|osint|this-is-not-the-flag-you-are-looking-for|
+|osint|where-is-it|
+|web|Consent-N-Consent|
+|web|N0D3BR3ACHER$|
+|web|interesting-sites|
+|web|logging4joy|
+|web|mmmmm-rbs|
+|web|require-all-denied|
+|web|runner-net|
 {{< /collapse >}}
