@@ -353,6 +353,41 @@ print(f"{int(s)=}")
 print(f"{h}, ({int(r)}, {int(s)})")  # Assemble these values, wrap in jctf{} and submit as the flag.
 ```
 
+#### AdveRSAry
+![](2024-03-26-15-43-48.png)
+
+1. The `publickeys` attachment has the values `n`, `e` and `q`, which are the modulus, exponent and one of the private prime factors, respectively. 
+1. Since we know one of the prime factors, we can determine the second one, thus defeating the RSA algorithm
+1. The second attachment `intercepted` contains a bytestream, which is presumed to be the encrypted traffic intercepted on a channel. 
+1. This is textbook example of RSA with one of the prime factors given. So it is quite simple to solve it. 
+
+```python
+from Crypto.Util.number import inverse, long_to_bytes, bytes_to_long
+
+'''
+we are given
+ct : ciphertext (in bytes)
+n  : modulus
+e  : exponent
+q  : private prime factor of the modulus
+'''
+ct = ..
+n  = ..
+e  = 65537
+q  = ..
+
+assert n%q == 0
+p = n//q
+
+phi = (p-1)*(q-1)
+d = inverse(e, phi)
+
+c = bytes_to_long(ct)
+m = pow(c, d, n)
+print(long_to_bytes(m)) 
+# b' .... jctf{HAHAHA I knew you would intercept this transmission. You may have won this round, but there are many more challenges for me to best you at}'
+```
+
 ### Resources
 * https://github.com/DvorakDwarf/Infinite-Storage-Glitch
 * https://github.com/GiacomoPope/giacomopope.github.io/tree/master/redpwn
