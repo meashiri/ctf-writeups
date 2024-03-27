@@ -137,7 +137,27 @@ jctf{p4ck3t_c4ptur3_ftw}
 ### Forensics
 
 #### locked out
+![](2024-03-27-10-47-41.png)
+
+1. We are given a password-protected zip file
+1. The zip file seems to contain an image file and an SVG document
+1. Exploring the details of zip, we can see that is using a old zip library, which is also confirmed by the challenge statement. 
+1. From prior experience the `bkcrack` utility can crack the password, provided we know atleast 12 contiguous bytes of plain text that is in the zip file contents.
+1. We know that the SVG file is an XML file with the header `<svg version="1.1"`
+1. Those 18 bytes are sufficient to break the encryption on this zip file.
 ```
+$ unzip -l locked-out.zip 
+Archive:  locked-out.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+    10528  02-19-2024 18:19   flag.png
+   163138  02-19-2024 19:34   nokeynoprob.svg
+---------                     -------
+   173666                     2 files
+
+$ echo -n '<svg version="1.1"' | xxd -p
+3c7376672076657273696f6e3d22312e3122
+
 $ bkcrack -x 0 3c7376672076657273696f6e3d22312e3122 -C locked-out.zip -c nokeynoprob.svg 
 [16:40:00] Z reduction using 11 bytes of known plaintext
 100.0 % (11 / 11)
@@ -267,6 +287,25 @@ UkghhRRSSCGFFFJIIYUUUkghhRRSSCGFFFJIIYUUUkghhRRSSCGFFFJIIYUUUkghhRRSSCGF1M2k
 |#723463|r4c|
 |#33737d|3s}|
 
+Here is the python code to do the same thing:
+```python
+from PIL import Image
+
+im = Image.open('digital_footprint.png')
+print(im.size)
+num_blocks = 17
+wid = im.size[0]//num_blocks
+half = im.size[1]//2
+out_str = ""
+rgb_im = im.convert('RGB')
+for i in range(num_blocks):  
+    r, g, b = rgb_im.getpixel( (half+i*wid, half) )
+    out_str += chr(r)
+    out_str += chr(g)
+    out_str += chr(b)
+print(out_str)   # jctf{st0mping_4r0und_1n_th3_mud_4nd_l3aving_tr4c3s}
+```
+
 Flag : `jctf{st0mping_4r0und_1n_th3_mud_4nd_l3aving_tr4c3s}`
 
 ### Crypto
@@ -318,10 +357,10 @@ d:  8575287920002633277647015146364956891487076374073886919458294809421653738185
 
 We are asked to sign the message `Establishing a Secure Connection... :)` and return the hashed message along with the signature (which are two coordinates on the EC).  This is an implementation of ECDSA (Elliptic Curve Digital Signature Algorithm).  The algorithm is as follows: 
 
-1. To sign the message m, the server calculates the hash: h = Hash(m). 
-1. A cryptographically secure integer k is picked. In our case, this is provided in the challenge
-1. A random point on the curve is produced from R = k*G and an integer r = R.x mod n is caluclated.
-1. Finally we signs h by calculating s = k^-1(h + r*d) mod n. The signed message S(m) is the tuple (r,s).
+1. To sign the message \\(m\\), the server calculates the hash: \\(h = SHA1(m)  \\). 
+1. A cryptographically secure integer \\(k\\) is picked. In our case, this is provided in the challenge
+1. A random point on the curve is produced from \\(R = k*G\\) and an integer \\(r = R \cdot x \mod n \\) is caluclated.
+1. Finally we sign \\(h\\) by calculating \\(s = k^{-1}(h + r*d) \mod n\\). The signed message \\(S(m)\\) is the tuple \\((r,s)\\).
 
 This is the implementation of this algo to derive the flag.
 
@@ -410,7 +449,6 @@ Press 'q' or Ctrl-C to abort, almost any other key for status
 Use the "--show" option to display all of the cracked passwords reliably
 Session completed
 ```
-
 
 ### Resources
 * https://github.com/DvorakDwarf/Infinite-Storage-Glitch
