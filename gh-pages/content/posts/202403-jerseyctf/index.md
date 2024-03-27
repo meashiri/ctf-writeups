@@ -388,6 +388,30 @@ print(long_to_bytes(m))
 # b' .... jctf{HAHAHA I knew you would intercept this transmission. You may have won this round, but there are many more challenges for me to best you at}'
 ```
 
+#### Hashcraft
+![](2024-03-26-23-12-26.png)
+
+We are given a password protected zip file. The challenge description hints at creating rules for `hashcat` based on the word `adminbackup`.  The challenge hint says `OneRuleToRuleThemAll`. 
+
+1. The hint refers to a `hashcat` [rulebase here](https://github.com/NotSoSecure/password_cracking_rules)
+1. Use the word `adminbackup` to generate a wordlist using this ruleset
+1. Run John against the hash, using this wordlist.
+1. Wrap the password detected in `jctf{}` and submit as the flag.
+
+```bash
+% echo -n "adminbackup" | hashcat -r OneRuleToRuleThemAll.rule --stdout > adminbackup.txt
+% zip2john encrypted_backup.zip > zip.hash
+% john --wordlist=adminbackup.txt zip.hash
+Using default input encoding: UTF-8
+Loaded 1 password hash (PKZIP [32/64])
+Press 'q' or Ctrl-C to abort, almost any other key for status
+1a2d3m4inbackup  (encrypted_backup.zip/etc_backup.tar.gz)			<====== password here
+1g 0:00:00:00 DONE (2024-03-26 23:17) 25.00g/s 1206Kp/s 1206Kc/s 1206KC/s adminbeackup1..adminbackup2
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed
+```
+
+
 ### Resources
 * https://github.com/DvorakDwarf/Infinite-Storage-Glitch
 * https://github.com/GiacomoPope/giacomopope.github.io/tree/master/redpwn
