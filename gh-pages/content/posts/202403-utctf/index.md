@@ -7,9 +7,9 @@ math: true
 cover:
     image: utctf_banner.png
 ---
-
+This CTF was organized by the University of Texas, Austin's Info Security association. I participated as part of the team `Weak But Leet` and we were placed 9th out of approximately 900 teams participating. 
 <!--more-->
-
+Here are some of the challenges I solved and the approach I took.
 ### Crypto
 #### RSA 256
 ![](2024-03-31-13-52-37.png)
