@@ -352,6 +352,37 @@ for line in F:
 S = ''.join(key_sequence)
 print('\n'.join(key_sequence))
 ```
+At this point, I was stumped as to what the keystrokes might mean. In an attempt to analyze the alphabet, I generated a frequency distribution of the letters.
+```
+% fold -w 1 keystrokes_in.txt | sort | uniq -c | sort 
+   1 ]
+   1 h
+   4 '
+   6  
+   9 u
+  10 l
+  11 g
+  17 o
+  17 s
+  26 k
+  27 ;
+  27 [
+  31 d
+  43 f
+  44 m
+  46 w
+  48 e
+  48 i
+  49 a
+  52 r
+  64 j
+  66 c
+  70 v
+  72 n
+  76 p
+ 263 ⌫
+```
+My teammate recognized that there are no `b`, `z` or `t` being used and surmised that it could be stenography. A quick search of "stenography on qwerty" produced a number of hits on Plover, OpenStenography and other similar sites.  A check on the OpenStenography site with some of the key combos quickly confirmed that it is indeed stenography. So, the next step was to find out which keys go together. To determine this we pulled in the `time_epoch` field from the usb capture and calculated the difference between the keystrokes.
 
 The following sequence shows the key sequence `fgmik[` being recorded.  
 ```
@@ -386,6 +417,7 @@ def test_gibberish(capture, machine, strokes):
     assert 1 == 1
 ```
 I added another test case using the same framework and fed our keystrokes and converted them into stenographical text. For example, the keystrokes `m p` gives us `u t`. So, doing this for the keystrokes of interest gives us the Steno equivalents for the QWERTY text entered. 
+
 ```
 % pytest -s test_keyboard.py   
 ======================================== test session starts ========================================
@@ -396,72 +428,58 @@ plugins: anyio-3.6.2
 collected 7 items                                                                                   
 
 test_keyboard.py ...
-a n p       --> [{'S-'}, {'-E'}, {'-T'}]
-w e r c f l --> [{'T-'}, {'P-'}, {'H-'}, {'A-'}, {'R-'}, {'-G'}]
-w v         --> [{'T-'}, {'O-'}]
-m p         --> [{'-U'}, {'-T'}]
-w e c r f l --> [{'T-'}, {'P-'}, {'A-'}, {'H-'}, {'R-'}, {'-G'}]
-w e f l k p --> [{'T-'}, {'P-'}, {'R-'}, {'-G'}, {'-B'}, {'-T'}]
-r f n j i k --> [{'H-'}, {'R-'}, {'-E'}, {'-R'}, {'-P'}, {'-B'}]
-f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]
-a w e r v l --> [{'S-'}, {'T-'}, {'P-'}, {'H-'}, {'O-'}, {'-G'}]
-w e n m     --> [{'T-'}, {'P-'}, {'-E'}, {'-U'}]
-f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]
-v i k       --> [{'O-'}, {'-P'}, {'-B'}]
-f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]
-c n m       --> [{'A-'}, {'-E'}, {'-U'}]
-f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]
-s d j n p   --> [{'K-'}, {'W-'}, {'-R'}, {'-E'}, {'-T'}]
-s d f n m   --> [{'K-'}, {'W-'}, {'R-'}, {'-E'}, {'-U'}]
-f g m i k [ --> [{'R-'}, {'*'}, {'-U'}, {'-P'}, {'-B'}, {'-D'}]
-s v c n k [ --> [{'K-'}, {'O-'}, {'A-'}, {'-E'}, {'-B'}, {'-D'}]
-f g m i k [ --> [{'R-'}, {'*'}, {'-U'}, {'-P'}, {'-B'}, {'-D'}]
-a           --> [{'S-'}]
-f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]
-s d v c n m --> [{'K-'}, {'W-'}, {'O-'}, {'A-'}, {'-E'}, {'-U'}]
-s d v c n m --> [{'K-'}, {'W-'}, {'O-'}, {'A-'}, {'-E'}, {'-U'}]
-f g m i k [ --> [{'R-'}, {'*'}, {'-U'}, {'-P'}, {'-B'}, {'-D'}]
-m n u o p [ --> [{'-U'}, {'-E'}, {'-F'}, {'-L'}, {'-T'}, {'-D'}]
-w e f g k   --> [{'T-'}, {'P-'}, {'R-'}, {'*'}, {'-B'}]
+a n p       --> [{'S-'}, {'-E'}, {'-T'}]                         --> set
+w e r c f l --> [{'T-'}, {'P-'}, {'H-'}, {'A-'}, {'R-'}, {'-G'}] --> flag
+w v         --> [{'T-'}, {'O-'}]                                 --> to
+m p         --> [{'-U'}, {'-T'}]                                 --> ut
+w e c r f l --> [{'T-'}, {'P-'}, {'A-'}, {'H-'}, {'R-'}, {'-G'}] --> flag
+w e f l k p --> [{'T-'}, {'P-'}, {'R-'}, {'-G'}, {'-B'}, {'-T'}] --> {
+r f n j i k --> [{'H-'}, {'R-'}, {'-E'}, {'-R'}, {'-P'}, {'-B'}] --> learning
+f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]  --> _
+a w e r v l --> [{'S-'}, {'T-'}, {'P-'}, {'H-'}, {'O-'}, {'-G'}] --> stenog (??)
+w e n m     --> [{'T-'}, {'P-'}, {'-E'}, {'-U'}]                 --> raphy  (??)
+f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]  --> _
+v i k       --> [{'O-'}, {'-P'}, {'-B'}]                         --> on
+f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]  --> _
+c n m       --> [{'A-'}, {'-E'}, {'-U'}]                         --> a
+f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]  --> _
+s d j n p   --> [{'K-'}, {'W-'}, {'-R'}, {'-E'}, {'-T'}]         --> qwerty
+s d f n m   --> [{'K-'}, {'W-'}, {'R-'}, {'-E'}, {'-U'}]         --> qwerty
+f g m i k [ --> [{'R-'}, {'*'}, {'-U'}, {'-P'}, {'-B'}, {'-D'}]  --> _
+s v c n k [ --> [{'K-'}, {'O-'}, {'A-'}, {'-E'}, {'-B'}, {'-D'}] --> keyboard
+f g m i k [ --> [{'R-'}, {'*'}, {'-U'}, {'-P'}, {'-B'}, {'-D'}]  --> _
+a           --> [{'S-'}]                                         --> is
+f g i k m [ --> [{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]  --> _
+s d v c n m --> [{'K-'}, {'W-'}, {'O-'}, {'A-'}, {'-E'}, {'-U'}] --> [deleted]
+s d v c n m --> [{'K-'}, {'W-'}, {'O-'}, {'A-'}, {'-E'}, {'-U'}] --> quite
+f g m i k [ --> [{'R-'}, {'*'}, {'-U'}, {'-P'}, {'-B'}, {'-D'}]  --> _
+m n u o p [ --> [{'-U'}, {'-E'}, {'-F'}, {'-L'}, {'-T'}, {'-D'}] --> difficult
+w e f g k   --> [{'T-'}, {'P-'}, {'R-'}, {'*'}, {'-B'}]          --> }
 ....
 ```
 The next step was to use a lot of ~~guesswork~~ intelligence to `read` the steno text to have it make sense, while referencing the online resources to lookup values for symbols and punctuations. For example R*PBUD is the underscore character.  
-
-|QWERTY text|Steno text|possible words|
-|----|----|----|
-|a n p       |[{'S-'}, {'-E'}, {'-T'}]| set |
-|w e r c f l |[{'T-'}, {'P-'}, {'H-'}, {'A-'}, {'R-'}, {'-G'}]| flag | 
-|w v         |[{'T-'}, {'O-'}]| to | 
-|m p         |[{'-U'}, {'-T'}]| ut |
-|w e c r f l |[{'T-'}, {'P-'}, {'A-'}, {'H-'}, {'R-'}, {'-G'}]| flag|
-|w e f l k p |[{'T-'}, {'P-'}, {'R-'}, {'-G'}, {'-B'}, {'-T'}]| { |
-|r f n j i k |[{'H-'}, {'R-'}, {'-E'}, {'-R'}, {'-P'}, {'-B'}]| learning |
-|f g i k m [ |[{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]| _ |
-|a w e r v l |[{'S-'}, {'T-'}, {'P-'}, {'H-'}, {'O-'}, {'-G'}]| steno (??) |
-|w e n m     |[{'T-'}, {'P-'}, {'-E'}, {'-U'}]| graphy (??) |
-|f g i k m [ |[{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]| _ |
-|v i k       |[{'O-'}, {'-P'}, {'-B'}]| on |
-|f g i k m [ |[{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]| _ |
-|c n m       |[{'A-'}, {'-E'}, {'-U'}]| a |
-|f g i k m [ |[{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]| _ |
-|s d j n p   |[{'K-'}, {'W-'}, {'-R'}, {'-E'}, {'-T'}]| qwerty |
-|s d f n m   |[{'K-'}, {'W-'}, {'R-'}, {'-E'}, {'-U'}]| qwerty |
-|f g m i k [ |[{'R-'}, {'*'}, {'-U'}, {'-P'}, {'-B'}, {'-D'}]| _ |
-|s v c n k [ |[{'K-'}, {'O-'}, {'A-'}, {'-E'}, {'-B'}, {'-D'}]| keyboard | 
-|f g m i k [ |[{'R-'}, {'*'}, {'-U'}, {'-P'}, {'-B'}, {'-D'}]| _ |
-|a           |[{'S-'}]| is | 
-|f g i k m [ |[{'R-'}, {'*'}, {'-P'}, {'-B'}, {'-U'}, {'-D'}]| _ |
-|s d v c n m |[{'K-'}, {'W-'}, {'O-'}, {'A-'}, {'-E'}, {'-U'}]|deleted by backspaces |
-|s d v c n m |[{'K-'}, {'W-'}, {'O-'}, {'A-'}, {'-E'}, {'-U'}]|quite|
-|f g m i k [ |[{'R-'}, {'*'}, {'-U'}, {'-P'}, {'-B'}, {'-D'}]| _ |
-|m n u o p [ |[{'-U'}, {'-E'}, {'-F'}, {'-L'}, {'-T'}, {'-D'}]| difficult|
-|w e f g k   |[{'T-'}, {'P-'}, {'R-'}, {'*'}, {'-B'}]| } |
-
 
 [This site](https://spectra.sammdot.ca/) was incredibly useful to ~~guess~~ decode the steno text into normal english. 
 
 `utflag{learning_stenography_on_a_qwerty_keyboard_is_quite_difficult}`
 
+PS: after discussing with the challenge author, I realized that I overlooked something important. The `usbhid.data` field can identify only 6 keys (as it has room for only 6 bytes). However, some of the `chords` use a key combo of longer than 6 keys. This is recognized by key strokes where some keys are released and new keys are pressed, without the keyboard being idle. The following is an example of such a scenario, showing a chord of `ecrnmkl`
+```
+0.1055 : []
+11.6665 : ['e']
+0.0895 : ['e', 'c']
+0.0130 : ['e', 'c', 'r']
+0.1145 : ['e', 'c', 'r', 'n']
+0.0499 : ['e', 'c', 'r', 'n', 'm']
+0.2860 : ['e', 'r', 'n', 'm']
+0.0091 : ['e', 'n', 'm']
+0.0030 : ['n', 'm']
+0.2325 : ['n', 'm', 'k']
+0.1845 : ['n', 'm', 'k', 'l']
+0.2780 : ['n', 'm', 'k']
+0.0028 : ['n', 'm']
+0.0382 : []
+```
 #### Insanity Check: Reimagined
 ![](2024-03-31-13-57-11.png)
 
@@ -542,6 +560,13 @@ print(morse)
 * http://www.openstenoproject.org/
 * http://www.openstenoproject.org/plover/
 * https://spectra.sammdot.ca/
+* https://connor-mccartney.github.io/cryptography/other/UTCTF-2024
+* https://warlocksmurf.github.io/posts/utctf2024/
+* https://seall.dev/posts/utctf2024
+* https://hackmd.io/@benjaminion/bls12-381#Rogue-key-attacks (Forgery)
+* https://ctf.krauq.com/utctf-2024
+
+
 
 ### Challenges
 {{< collapse summary="Expand to see the list of challenges" >}}
