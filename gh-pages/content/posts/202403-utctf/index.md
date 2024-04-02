@@ -243,6 +243,72 @@ Nice! You got it :) Have a flag:
 utflag{sometimes_pure_guessing_is_the_strat}
 ```
 
+On discord, Minh_AT20A (minhack) shared their brilliant solution, which does not require the use of the wordlist. I tried to describe their solution and my analysis of it here. 
+
+Let the secret word have its characters at an index of \\( [w_1,w_2,w_3,w_4,w_5]\\). These indices are with respect to the letter `a` being at `0`.  So, the word `apple` would be represented as \\( [0, 15, 15, 11, 4]\\). Our challenge is to determine these indices given the responses from the server, which happens to be \\( \prod (g_i-w_i) \mod 31 \\), where \\(g_i\\) is the guessed letter and \\(w_i\\) is the actual letter. 
+
+For each word, we will try 5 guesses. With the guesses being `aaaaa`, `baaaa`, `abaaa`, `aabaa` and `aaaba`.
+
+For the first guess, `aaaaa`, the response from the server is 
+$$
+\begin{align}
+r_1 &= ( 0 - w_1 ) * ( 0 - w_2 ) * ( 0 - w_3 ) * ( 0 - w_4 ) * ( 0 - w_5 )  \notag \\\ 
+r_1 &= - (w_1 \cdot w_2 \cdot w_3 \cdot w_4 \cdot w_5 ) \pmod {31}  \\\ 
+\end{align}
+$$
+For the second guess, `baaaa`, the response from the server is 
+$$
+\begin{align}
+r_2 &= ( 1 - w_1 ) * ( 0 - w_2 ) * ( 0 - w_3 ) * ( 0 - w_4 ) * ( 0 - w_5 )  \notag \\\ 
+r_2 &= (w_2 \cdot w_3 \cdot w_4 \cdot w_5) - (w_1 \cdot w_2 \cdot w_3 \cdot w_4 \cdot w_5 ) \pmod {31} \\\
+r_1 - r_2 &= - (w_2 \cdot w_3 \cdot w_4 \cdot w_5) \pmod {31}  \\\
+\frac {r_1} {r_1 - r_2} &= w_1  \pmod {31} \\\
+Likewise,  \notag \\\
+\frac {r_1} {r_1 - r_3} &= w_2  \pmod {31} \\\
+\frac {r_1} {r_1 - r_4} &= w_3  \pmod {31} \\\
+\frac {r_1} {r_1 - r_5} &= w_4  \pmod {31} \\\
+\\\
+Finally, \notag \\\
+w_5 &= \frac {- r_1} {w_1 \cdot w_2 \cdot w_3 \cdot w_4} \pmod {31}  \\\ 
+\end{align}
+$$
+
+Since we are doing modular arithmetic, all division above should be represented as 
+$$
+\frac {a} {b} \pmod {n}  = a * b^{-1} \pmod {n}
+\\\
+\text{In python,       }  a * pow(b, -1, n) \pmod {n}
+$$
+
+The only catch with the above solution is that if the secret word contains the letter `a`, \\(r_1 = 0\\) and one of \\(r_2,r_3,r_4,r_5 = 0\\). This causes the `pow()` function to fail, producing the `base is not invertible for the given modulus` error.  
+
+```python
+def calc_answer(r):
+    ans = []
+    product = -1
+    for i in range(1, 5):
+        ans.append((r[0] * pow(r[0] - r[i], -1, 31)) % 31)
+        product *= ans[-1]
+    ans.append( (r[0] * pow(product, -1, 31)) % 31 )
+    return ''.join[chr(ord('a')+x) for x in ans]
+    
+
+P = remote('betta.utctf.live', 7496)
+canned = [b'aaaaa', b'baaaa', b'abaaa', b'aabaa', b'aaaba']
+for iter in range(3):
+    responses = []
+    for attempts in range(5):
+        P.recvuntil(b"guess?\n")
+        P.sendline(canned[attempts])
+        responses.append(int(P.recvline().strip()))
+    my_answer = calculate_answer(responses)
+    P.recvuntil(b'guess?\n')
+    P.sendline(my_answer.encode())
+    guess_response = P.recvline().strip()
+    print(guess_response)
+P.interactive()  
+```
+
 #### simple signature
 ![](2024-03-31-13-55-16.png)
 
@@ -565,7 +631,7 @@ print(morse)
 * https://seall.dev/posts/utctf2024
 * https://hackmd.io/@benjaminion/bls12-381#Rogue-key-attacks (Forgery)
 * https://ctf.krauq.com/utctf-2024
-
+* https://slefforge.github.io/CTF.html
 
 
 ### Challenges
