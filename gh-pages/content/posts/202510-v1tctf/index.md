@@ -1,5 +1,5 @@
 ---
-title: "202510 V1tctf"
+title: "V1T CTF"
 date: 2025-11-01T12:30:13-04:00
 categories: [ctf, writeup]
 tags: [RSA,LSB, PRNG, NLCG, Emoji, DNA, Hexavue]
