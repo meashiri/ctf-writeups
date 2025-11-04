@@ -97,7 +97,7 @@ v2 = ord('1')-flagc[1]
 v3 = ord('t')-flagc[2]
 
 M = math.gcd(v1, v2, v3)
-print(v1, v2, v3, "GCD=", M)
+print(v1, v2, v3, "GCD=", M)   #102
 
 # common divisor of v1, v2, v3 and > 49, <=100
 key = 51
@@ -137,7 +137,7 @@ print(long_to_bytes(m))     # b'v1t{f3rm4t_l1ttl3_duck}'
 ```
 
 ### <White text>
-We are given a text file filled with 
+We are given a text file filled with white spaces. Looking with `xxd` we can see that the file consists of varying patterns of 0x20 (space), 0x09 (tab), 0x0a (CR) and 0x0d (LF) characters. 
 
 ```
  % xxd -c1000 -p  txt |                     
