@@ -152,6 +152,146 @@ v1t{1_c4nt_s33_4nyth1ng}?
 ### Shamir's Duck
 
 ### Random Stuff
+This problem came in two parts, each part refers a different technique and reveals one part of the flag. 
+#### Part 1
+This part referenced a PRNG, using a non-linear, congruential generator - with a twist. In this case, all the parameters of the NLCG are revealed. However, we have to reverse engineer the current value of the RNG to determine the original seed. 
+
+```python
+part_1 = "<flag_part_1>".encode()
+
+class LCG():
+    def __init__(self, seed, a, c, m):
+        self.seed = seed
+        self.a = a
+        self.c = c
+        self.m = m
+        self.state = seed
+        
+    # Non-linear generator as it uses (a*s^e+c)%m  instead of the usual (a*s+e) % m
+    # also that we are given only the highest ~30 bits of s. The lower 20 bits are discarded
+    def next(self):
+        self.seed = (self.a * self.seed ** 65537 + self.c) % m
+        return self.seed >> 20
+# a,c and seed are ~50 bits, modulus m is ~100 bits    
+a = getPrime(50)
+c = getPrime(50)
+m = getPrime(100)
+seed = getRandomInteger(50)
+lcg = LCG(seed, a, c, m)
+key = sha256(long_to_bytes(seed)).digest()
+enc = AES.new(key, AES.MODE_ECB).encrypt(pad(part_1, 16))
+
+# We are given the values below
+print(f"{enc = }") # enc = b'\xe6\x97\x9f\xb9\xc9>\xde\x1e\x85\xbb\xebQ"Ii\xda\'\x1f\xae\x19\x05M\x01\xe1kzS\x8fi\xf4\x8cz'
+print(f"{a = }") # a = 958181900694223
+print(f"{c = }") # c = 1044984108221161
+print(f"{m = }") # m = 675709840048419795804542182249
+print(f"{lcg.next() = }") # lcg.next() = 176787694147066159797379
+```
+
+The formula in the provided code is:
+$$X_{next} = (a \cdot X_{current}^{65537} + c) \pmod m$$
+Where:
+* $X_{current}$ is `self.seed` (the previous state).
+* $X_{next}$ is the new value of `self.seed`.
+* The value returned by `next()` is $Y = X_{next} \gg 20$, which means $Y = \lfloor X_{next} / 2^{20} \rfloor$.
+
+The problem effectively boils down to finding $X_0$ given $Y$, $a$, $c$, and $m$.
+
+$$X_{next} = (a \cdot X_{0}^{65537} + c) \pmod m$$
+$$Y = X_{next} \gg 20 = \lfloor \frac{X_{next}}{2^{20}} \rfloor$$
+
+From the definition of integer division:
+$$Y \cdot 2^{20} \le X_{next} < (Y + 1) \cdot 2^{20}$$
+
+Since $X_{next}$ is the result of a modulo $m$ operation, the *actual* value of $X_{next}$ used in the return must be in the range $[0, m-1]$.
+
+Therefore, the actual $X_{next}$ must satisfy:
+$$X_{next} \in [0, m-1] \cap [Y \cdot 2^{20}, (Y + 1) \cdot 2^{20} - 1]$$
+
+We now have the equation for $X_{next}$:
+$$X_{next} \equiv a \cdot X_{0}^{65537} + c \pmod m$$
+Rearranging to isolate the term with $X_0$:
+$$a \cdot X_{0}^{65537} \equiv X_{next} - c \pmod m$$
+
+Let $R = X_{next} - c \pmod m$. The equation is:
+$$a \cdot X_{0}^{65537} \equiv R \pmod m$$
+
+Since $a$ and $m$ are both 50-bit and 100-bit primes respectively, they are relatively prime, so $a$ has a modular multiplicative inverse modulo $m$, let's call it $a^{-1}$.
+
+$$X_{0}^{65537} \equiv R \cdot a^{-1} \pmod m$$
+
+Let $S = R \cdot a^{-1} \pmod m$. The final equation is a discrete root problem:
+$$X_{0}^{65537} \equiv S \pmod m$$
+We have the equation $X_0^e \equiv S \pmod m$, where $e=65537$ and $m$ is prime. The order of the multiplicative group modulo $m$ is $\phi(m) = m - 1$.
+
+We need to find the multiplicative inverse of the exponent $e=65537$ modulo $m-1$. That is, find $d$ such that:
+$$e \cdot d \equiv 1 \pmod{m-1}$$
+This $d$ can be found using the **Extended Euclidean Algorithm** if $\gcd(e, m-1) = 1$. Since $e = 2^{16} + 1$, it is a Fermat number, and its primality is not guaranteed, but it's very likely co-prime to $m-1$ since $m$ is a randomly chosen large prime.
+
+If we find $d$, then we can calculate $X_0$:
+$$(X_0^e)^d \equiv S^d \pmod m$$
+$$X_0^{e d} \equiv S^d \pmod m$$
+
+Since $e d \equiv 1 \pmod{m-1}$, we have $e d = k(m-1) + 1$ for some integer $k$. By **Fermat's Little Theorem** (or Euler's Theorem), for $X_0 \not\equiv 0 \pmod m$:
+$$X_0^{e d} = X_0^{k(m-1) + 1} = (X_0^{m-1})^k \cdot X_0^1 \equiv 1^k \cdot X_0 \equiv X_0 \pmod m$$
+
+Thus, the solution for the seed $X_0$ is:
+$$X_0 \equiv S^d \pmod m$$
+
+Since the original `seed` $X_0$ was a 50-bit integer, the calculated $X_0 \pmod m$ will be the unique seed value we are looking for (as $m$ is a 100-bit number, the solution will be in the range $[0, m-1]$).
+
+1.  **Determine $X_{next}$:** Given $Y$, find the unique value $X_{next} \in [0, m-1]$ such that $Y \cdot 2^{20} \le X_{next} < (Y + 1) \cdot 2^{20}$.
+2.  **Calculate $S$:**
+    * Find $R = (X_{next} - c) \pmod m$.
+    * Find $a^{-1} = a^{\phi(m) - 1} \pmod m$ (since $m$ is prime, $\phi(m)=m-1$) using the Extended Euclidean Algorithm or modular exponentiation.
+    * Calculate $S = (R \cdot a^{-1}) \pmod m$.
+3.  **Find the Exponent Inverse $d$:** Use the Extended Euclidean Algorithm to find $d$ such that $65537 \cdot d \equiv 1 \pmod{m-1}$.
+4.  **Calculate $X_0$ (The Seed):** The seed is $X_0 = S^d \pmod m$.
+
+This $X_0$ will be the original `seed` value used to initialize the `LCG` object.
+
+The complete solution is as follows
+```python
+enc = b'\xe6\x97\x9f\xb9\xc9>\xde\x1e\x85\xbb\xebQ"Ii\xda\'\x1f\xae\x19\x05M\x01\xe1kzS\x8fi\xf4\x8cz'
+a = 958181900694223
+c = 1044984108221161
+m = 675709840048419795804542182249
+Y = 176787694147066159797379        # value of [ lcg.next() >> SHIFT_BITS ]
+e = 65537
+SHIFT_BITS = 20
+
+L = Y * (1 << SHIFT_BITS)  # Lower bound for X0
+R = (Y + 1) * (1 << SHIFT_BITS) # Upper bound for X0 (exclusive)
+
+a_inv = inverse(a, m)
+d = inverse(e, m - 1)
+
+print (f"Testing possible values: {R-L}")
+for x0 in range (L, R):
+    # Calculate R: R = (X0 - c) * a_inv mod m
+    X0_minus_c = (x0 - c) % m
+    R = (X0_minus_c * a_inv) % m
+    #seed 
+    S = pow(R, d, m)
+
+    # use this seed to regenerate x0. if we get it back, we have the right seed
+    x0_check = (a * pow(S, e, m) + c) % m
+    if (x0_check == x0):
+        key = sha256(long_to_bytes(S)).digest()
+        cipher = AES.new(key, AES.MODE_ECB)
+        dec = cipher.decrypt(enc)
+        if (dec.startswith(b'v1t{')):
+            print(f"{S=}\n{dec=}")
+            break
+```
+
+
+
+
+
+
+
 
 ## Misc
 ### Talking Duck
