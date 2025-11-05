@@ -136,8 +136,8 @@ m = pow(c,d,n)
 print(long_to_bytes(m))     # b'v1t{f3rm4t_l1ttl3_duck}'
 ```
 
-### <White text>
-We are given a text file filled with white spaces. Looking with `xxd` we can see that the file consists of varying patterns of 0x20 (space), 0x09 (tab), 0x0a (CR) and 0x0d (LF) characters. 
+### Whitespace.TXT
+We are given a text file filled with white spaces. Looking with `xxd` we can see that the file consists of varying patterns of 0x20 (space), 0x09 (tab), 0x0a (CR) and 0x0d (LF) characters. Decode the pattern to get the binary value of the flag.
 
 ```
  % xxd -c1000 -p  txt |                     
@@ -154,7 +154,7 @@ v1t{1_c4nt_s33_4nyth1ng}?
 ### Random Stuff
 This problem came in two parts, each part refers a different technique and reveals one part of the flag. 
 #### Part 1
-This part referenced a PRNG, using a non-linear, congruential generator - with a twist. In this case, all the parameters of the NLCG are revealed. However, we have to reverse engineer the current value of the RNG to determine the original seed. 
+This part referenced a PRNG, using a non-linear, congruential generator - with a twist. In this case, all the parameters of the NLCG are revealed. However, we have to reverse engineer the current value of the RNG to determine the original seed, when the lowest 20 bits are lost.
 
 ```python
 part_1 = "<flag_part_1>".encode()
@@ -269,11 +269,11 @@ d = inverse(e, m - 1)
 
 print (f"Testing possible values: {R-L}")
 for x0 in range (L, R):
-    # Calculate R: R = (X0 - c) * a_inv mod m
+    # Calculate P: P = (X0 - c) * a_inv mod m
     X0_minus_c = (x0 - c) % m
-    R = (X0_minus_c * a_inv) % m
+    P = (X0_minus_c * a_inv) % m
     #seed 
-    S = pow(R, d, m)
+    S = pow(P, d, m)
 
     # use this seed to regenerate x0. if we get it back, we have the right seed
     x0_check = (a * pow(S, e, m) + c) % m
@@ -284,15 +284,85 @@ for x0 in range (L, R):
         if (dec.startswith(b'v1t{')):
             print(f"{S=}\n{dec=}")
             break
+# S=529909332019471
+# dec=b'v1t{Pseud0_R4nd0m_G3ner4t0r\x05\x05\x05\x05\x05'
 ```
+#### Part 2
+The second part of the flag is obfuscated by a series of XOR and bit-shift operations as shown:
+```python
+    flag = bytearray(b"th4t_y0u_h4ve_t0_f1nd")
+    length = len(flag)
 
+    for i in range(length):
+        if i > 0:
+            flag[i] ^= flag[i-1]
 
+        v = flag[i] & 0xFF
+        v ^= (v >> 4)
+        v &= 0xFF
+        v ^= (v >> 3)
+        v &= 0xFF
+        v ^= (v >> 2)
+        v &= 0xFF
+        v ^= (v >> 1)
+        v &= 0xFF
 
+        flag[i] = v
+        print(f"{v:02x}", end="")   # given to be 6768107b1a357132741539783d6a661b5f3b
+```
+The challenge is to unravel the XOR and the bit-shifts to determine the original input. 
+I re-wrote the program to use different variables for each step to help me understand it better. 
+```python
+for i in range(length):
+    if i > 0:
+        flag[i] ^= flag[i-1]
 
+    v = flag[i] & 0xFF
+    v1 = v ^ (v >> 4)
+    v1 &= 0xFF
 
+    v2 = v1 ^ (v1 >> 3)
+    v2 &= 0xFF
 
+    v3 = v2 ^ (v2 >> 2)
+    v3 &= 0xFF
 
+    v4 = v3 ^ (v3 >> 1)
+    v4 &= 0xFF
 
+    flag[i] = v4
+```
+Methodically capturing the bit manipulations for each byte shows the following logic. 
+![](2025-11-04-21-59-10.png)
+We can determine the original bits from the encoded value. The last step is to XOR the value with the encoded value of the previous character.
+
+The final solution is 
+```python
+def extractBitByPosition(byteval, pos):
+    # pos = 0 for LSB, 7 for MSB
+    shifted_val = byteval >> pos
+    return shifted_val & 1; 
+
+def undoXORchain(v):
+    result_bits = []
+    result_bits.append(extractBitByPosition(v,7))   #G7
+    result_bits.append(extractBitByPosition(v,6)^result_bits[0]) # G6^B7
+    result_bits.append(extractBitByPosition(v,5)^result_bits[0]^result_bits[1])  #G5^B6^B7
+    result_bits.append(extractBitByPosition(v,4)^result_bits[1]^result_bits[2])  #G4^B5^B6
+    result_bits.append(extractBitByPosition(v,3)^result_bits[2]^result_bits[3])  #G3^B4^B5
+    result_bits.append(extractBitByPosition(v,2)^result_bits[3]^result_bits[4])  #G2^B3^B4
+    result_bits.append(extractBitByPosition(v,1)^result_bits[4]^result_bits[5])  #G1^B2^B3
+    result_bits.append(extractBitByPosition(v,0)^result_bits[5]^result_bits[6]) #G0^B1^B2
+    return int("".join(str(c) for c in result_bits), 2)
+
+    enc = bytes.fromhex("6768107b1a357132741539783d6a661b5f3b")
+
+    for i,c in enumerate(enc):
+        o = undoXORchain(c)
+        if i > 0: 
+            o ^= enc[i-1]
+        print(chr(o), end="") # _1s_n0t_th4t_h4rd}
+```
 ## Misc
 ### Talking Duck
 ![](2025-11-02-12-43-55.png) 
@@ -303,7 +373,39 @@ V1T DUCK S0S S0S
 ```
 ### Emoji Thief
 
+
 ### RotBrain
+We are given an file called `gnp.egami`, which is `image.png` reversed. So, we expect data to be ordered in a reversed manner. Looking at the beginning and end of the file confirms our suspicion. 
+
+```bash
+% xxd gnp.egami| head 
+00000000: c282 6042 c2ae 444e 4549 0000 0000 5dc2  ..`B..DNEI....].
+00000010: 93c3 a915 357a c388 c2b4 0fc3 bc41 c391  ....5z.......A..
+00000020: 28c2 95c3 824a 20c3 a8c2 944a c3a1 2510  (....J ....J..%.
+00000030: 744a 2570 c292 c288 3a25 12c2 b849 441d  tJ%p....:%...ID.
+00000040: 12c2 895c 24c2 a20e c289 44c2 ae12 50c2  ...\$.....D...P.
+00000050: 9fc3 be25 12c2 b84f 01c2 8364 2b4b c399  ...%...O...d+K..
+00000060: 3604 72c3 bb69 7dc2 9c20 115f c3ad c29a  6.r..i}.. ._....
+00000070: 1ac2 ae71 37c2 a851 34c2 8d5c 7e77 c3b9  ...q7..Q4..\~w..
+00000080: c28a 21c2 b440 c3a0 c285 c38c c3bd c2bf  ..!..@..........
+00000090: c39a 0cc2 9ec3 b35a 79c3 80c3 9ac3 bd74  .......Zy......t
+% xxd gnp.egami| tail 
+00001680: 6666 6666 6665 56c3 a665 41c2 9950 657c  fffffeV..eA..Pe|
+00001690: 6666 556d 5155 c2b9 c299 c299 c299 c299  ffUmQU..........
+000016a0: c299 c299 c294 c3a0 0517 472b 6c05 c39c  ..........G+l...
+000016b0: c3ad 5e78 5441 4449 050f 0000 781f 66c3  ..^xTADI....x.f.
+000016c0: 9e01 7412 0000 7412 0000 7359 4870 0900  ..t...t...sYHp..
+000016d0: 0000 0561 c3bc 0bc2 8fc2 b100 0041 4d41  ...a.........AMA
+000016e0: 6704 0000 00c3 a91c c38e c2ae 0042 4752  g............BGR
+000016f0: 7301 0000 005b 260f 6400 0000 0608 2700  s....[&.d.....'.
+00001700: 0000 c39c 0000 0052 4448 490d 0000 000a  .......RDHI.....
+00001710: 1a0a 0d47 4e50 c289                      ...GNP..
+```
+We see the familiar PNG header at the bottom of the file and the IEND header at the beginning. 
+
+While I was exploring different ways to approach the problem, I accidentally discovered that CyberChef can solve this problem easily. I am sure that is not the intended solution.
+
+![](2025-11-04-12-42-01.png)
 
 ### Specimen 512
 
