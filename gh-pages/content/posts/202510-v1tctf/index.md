@@ -262,20 +262,21 @@ e = 65537
 SHIFT_BITS = 20
 
 L = Y * (1 << SHIFT_BITS)  # Lower bound for X0
-R = (Y + 1) * (1 << SHIFT_BITS) # Upper bound for X0 (exclusive)
+U = (Y + 1) * (1 << SHIFT_BITS) # Upper bound for X0 (exclusive)
 
 a_inv = inverse(a, m)
 d = inverse(e, m - 1)
 
-print (f"Testing possible values: {R-L}")
-for x0 in range (L, R):
-    # Calculate P: P = (X0 - c) * a_inv mod m
+print (f"Testing possible values: {U-L}")
+for x0 in range (L, U):
+    # Calculate R: R = (X0 - c) * a_inv mod m
     X0_minus_c = (x0 - c) % m
-    P = (X0_minus_c * a_inv) % m
+    R = (X0_minus_c * a_inv) % m
     #seed 
-    S = pow(P, d, m)
+    S = pow(R, d, m)
 
     # use this seed to regenerate x0. if we get it back, we have the right seed
+    # Edit: There are multiple values of S that seems to generate x0, so decrypt the flag for an additional check
     x0_check = (a * pow(S, e, m) + c) % m
     if (x0_check == x0):
         key = sha256(long_to_bytes(S)).digest()
@@ -355,13 +356,13 @@ def undoXORchain(v):
     result_bits.append(extractBitByPosition(v,0)^result_bits[5]^result_bits[6]) #G0^B1^B2
     return int("".join(str(c) for c in result_bits), 2)
 
-    enc = bytes.fromhex("6768107b1a357132741539783d6a661b5f3b")
+enc = bytes.fromhex("6768107b1a357132741539783d6a661b5f3b")
 
-    for i,c in enumerate(enc):
-        o = undoXORchain(c)
-        if i > 0: 
-            o ^= enc[i-1]
-        print(chr(o), end="") # _1s_n0t_th4t_h4rd}
+for i,c in enumerate(enc):
+    o = undoXORchain(c)
+    if i > 0: 
+        o ^= enc[i-1]
+    print(chr(o), end="") # _1s_n0t_th4t_h4rd}
 ```
 ## Misc
 ### Talking Duck
@@ -372,6 +373,10 @@ Interpret the spectrogram as morse code. Short pause separates letters. Long pau
 V1T DUCK S0S S0S
 ```
 ### Emoji Thief
+
+https://paulbutler.org/2025/smuggling-arbitrary-data-through-an-emoji/
+
+https://emoji.paulbutler.org/?mode=decode
 
 
 ### RotBrain
@@ -408,6 +413,107 @@ While I was exploring different ways to approach the problem, I accidentally dis
 ![](2025-11-04-12-42-01.png)
 
 ### Specimen 512
+`An unmarked data file was recovered from an abandoned research server labeled only as Specimen 512. No accompanying documentation, no metadata, and no obvious contents — just a massive file filled with strange sequences. Some say it hides a secret`
+
+We are given a large text file, which purpotedly is a DNA sequence. The header of the file gives some important information 
+```
+>DNA_ARCHIVE_sample|size_target_mb=5
+; hint: encoding=base64->triplet-codon (lexicographic AAA..TTT => b64 idx 0..63)
+; pad_count=2  ; note: base64 padding removed from stream
+; gc_hint: some decoy regions have varying GC to confuse simple heuristics
+```
+So, it looks like we need to extract three letters as a sequence, map them to values 0..63 using lexicographic ordering (dictionary ordering). Then replace them with the corresponding letter from the base64 scheme to create a long base64 encoded string. However, it also warns us about decoys. So, let's check the file out.
+
+```
+% cat Specimen_512.fasta | awk '/^>/{print NR $0;}'
+1>DNA_ARCHIVE_sample|size_target_mb=5
+5>prelude
+26221>archive_core
+27237>decoy
+29738>decoy
+32239>decoy
+34740>decoy
+37241>decoy
+39742>decoy
+42243>decoy
+44744>decoy
+47245>decoy
+49746>decoy
+52247>decoy
+54748>decoy
+57249>decoy
+59750>decoy
+62251>decoy
+64752>decoy
+```
+So, after the prelude, there are about 26,221 lines of codes, before a new segment marked as `>archive_core`. The rest of the segments seem to be decoys. So, let's focus on this main segment. 
+
+```python
+import base64
+import itertools
+
+def generate_codon_map():
+    bases = ['A', 'C', 'G', 'T']
+    codons = [''.join(p) for p in itertools.product(bases, repeat=3)]
+    codon_to_index = {codon: index for index, codon in enumerate(codons)}
+    return codon_to_index
+
+# Custom map from codon (3 bases) to Base64 index (0-63)
+codon_to_index = generate_codon_map()
+
+# Standard Base64 alphabet (used to convert index back to character)
+standard_b64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+def process_segment(seg):
+    raw_b64_str = ""
+    for i in range(0, len(seg), 3):
+        codon = seg[i:i+3]
+        if (len(codon)==3):
+            raw_b64_str += standard_b64_chars[codon_to_index[seg[i:i+3]]]
+    decoded_bytes = base64.b64decode(raw_b64_str+"==") #pad per the header
+    OUT = open("out.bin", "wb")
+    OUT.write(decoded_bytes)
+    OUT.close()
+    print(f"Wrote: {len(decoded_bytes)} bytes")
+
+with open('Specimen_512.fasta', 'r') as F:
+    lines = F.readlines()
+    segment_name = "*none*"
+    segment=""
+    for l in lines:
+        if l.startswith('>'):
+            print(f"Begin segment: {l[1:].strip()}")
+            segment_len = len(segment)
+            codons = f"{segment_len//3} : {segment_len%3}"
+            print(f"Previous segment: {segment_name}  {len(segment)} {codons}")
+            if (segment_name == "archive_core"):
+                process_segment(segment)
+            segment_name = l[1:].strip()
+            segment=""
+        else:
+            segment+=l.strip()
+```
+Running this program creates a base64 string and decodes it to a binary stream. While this binary data seems to be random, running `binwalk` on that data shows that there is a hidden zip file. We can use `binwalk` or `unzip` to extract the files.
+```
+% file out.bin 
+out.bin: data
+% binwalk out.bin 
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+10000         0x2710          Zip archive data, at least v2.0 to extract, compressed size: 40, uncompressed size: 38, name: flag.txt
+10078         0x275E          Zip archive data, at least v2.0 to extract, compressed size: 48, uncompressed size: 50, name: readme.txt
+10276         0x2824          End of Zip archive, footer length: 22
+% unzip -x out.bin 
+Archive:  out.bin
+warning [out.bin]:  10000 extra bytes at beginning or within zipfile
+  (attempting to process anyway)
+  inflating: flag.txt                
+  inflating: readme.txt  
+% cat readme.txt
+This is a DNA Archive payload. Life finds a flag.
+% cat flag.txt
+v1t{30877432d1026706d7e805da846a32c3}
+```
 
 ### Polyglot
 
