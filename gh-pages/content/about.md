@@ -19,9 +19,9 @@ As with any problem solving, there are essentially unlimited number of approache
 
 In most cases, I try to solve solve the problem from the ground-up atleast once. It is not a whole lot of fun to just run a prebuilt utility and get to the flag, even though it is expedient, I prefer to learn how that approach works. 
 
-This is 100% true :p
-![](ctf_writeups.jpg)
-
 It is cool to see people from all over the world reading this site. 
-![](2024-03-31-19-15-26.png)
-![](2024-03-31-19-39-44.png)
+![](/ctf-writeups/2024-03-31-19-15-26.png)
+![](/ctf-writeups/2024-03-31-19-39-44.png)
+
+BTW, this is 100% true :p
+![](/ctf-writeups/ctf_writeups.jpg)
